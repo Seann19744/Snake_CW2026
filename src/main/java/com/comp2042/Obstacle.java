@@ -17,15 +17,22 @@ public class Obstacle {
        this.y = y;
     }
 
+    /**
+     * Generates a specified amount of random obstacle on the game grid without being directly spawned on the coin or snake
+     */
     public void newObstacles(Snake snek, Coin coin, int amount) {
+        // Exit the method if there are already more than 50 obstacles (Max amount of obstacle = 50)
         if (obstacles.size() > 50) {
             return;
         }
+        // Random number generator
         Random rnd = new Random();
+        // Store each obstacle's coordinates
         Point p;
         for (int i=0; i<amount; i++) {
             do {
-                p = new Point(rnd.nextInt(x) + 1, rnd.nextInt(y));
+                //
+                p = new Point(rnd.nextInt(x), rnd.nextInt(y));
             } while (coin.getPos().equals(p) || snek.getBody().contains(p) || snek.getHead().equals(p));
             obstacles.add(p);
         }
