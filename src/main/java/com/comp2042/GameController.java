@@ -122,13 +122,21 @@ public class GameController {
         }
     }
 
+    /**
+     * Private helper method that validates a pressed KeyCode (JavaFX)
+     * Returns true or false if the key is a valid direction change, false if otherwise
+     */
     private boolean valKey(KeyCode key) {
+        // Rejects any key that is not arrow key button (Up, Down, Left, Right)
         if (!key.isArrowKey()) return false;
         else {
+            // Checks the opposite direction of the snake moving before moving the snake
+            // This is so that the snake does not overlap itself
             if (key.equals(KeyCode.LEFT)) if (!this.key.equals(KeyCode.RIGHT)) return true;
             if (key.equals(KeyCode.RIGHT)) if (!this.key.equals(KeyCode.LEFT)) return true;
-            if (key.equals(KeyCode.DOWN)) if (!this.key.equals(KeyCode.DOWN)) return true;
+            if (key.equals(KeyCode.DOWN)) if (!this.key.equals(KeyCode.UP)) return true;
             if (key.equals(KeyCode.UP)) return !this.key.equals(KeyCode.DOWN);
+            // Safety net to ignore invalid turns
             return false;
         }
     }
