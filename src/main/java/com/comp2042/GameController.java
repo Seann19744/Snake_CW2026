@@ -123,8 +123,12 @@ public class GameController {
     }
 
     /**
-     * Private helper method that validates a pressed KeyCode (JavaFX)
-     * Returns true or false if the key is a valid direction change, false if otherwise
+     * Checks whether a pressed key is an allowed direction change.
+     * Only arrow keys are accepted, and the snake cannot reverse onto itself
+     * (for example, DOWN is rejected while moving UP)
+     *
+     * @param key the key the player just used
+     * @return true if the snake may turn in the direction, false otherwise.
      */
     private boolean valKey(KeyCode key) {
         // Rejects any key that is not arrow key button (Up, Down, Left, Right)

@@ -18,20 +18,23 @@ public class Obstacle {
     }
 
     /**
-     * Generates a specified amount of random obstacle on the game grid without being directly spawned on the coin or snake
+     * Adds randomly placed obstacles to the grid, avoiding the coin and snake.
+     * Does nothing if more than 50 obstacles already exist, so the total can still pass 50 by the end of one call
+     *
+     * @param snek the snake, used to avoid its head and body
+     * @param coin the current coin, used to avoid its square
+     * @param amount how many obstacles is added.
      */
     public void newObstacles(Snake snek, Coin coin, int amount) {
-        // Exit the method if there are already more than 50 obstacles (Max amount of obstacle = 50)
+        // Exit the method if there are already more than 50 obstacles
         if (obstacles.size() > 50) {
             return;
         }
-        // Random number generator
         Random rnd = new Random();
         // Store each obstacle's coordinates
         Point p;
         for (int i=0; i<amount; i++) {
             do {
-                //
                 p = new Point(rnd.nextInt(x), rnd.nextInt(y));
             } while (coin.getPos().equals(p) || snek.getBody().contains(p) || snek.getHead().equals(p));
             obstacles.add(p);
