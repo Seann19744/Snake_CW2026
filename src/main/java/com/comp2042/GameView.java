@@ -124,14 +124,25 @@ public class GameView {
         drawHead(snek);
     }
 
+    /**
+     * Draws the snake's head on the canvas, rotated to face its current direction.
+     * @param snek the snek whose head is drawn
+     */
     private void drawHead(Snake snek) {
         snek.getImageViewHead().setRotate(snek.getSnakeDir());
         SnapshotParameters params = new SnapshotParameters();
         params.setFill(Color.TRANSPARENT);
         Image rotatedImage = snek.getImageViewHead().snapshot(params, null);
-        gc.drawImage(rotatedImage, (snek.getHead().x * game.getMultiplier()) * fullScale, (snek.getHead().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale * fullScale, game.getMultiplier() * fullScale * fullScale);
+        gc.drawImage(rotatedImage, (snek.getHead().x * game.getMultiplier()) * fullScale, (snek.getHead().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
     }
 
+    /**
+     * Draws the segment of the snake's body, choosing the right picture
+     * (tail, corner or straight piece) and rotation for it.
+     * @param snek the snake being drawn
+     * @param point the grid position of this segment
+     * @param index the segment's position in the body list, where 0 is the tail
+     */
     private void drawBody(Snake snek, Point point, int index) {
         Image rotatedImage;
         if (snek.getBody().size() <= 1) {
@@ -170,7 +181,7 @@ public class GameView {
             turnArray[(int) snek.getBody().get(0).getX()][(int) snek.getBody().get(0).getY()] = 0;
         }
 
-        gc.drawImage(rotatedImage, (point.x * game.getMultiplier()) * fullScale, (point.y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale * fullScale, game.getMultiplier() * fullScale * fullScale);
+        gc.drawImage(rotatedImage, (point.x * game.getMultiplier()) * fullScale, (point.y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
     }
 
     public void turnDir(Snake snek) {
