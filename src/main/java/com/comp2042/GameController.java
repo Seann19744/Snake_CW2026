@@ -82,9 +82,17 @@ public class GameController {
         }
     }));
 
+    /**
+     * Runs everytime a key is pressed while game window is focused.
+     * connected in MainMenuController.java ( gameScene.setOnKeyPressed(controller::handle); )
+     * @param event which key was pressed.
+     */
     public void handle(KeyEvent event) {
+
+        // Arrow keys to start the game
         if (event.getCode().isArrowKey()) animation.play();
 
+        // Snake changing direction using method valKey
         if (valKey(event.getCode()) && !keyPressed) {
             lastKey = key;
             key = event.getCode();
@@ -92,29 +100,39 @@ public class GameController {
             gameView.turnDir(snek);
         }
 
+        // Pause the game
         if (event.getCode().equals(KeyCode.P)) {
             animation.stop();
         }
 
+        // Reset the game
         if (event.getCode().equals(KeyCode.TAB)) {
             reset();
             gameView.scoreLabel.setText("Score: " + game.getScorePoints());
         }
 
-        if (event.getCode().equals(KeyCode.PLUS)) {
+        // Fullscreen
+        if (event.getCode().equals(KeyCode.PLUS)
+                || event.getCode().equals(KeyCode.EQUALS)
+                || event.getCode().equals(KeyCode.ADD)) {
+
             gameView.scaleToFullscreen(true, stage, obstacle, snek, coin);
             gameView.gameOverLabel.setStyle("-fx-font-size: 50;");
             gameView.gameWonLabel.setStyle("-fx-font-size: 50;");
             gameView.scoreLabel.setStyle("-fx-font-size: 35;");
         }
 
-        if (event.getCode().equals(KeyCode.MINUS)) {
+        // Minimize screen
+        if (event.getCode().equals(KeyCode.MINUS)
+                || event.getCode().equals(KeyCode.SUBTRACT)) {
+
             gameView.scaleToFullscreen(false, stage, obstacle, snek, coin);
             gameView.gameOverLabel.setStyle("-fx-font-size: 15;");
             gameView.gameWonLabel.setStyle("-fx-font-size: 15;");
             gameView.scoreLabel.setStyle("-fx-font-size: 15;");
         }
 
+        // Goes back to main menu
         if (event.getCode().equals(KeyCode.ESCAPE)) {
             MainMenuController mainMenuController = new MainMenuController();
             mainMenuController.getViewManager().getPrimaryStage().show();
