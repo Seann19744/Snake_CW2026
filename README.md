@@ -19,5 +19,6 @@ https://github.com/Seann19744/Snake_CW2026
 - GameController.java rainbow coin never spawns because ran == 1, so changed ran == 2. This is because both gold and rainbow coin is 1 so it runs gold as it is first in the if/else.
 - GameController.java fix reverse direction by changing (KeyCode.DOWN) to (KeyCode.UP), so that snake cannot move in the opposite direction using movement key
 - Obstacle.java obstacles does not spawn on the leftmost side of the game grid because the x coordinate has a + 1, removed it so that obstacles can spawn everywhere on the game except on the snake and coin
+- GameController.java fix fullscreen key binds by adding EQUAL and ADD so that game can go to fullscreen, also add SUBSTRACT to minimize screen. Both using numpad + and - works same with the keyboard shift + and -
 
 ## Unexpected Problem
