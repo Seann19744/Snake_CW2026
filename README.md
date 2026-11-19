@@ -21,5 +21,6 @@ https://github.com/Seann19744/Snake_CW2026
 - Obstacle.java obstacles does not spawn on the leftmost side of the game grid because the x coordinate has a + 1, removed it so that obstacles can spawn everywhere on the game except on the snake and coin
 - GameController.java fix fullscreen key binds by adding EQUAL and ADD so that game can go to fullscreen, also add SUBSTRACT to minimize screen. Both using numpad + and - works same with the keyboard shift + and -
 - GameView.java fix snake being enlarged in fullscreen, removed extra (* fullScale) at both snake head and body for both width and height
+- GameController.java removed legacyScoreMultiplier and calculateBonusScore(), does not affect gameplay
 
 ## Unexpected Problem
