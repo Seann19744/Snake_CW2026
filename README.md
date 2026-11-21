@@ -6,6 +6,7 @@ https://github.com/Seann19744/Snake_CW2026
 ## Compilation Instructions
 
 ## Implemented and Working Properly
+- GameController.java coinSoundPath was an unused String. Replaced it with an AudioClip loaded from the classpath and played when a coin is eaten
 
 ## Implemented but not Working Properly
 
@@ -22,5 +23,7 @@ https://github.com/Seann19744/Snake_CW2026
 - GameController.java fix fullscreen key binds by adding EQUAL and ADD so that game can go to fullscreen, also add SUBSTRACT to minimize screen. Both using numpad + and - works same with the keyboard shift + and -
 - GameView.java fix snake being enlarged in fullscreen, removed extra (* fullScale) at both snake head and body for both width and height
 - GameController.java removed legacyScoreMultiplier and calculateBonusScore(), does not affect gameplay
-
+- GameController.java removed unusedObstacleCount, does not affect gameplay
+- GameController.java removed import javafx for media, multimedia and file
+- GameController.java added an AudioClip to play coin sound that was never used before in resources
 ## Unexpected Problem
