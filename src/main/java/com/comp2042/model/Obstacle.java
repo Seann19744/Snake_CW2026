@@ -1,6 +1,5 @@
-package com.comp2042;
+package com.comp2042.model;
 
-import com.comp2042.model.Coin;
 import javafx.scene.paint.Color;
 
 import java.awt.*;
