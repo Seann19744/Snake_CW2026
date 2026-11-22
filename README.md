@@ -26,4 +26,17 @@ https://github.com/Seann19744/Snake_CW2026
 - GameController.java removed unusedObstacleCount, does not affect gameplay
 - GameController.java removed import javafx for media, multimedia and file
 - GameController.java added an AudioClip to play coin sound that was never used before in resources
+
+### Package Reorganisation
+- com.comp2042.controller: GameController, MainMenuController
+- com.comp2042.model: BlueCoin, Coin, Game, GoldCoin, Obstacle, RainbowCoin, SilverCoin, Snake
+- com.comp2042.view: GameView, ViewManager
+- Reason for reorganisation was because everything was under com.comp2042 which made the files harder to search and now easier to identify if a specific area has a problem
+
+### Renamed identifiers
+- snek is renamed to snake in all files
+- ViewManager.initalizeMainMenu() is changed to initializeMainMenu() instead because of spelling error
+- GameController.valkey() is changed to isValidTurn() for easier understanding
+
 ## Unexpected Problem
+- After moving classes into packages, IntelliJ's saved Run configuration changed its main class to `com.comp2042.model.comp2042.Launcher`, so the game failed with `ClassNotFoundException`. Fixed by correcting the Main class to `com.comp2042.Launcher` in Edit Configurations

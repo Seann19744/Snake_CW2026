@@ -11,7 +11,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         viewManager = new ViewManager();
-        viewManager.initalizeMainMenu();
+        viewManager.initializeMainMenu();
     }
 
     public static void main(String[] args) {
