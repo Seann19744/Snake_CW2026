@@ -1,5 +1,7 @@
-package com.comp2042;
+package com.comp2042.view;
 
+import com.comp2042.GameController;
+import com.comp2042.MainMenuController;
 import com.comp2042.model.Coin;
 import com.comp2042.model.Game;
 import com.comp2042.model.Obstacle;

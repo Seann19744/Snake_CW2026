@@ -1,6 +1,7 @@
 package com.comp2042;
 
 import com.comp2042.model.*;
+import com.comp2042.view.GameView;
 import javafx.scene.media.AudioClip;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
