@@ -1,4 +1,4 @@
-package com.comp2042;
+package com.comp2042.model;
 
 import javafx.scene.paint.Color;
 
@@ -21,11 +21,11 @@ public class Obstacle {
      * Adds randomly placed obstacles to the grid, avoiding the coin and snake.
      * Does nothing if more than 50 obstacles already exist, so the total can still pass 50 by the end of one call
      *
-     * @param snek the snake, used to avoid its head and body
+     * @param snake the snake, used to avoid its head and body
      * @param coin the current coin, used to avoid its square
      * @param amount how many obstacles is added.
      */
-    public void newObstacles(Snake snek, Coin coin, int amount) {
+    public void newObstacles(Snake snake, Coin coin, int amount) {
         // Exit the method if there are already more than 50 obstacles
         if (obstacles.size() > 50) {
             return;
@@ -36,7 +36,7 @@ public class Obstacle {
         for (int i=0; i<amount; i++) {
             do {
                 p = new Point(rnd.nextInt(x), rnd.nextInt(y));
-            } while (coin.getPos().equals(p) || snek.getBody().contains(p) || snek.getHead().equals(p));
+            } while (coin.getPos().equals(p) || snake.getBody().contains(p) || snake.getHead().equals(p));
             obstacles.add(p);
         }
     }
