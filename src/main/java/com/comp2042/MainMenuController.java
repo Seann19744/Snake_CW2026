@@ -1,5 +1,6 @@
 package com.comp2042;
 
+import com.comp2042.model.Coin;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;

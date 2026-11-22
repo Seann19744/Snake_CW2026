@@ -1,5 +1,6 @@
 package com.comp2042;
 
+import com.comp2042.model.Coin;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;

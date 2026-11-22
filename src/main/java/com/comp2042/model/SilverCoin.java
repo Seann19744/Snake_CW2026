@@ -1,5 +1,7 @@
-package com.comp2042;
+package com.comp2042.model;
 
+import com.comp2042.Obstacle;
+import com.comp2042.Snake;
 import javafx.scene.image.Image;
 
 public class SilverCoin extends Coin {
