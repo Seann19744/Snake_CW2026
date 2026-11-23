@@ -39,6 +39,9 @@ public class GameController {
         this.obstacle = obstacle;
         animation.setCycleCount(Animation.INDEFINITE);
         animation.setRate(game.getSpeed());
+
+        key = KeyCode.LEFT;
+        lastKey = KeyCode.LEFT;
     }
 
     private final Timeline animation = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
@@ -131,6 +134,7 @@ public class GameController {
 
         // Goes back to main menu
         if (event.getCode().equals(KeyCode.ESCAPE)) {
+            animation.stop();
             MainMenuController mainMenuController = new MainMenuController();
             mainMenuController.getViewManager().getPrimaryStage().show();
             mainMenuController.getViewManager().getGameStage().close();
@@ -170,6 +174,7 @@ public class GameController {
 
         animation.setRate(game.getSpeed());
         key = KeyCode.LEFT;
+        lastKey = KeyCode.LEFT;
         keyPressed = false;
         game.resetScore();
         obstacle.reset();
