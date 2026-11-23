@@ -1,0 +1,140 @@
+package com.comp2042.model;
+
+import com.comp2042.JavaFXTestBase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.awt.Point;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@DisplayName("Snake Model Unit Tests")
+class SnakeTest extends JavaFXTestBase {
+
+    private Obstacle obstacle;
+    private Snake snake;
+
+    @BeforeEach
+    void setUp() {
+        obstacle = new Obstacle(20, 20);
+        snake = new Snake(20, 20, false, obstacle);
+    }
+
+    @Test
+    @DisplayName("Verify initial snake state: centered head, 1 body segment, alive")
+    void testInitialSnakeState() {
+        // Head should be at (20/2, 20/2) = (10, 10)
+        assertEquals(new Point(10, 10), snake.getHead(), "Initial head position should be at (10, 10)");
+        assertEquals(1, snake.getBody().size(), "Snake should start with 1 body segment");
+        assertEquals(new Point(11, 10), snake.getBody().get(0), "Initial body segment should be at (11, 10)");
+        assertFalse(snake.getDead(), "Snake should be alive initially");
+        assertEquals(270, snake.getSnakeDir(), "Initial direction should be 270 (facing LEFT)");
+    }
+
+    @Test
+    @DisplayName("Verify snake move LEFT updates head and direction")
+    void testMoveLeft() {
+        snake.move('L');
+        assertEquals(new Point(9, 10), snake.getHead(), "Head should move left to (9, 10)");
+        assertEquals(270, snake.getSnakeDir(), "Direction should be 270 for LEFT");
+        assertFalse(snake.getDead(), "Snake should be alive after moving within bounds");
+    }
+
+    @Test
+    @DisplayName("Verify snake move UP updates head and direction")
+    void testMoveUp() {
+        snake.move('U');
+        assertEquals(new Point(10, 9), snake.getHead(), "Head should move up to (10, 9)");
+        assertEquals(0, snake.getSnakeDir(), "Direction should be 0 for UP");
+        assertFalse(snake.getDead(), "Snake should be alive after moving within bounds");
+    }
+
+    @Test
+    @DisplayName("Verify snake move DOWN updates head and direction")
+    void testMoveDown() {
+        snake.move('D');
+        assertEquals(new Point(10, 11), snake.getHead(), "Head should move down to (10, 11)");
+        assertEquals(180, snake.getSnakeDir(), "Direction should be 180 for DOWN");
+        assertFalse(snake.getDead(), "Snake should be alive after moving within bounds");
+    }
+
+    @Test
+    @DisplayName("Verify snake move RIGHT updates head and direction")
+    void testMoveRight() {
+        snake.move('R');
+        assertEquals(new Point(11, 10), snake.getHead(), "Head should move right to (11, 10)");
+        assertEquals(90, snake.getSnakeDir(), "Direction should be 90 for RIGHT");
+    }
+
+    @Test
+    @DisplayName("Verify eating coin retains tail (snake grows)")
+    void testAteCoinGrowth() {
+        Coin coin = new Coin(20, 20, snake, obstacle);
+        // Move snake without eating: body size remains 1 because ateCoin removes tail
+        snake.move('L');
+        assertFalse(snake.ateCoin(coin), "Should not have eaten coin at different position");
+        assertEquals(1, snake.getBody().size(), "Body size remains 1 when no coin is eaten");
+
+        // Manually position head on coin to test eating mechanics
+        Point coinPos = coin.getPos();
+        // Create snake with custom position by moving towards coin
+        Snake targetSnake = new Snake(20, 20, false, obstacle);
+        // If head equals coin position
+        assertTrue(targetSnake.ateCoin(new CoinMock(targetSnake.getHead())), "ateCoin should return true when head equals coin position");
+        // Body was NOT removed, so growth occurs
+        assertEquals(1, targetSnake.getBody().size(), "Body segment count preserved for growth");
+    }
+
+    @Test
+    @DisplayName("Verify wall collision in Normal mode causes death")
+    void testFatalWallCollision() {
+        Snake normalSnake = new Snake(4, 4, false, obstacle);
+        // Starts at (2, 2)
+        normalSnake.move('L'); // (1, 2)
+        normalSnake.move('L'); // (0, 2)
+        normalSnake.move('L'); // moves to (-1, 2), triggers borderControl -> fatal
+        assertTrue(normalSnake.getDead(), "Snake must die when colliding with boundary in normal mode");
+    }
+
+    @Test
+    @DisplayName("Verify wall wrap-around in Easy mode (noBorder = true)")
+    void testBorderWrapAround() {
+        Snake easySnake = new Snake(4, 4, true, obstacle);
+        // Starts at (2, 2)
+        easySnake.move('L'); // (1, 2)
+        easySnake.move('L'); // (0, 2)
+        easySnake.move('L'); // Crosses left boundary (x < 0) -> wraps to (3, 2)
+        assertFalse(easySnake.getDead(), "Snake should NOT die on border in Easy mode");
+        assertEquals(3.0, easySnake.getHead().getX(), "Head X should wrap around to gx - 1 (3)");
+        assertEquals(2.0, easySnake.getHead().getY(), "Head Y should remain 2");
+    }
+
+    @Test
+    @DisplayName("Verify collision with obstacle causes death")
+    void testObstacleCollision() {
+        Point obstaclePoint = new Point(9, 10);
+        obstacle.getObstacles().add(obstaclePoint);
+
+        // Snake starts at (10, 10) and moves LEFT to (9, 10)
+        snake.move('L');
+        assertTrue(snake.getDead(), "Snake must die upon hitting an obstacle");
+    }
+
+    /**
+     * Helper mock for Coin to test specific coordinates in ateCoin
+     */
+    private static class CoinMock extends Coin {
+        private final Point fixedPos;
+
+        public CoinMock(Point pos) {
+            super(20, 20, new Snake(20, 20, false, new Obstacle(20, 20)), new Obstacle(20, 20));
+            this.fixedPos = pos;
+        }
+
+        @Override
+        public Point getPos() {
+            return new Point(fixedPos);
+        }
+    }
+}
