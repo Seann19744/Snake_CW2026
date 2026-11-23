@@ -29,6 +29,8 @@ https://github.com/Seann19744/Snake_CW2026
 - GameController.java added an AudioClip to play coin sound that was never used before in resources
 - Game.java constructor take a difficulty instead of letters, this also solves the problem where invalid letters causes the snake to not move
 - MainMenuController.java difficulty constant changed from char to DIFFICULTY
+- MainMenuController.java added initialize method to let user select difficulty from dropdown bar
+- MainMenu.fxml added ComboBox to have a dropdown bar
 
 ### Package Reorganisation
 - com.comp2042.controller: GameController, MainMenuController
