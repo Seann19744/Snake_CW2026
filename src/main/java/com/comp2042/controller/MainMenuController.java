@@ -8,31 +8,45 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
+import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
+import javafx.fxml.FXML;
 
 public class MainMenuController {
 
     private static final int X_VALUE = 20;
     private static final int Y_VALUE = 20;
     private static final boolean POWER_UP = true;
-    private static final Difficulty DIFFICULTY = Difficulty.NORMAL;
+
+    @FXML
+    private ComboBox<Difficulty> difficultyBox;
+
+    @FXML
+    /**
+     * Have dropdown bar display all difficulty stages
+     */
+    public void initialize() {
+        difficultyBox.getItems().setAll(Difficulty.values());
+        difficultyBox.setValue(Difficulty.NORMAL);
+    }
 
     private Scene gameScene;
 
     private ViewManager viewManager = Main.getViewManager();
 
     public void handleStart() {
+        Difficulty difficulty = difficultyBox.getValue();
         viewManager.initGameStage();
 
         Stage gameStage = viewManager.getGameStage();
-        launchSnake(gameStage);
+        launchSnake(gameStage, difficulty);
         gameStage.setScene(gameScene);
         viewManager.getPrimaryStage().close();
         gameStage.show();
     }
 
-    private void launchSnake(Stage gameStage) {
-        Game game = new Game(X_VALUE, Y_VALUE, POWER_UP, DIFFICULTY);
+    private void launchSnake(Stage gameStage, Difficulty difficulty) {
+        Game game = new Game(X_VALUE, Y_VALUE, POWER_UP, difficulty);
         Obstacle obstacle = new Obstacle(game.getWidth(), game.getHeight());
         Snake snake = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle);
         Coin coin = new Coin(game.getWidth(), game.getHeight(), snake, obstacle);
