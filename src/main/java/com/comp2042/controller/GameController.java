@@ -149,7 +149,7 @@ public class GameController {
      * @param key the key the player just used
      * @return true if the snake may turn in the direction, false otherwise.
      */
-    private boolean isValidTurn(KeyCode key) {
+    boolean isValidTurn(KeyCode key) {
         // Rejects any key that is not arrow key button (Up, Down, Left, Right)
         if (!key.isArrowKey()) return false;
         else {
