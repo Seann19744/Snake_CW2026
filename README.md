@@ -13,7 +13,8 @@ https://github.com/Seann19744/Snake_CW2026
 ## Features not Implemented
 
 ## New Java Classes
-- Launcher.java : Let's Intellij start JavaFX app
+- Launcher.java: Let's Intellij start JavaFX app
+- Difficulty.java: enum defining EASY, NORMAL and HARD modes, doesn't need to use E, N and H anymore and other chracters other than those 3 will not break the game
 
 ## Modified Java Classes
 - Game.java has a duplicate line of code at line 32, was removed (this.powerUp = powerUp;)
@@ -26,6 +27,8 @@ https://github.com/Seann19744/Snake_CW2026
 - GameController.java removed unusedObstacleCount, does not affect gameplay
 - GameController.java removed import javafx for media, multimedia and file
 - GameController.java added an AudioClip to play coin sound that was never used before in resources
+- Game.java constructor take a difficulty instead of letters, this also solves the problem where invalid letters causes the snake to not move
+- MainMenuController.java difficulty constant changed from char to DIFFICULTY
 
 ### Package Reorganisation
 - com.comp2042.controller: GameController, MainMenuController
