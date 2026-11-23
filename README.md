@@ -31,6 +31,8 @@ https://github.com/Seann19744/Snake_CW2026
 - MainMenuController.java difficulty constant changed from char to DIFFICULTY
 - MainMenuController.java added initialize method to let user select difficulty from dropdown bar
 - MainMenu.fxml added ComboBox to have a dropdown bar
+- GameController.java added animation.stop() to ESCAPE so that it doesn't pause but resets after returning to main menu
+- GameController.java added lastkey=KeyCode.left so that last key pressed is always left and doesn't go another direction from the previous game after pressing ESCAPE
 
 ### Package Reorganisation
 - com.comp2042.controller: GameController, MainMenuController
