@@ -1,5 +1,6 @@
 package com.comp2042.model;
 
+import com.comp2042.JavaFXTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,7 @@ import java.awt.Point;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Coin Hierarchy Unit Tests")
-class CoinTest {
+class CoinTest extends JavaFXTestBase {
 
     private Obstacle obstacle;
     private Snake snake;
