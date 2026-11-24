@@ -131,4 +131,10 @@ class GameControllerTest extends JavaFXTestBase {
         ));
         assertTrue(com.comp2042.model.GameSettings.getInstance().isGridEnabled(), "G key should toggle grid back to true");
     }
+
+    @Test
+    @DisplayName("Verify handleResize invokes fitToWindow without throwing exceptions")
+    void testHandleResize() {
+        assertDoesNotThrow(() -> controller.handleResize(1200, 800));
+    }
 }

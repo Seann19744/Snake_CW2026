@@ -266,6 +266,7 @@ public class GameView {
         this.currentSnake = snake;
         this.currentObstacle = obstacle;
 
+        gc.clearRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
         gc.setFill(game.getColor());
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
@@ -314,6 +315,7 @@ public class GameView {
         this.currentCoin = coin;
         this.currentSnake = snake;
 
+        gc.clearRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
         gc.setFill(game.getColor());
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 

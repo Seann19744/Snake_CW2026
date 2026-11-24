@@ -114,12 +114,12 @@ public class MainMenuController {
         gamePane.setAlignment(gameView.scoreLabel, Pos.BOTTOM_CENTER);
         gamePane.setAlignment(gameView.pauseOverlay, Pos.CENTER);
 
-        // Dynamically scale on window resize or fullscreen toggle
+        // Dynamically scale on window resize or fullscreen toggle using live controller state
         gameScene.widthProperty().addListener((obs, oldV, newV) ->
-                gameView.fitToWindow(newV.doubleValue(), gameScene.getHeight(), obstacle, snake, coin)
+                controller.handleResize(newV.doubleValue(), gameScene.getHeight())
         );
         gameScene.heightProperty().addListener((obs, oldV, newV) ->
-                gameView.fitToWindow(gameScene.getWidth(), newV.doubleValue(), obstacle, snake, coin)
+                controller.handleResize(gameScene.getWidth(), newV.doubleValue())
         );
     }
 

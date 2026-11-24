@@ -202,6 +202,10 @@ public class GameController {
         mainMenuController.getViewManager().getPrimaryStage().show();
     }
 
+    public void handleResize(double width, double height) {
+        gameView.fitToWindow(width, height, obstacle, snake, coin);
+    }
+
     /**
      * Checks whether a pressed key is an allowed direction change.
      * Only arrow keys are accepted, and the snake cannot reverse onto itself
