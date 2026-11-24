@@ -46,6 +46,9 @@ public class GameController {
         this.snake.setGrowthRate(game.getGameMode().getGrowthRate());
         this.obstacle.loadLevelLayout(game.getCurrentLevel());
 
+        this.gameView.getResumeButton().setOnAction(e -> hidePauseMenu());
+        this.gameView.getReturnMenuButton().setOnAction(e -> returnToMainMenu());
+
         animation.setCycleCount(Animation.INDEFINITE);
         animation.setRate(game.getSpeed());
 
@@ -104,57 +107,82 @@ public class GameController {
      * @param event which key was pressed.
      */
     public void handle(KeyEvent event) {
+        KeyCode code = event.getCode();
+
+        // Pause Menu toggle with ESC or P
+        if (code.equals(KeyCode.ESCAPE) || code.equals(KeyCode.P)) {
+            togglePauseMenu();
+            return;
+        }
+
+        // If game is paused, ignore other input
+        if (gameView.isPauseMenuVisible()) {
+            return;
+        }
+
+        // Fullscreen toggle with F11
+        if (code.equals(KeyCode.F11)) {
+            gameView.toggleFullScreen(stage, obstacle, snake, coin);
+            return;
+        }
 
         // Arrow keys to start the game
-        if (event.getCode().isArrowKey()) animation.play();
+        if (code.isArrowKey()) {
+            if (!snake.getDead() && !game.gameWon()) {
+                animation.play();
+            }
+        }
 
-        // Snake changing direction using method valKey
-        if (isValidTurn(event.getCode()) && !keyPressed) {
+        // Snake changing direction using method isValidTurn
+        if (isValidTurn(code) && !keyPressed) {
             lastKey = key;
-            key = event.getCode();
+            key = code;
             keyPressed = true;
             gameView.turnDir(snake);
         }
 
-        // Pause the game
-        if (event.getCode().equals(KeyCode.P)) {
-            animation.stop();
-        }
-
         // Reset the game
-        if (event.getCode().equals(KeyCode.TAB)) {
+        if (code.equals(KeyCode.TAB)) {
             reset();
             gameView.scoreLabel.setText("Score: " + game.getScorePoints());
         }
+    }
 
-        // Fullscreen
-        if (event.getCode().equals(KeyCode.PLUS)
-                || event.getCode().equals(KeyCode.EQUALS)
-                || event.getCode().equals(KeyCode.ADD)) {
+    public boolean isPauseMenuVisible() {
+        return gameView.isPauseMenuVisible();
+    }
 
-            gameView.scaleToFullscreen(true, stage, obstacle, snake, coin);
-            gameView.gameOverLabel.setStyle("-fx-font-size: 50;");
-            gameView.gameWonLabel.setStyle("-fx-font-size: 50;");
-            gameView.scoreLabel.setStyle("-fx-font-size: 35;");
+    public void togglePauseMenu() {
+        if (gameView.isPauseMenuVisible()) {
+            hidePauseMenu();
+        } else {
+            showPauseMenu();
         }
+    }
 
-        // Minimize screen
-        if (event.getCode().equals(KeyCode.MINUS)
-                || event.getCode().equals(KeyCode.SUBTRACT)) {
+    public void showPauseMenu() {
+        animation.stop();
+        gameView.showPauseMenu(true);
+    }
 
-            gameView.scaleToFullscreen(false, stage, obstacle, snake, coin);
-            gameView.gameOverLabel.setStyle("-fx-font-size: 15;");
-            gameView.gameWonLabel.setStyle("-fx-font-size: 15;");
-            gameView.scoreLabel.setStyle("-fx-font-size: 15;");
+    public void stopAnimation() {
+        animation.stop();
+    }
+
+    public void hidePauseMenu() {
+        gameView.showPauseMenu(false);
+        if (!snake.getDead() && !game.gameWon()) {
+            animation.play();
         }
+    }
 
-        // Goes back to main menu
-        if (event.getCode().equals(KeyCode.ESCAPE)) {
-            animation.stop();
-            MainMenuController mainMenuController = new MainMenuController();
-            mainMenuController.getViewManager().getPrimaryStage().show();
-            mainMenuController.getViewManager().getGameStage().close();
+    public void returnToMainMenu() {
+        animation.stop();
+        if (stage != null) {
+            stage.close();
         }
+        MainMenuController mainMenuController = new MainMenuController();
+        mainMenuController.getViewManager().getPrimaryStage().show();
     }
 
     /**
@@ -195,6 +223,7 @@ public class GameController {
         lastKey = KeyCode.LEFT;
         keyPressed = false;
 
+        gameView.showPauseMenu(false);
         gameView.gameWon();
         gameView.gameOver(snake);
         gameView.updateScoreLabel();

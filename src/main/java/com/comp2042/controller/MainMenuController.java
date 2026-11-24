@@ -6,9 +6,11 @@ import com.comp2042.view.GameView;
 import com.comp2042.view.ViewManager;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.scene.control.ComboBox;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
 
@@ -41,6 +43,7 @@ public class MainMenuController {
         Stage gameStage = viewManager.getGameStage();
         launchSnake(gameStage, gameMode);
         gameStage.setScene(gameScene);
+        gameStage.setMaximized(true);
         viewManager.getPrimaryStage().close();
         gameStage.show();
     }
@@ -55,16 +58,33 @@ public class MainMenuController {
         GameController controller = new GameController(snake, coin, game, gameView, obstacle, gameStage);
 
         StackPane gamePane = new StackPane();
-        gameScene = new Scene(gamePane, game.getWidth() * game.getMultiplier(), game.getHeight() * game.getMultiplier());
+        gamePane.setStyle("-fx-background-color: #feffe4;");
+        Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+        gameScene = new Scene(gamePane, visualBounds.getWidth(), visualBounds.getHeight());
 
         gameScene.setOnKeyPressed(controller::handle);
 
-        gameView.makeScene(gameScene, snake, coin);
-        gamePane.getChildren().addAll(gameView.gridCanvas, gameView.gameOverLabel, gameView.gameWonLabel, gameView.scoreLabel);
+        gameView.makeScene(gameScene, snake, coin, obstacle);
+        gamePane.getChildren().addAll(
+                gameView.gridCanvas,
+                gameView.gameOverLabel,
+                gameView.gameWonLabel,
+                gameView.scoreLabel,
+                gameView.pauseOverlay
+        );
         gamePane.setPadding(new Insets(20));
         gamePane.setAlignment(gameView.gameOverLabel, Pos.TOP_CENTER);
         gamePane.setAlignment(gameView.gameWonLabel, Pos.TOP_CENTER);
         gamePane.setAlignment(gameView.scoreLabel, Pos.BOTTOM_CENTER);
+        gamePane.setAlignment(gameView.pauseOverlay, Pos.CENTER);
+
+        // Dynamically scale on window resize or fullscreen toggle
+        gameScene.widthProperty().addListener((obs, oldV, newV) ->
+                gameView.fitToWindow(newV.doubleValue(), gameScene.getHeight(), obstacle, snake, coin)
+        );
+        gameScene.heightProperty().addListener((obs, oldV, newV) ->
+                gameView.fitToWindow(gameScene.getWidth(), newV.doubleValue(), obstacle, snake, coin)
+        );
     }
 
     public ViewManager getViewManager() {

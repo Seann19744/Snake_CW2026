@@ -91,4 +91,23 @@ class GameControllerTest extends JavaFXTestBase {
         assertTrue(controller.isValidTurn(KeyCode.UP), "UP must be allowed when moving RIGHT");
         assertTrue(controller.isValidTurn(KeyCode.DOWN), "DOWN must be allowed when moving RIGHT");
     }
+
+    @Test
+    @DisplayName("Verify pause menu toggles visibility properly")
+    void testPauseMenuToggling() {
+        assertFalse(controller.isPauseMenuVisible(), "Pause menu should initially be hidden");
+
+        controller.showPauseMenu();
+        assertTrue(controller.isPauseMenuVisible(), "Pause menu should be visible after showPauseMenu()");
+
+        controller.hidePauseMenu();
+        assertFalse(controller.isPauseMenuVisible(), "Pause menu should be hidden after hidePauseMenu()");
+
+        controller.togglePauseMenu();
+        assertTrue(controller.isPauseMenuVisible(), "Pause menu should be visible after toggle");
+
+        controller.togglePauseMenu();
+        assertFalse(controller.isPauseMenuVisible(), "Pause menu should be hidden after second toggle");
+        controller.stopAnimation();
+    }
 }

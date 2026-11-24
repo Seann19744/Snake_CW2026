@@ -4,6 +4,7 @@ import com.comp2042.Main;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
@@ -47,7 +48,9 @@ public class ViewManager {
         gameStage = new Stage();
         gameStage.setTitle("Snake Game");
         gameStage.getIcons().add(snakeLogo);
-        gameStage.setResizable(false);
+        gameStage.setResizable(true);
+        gameStage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+        gameStage.setFullScreenExitHint("");
     }
 
     public Stage getGameStage() {

@@ -6,13 +6,18 @@ import com.comp2042.model.Coin;
 import com.comp2042.model.Game;
 import com.comp2042.model.Obstacle;
 import com.comp2042.model.Snake;
+import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
@@ -31,6 +36,10 @@ public class GameView {
     private boolean gameOverVis = false;
     private boolean gameWonVis = false;
 
+    public final StackPane pauseOverlay = new StackPane();
+    private final Button resumeButton = new Button("Resume");
+    private final Button returnMenuButton = new Button("Main Menu");
+
     private Game game;
     private double initX;
     private double initY;
@@ -40,15 +49,18 @@ public class GameView {
 
     public GameView(Game game) {
         this.game = game;
+        pauseOverlay.setVisible(false);
     }
 
     public void makeScene(Scene scene, Snake snake, Coin coin) {
-        Scene gameScene = scene;
-        gridCanvas = new Canvas(gameScene.getWidth(), gameScene.getHeight());
-        initX = scene.getWidth();
-        initY = scene.getHeight();
+        makeScene(scene, snake, coin, null);
+    }
+
+    public void makeScene(Scene scene, Snake snake, Coin coin, Obstacle obstacle) {
+        initX = game.getWidth() * game.getMultiplier();
+        initY = game.getHeight() * game.getMultiplier();
+        gridCanvas = new Canvas(initX, initY);
         gc = gridCanvas.getGraphicsContext2D();
-        drawGrid(coin, snake, gc);
 
         gameOverLabel = new Label("GAME OVER");
         gameOverLabel.setId("gameOverLabel");
@@ -64,39 +76,123 @@ public class GameView {
         scoreLabel = new Label();
         scoreLabel.setId("scoreLabel");
         scoreLabel.getStylesheets().add(css);
-        scoreLabel.setFont(new Font("Arial", 16));
+        scoreLabel.setFont(new Font("SF Pixelate", 16));
         updateScoreLabel();
         scoreLabel.setVisible(true);
+
+        setupPauseOverlay();
+
+        if (scene != null) {
+            fitToWindow(scene.getWidth(), scene.getHeight(), obstacle, snake, coin);
+        } else if (obstacle != null) {
+            drawGrid(coin, snake, obstacle, gc, false, 0);
+        } else {
+            drawGrid(coin, snake, gc);
+        }
+    }
+
+    private void setupPauseOverlay() {
+        pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.72);");
+        pauseOverlay.setVisible(false);
+
+        VBox pauseBox = new VBox(15);
+        pauseBox.setAlignment(Pos.CENTER);
+        pauseBox.setMaxSize(300, 250);
+
+        Label pauseTitle = new Label("GAME PAUSED");
+        pauseTitle.setId("pauseTitle");
+        pauseTitle.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 32px; -fx-text-fill: #ffffff;");
+
+        Label pauseHint = new Label("Press ESC or P to resume");
+        pauseHint.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-text-fill: #cccccc;");
+
+        resumeButton.getStyleClass().add("startAndQuitBtn");
+        resumeButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
+        resumeButton.setPrefSize(140, 40);
+
+        returnMenuButton.getStyleClass().add("startAndQuitBtn");
+        returnMenuButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
+        returnMenuButton.setPrefSize(140, 40);
+
+        pauseBox.getChildren().addAll(pauseTitle, pauseHint, resumeButton, returnMenuButton);
+        pauseOverlay.getChildren().add(pauseBox);
+    }
+
+    public void fitToWindow(double windowWidth, double windowHeight, Obstacle obstacle, Snake snake, Coin coin) {
+        if (windowWidth <= 0 || windowHeight <= 0) return;
+
+        double marginW = 100;
+        double marginH = 120;
+        double availableW = Math.max(initX, windowWidth - marginW);
+        double availableH = Math.max(initY, windowHeight - marginH);
+
+        fullScale = Math.max(1.0, Math.min(availableW / initX, availableH / initY));
+
+        if (gridCanvas != null) {
+            gridCanvas.setWidth(initX * fullScale);
+            gridCanvas.setHeight(initY * fullScale);
+        }
+
+        if (scoreLabel != null) {
+            scoreLabel.setFont(new Font("SF Pixelate", Math.max(16, 11 * fullScale)));
+        }
+        if (gameOverLabel != null) {
+            gameOverLabel.setFont(new Font("SF Pixelate", Math.max(26, 18 * fullScale)));
+        }
+        if (gameWonLabel != null) {
+            gameWonLabel.setFont(new Font("SF Pixelate", Math.max(26, 18 * fullScale)));
+        }
+
+        if (gc != null && snake != null && coin != null && obstacle != null) {
+            drawGrid(coin, snake, obstacle, gc, false, 0);
+        } else if (gc != null && snake != null && coin != null) {
+            drawGrid(coin, snake, gc);
+        }
     }
 
     public void scaleToFullscreen(boolean fullScreen, Stage primaryStage, Obstacle obstacle, Snake snake, Coin coin) {
-        primaryStage.setFullScreen(fullScreen);
-
-        double xScaling = Screen.getPrimary().getVisualBounds().getHeight() / initY;
-        double yScaling = Screen.getPrimary().getVisualBounds().getWidth() / initX;
-
-        if (fullScreen && !fullsize) {
-            if (xScaling < yScaling) {
-                fullScale = xScaling;
-            } else {
-                fullScale = yScaling;
-            }
-            gridCanvas.setWidth(gridCanvas.getWidth() * fullScale);
-            gridCanvas.setHeight(gridCanvas.getHeight() * fullScale);
-            fullsize = true;
-        } else if (!fullScreen) {
-            fullScale = 1;
-            gridCanvas.setWidth(initX);
-            gridCanvas.setHeight(initY);
-            fullsize = false;
+        if (primaryStage != null) {
+            primaryStage.setFullScreen(fullScreen);
         }
+        double width = 800;
+        double height = 600;
+        try {
+            Screen screen = Screen.getPrimary();
+            if (screen != null) {
+                Rectangle2D bounds = fullScreen ? screen.getBounds() : screen.getVisualBounds();
+                width = bounds.getWidth();
+                height = bounds.getHeight();
+            }
+        } catch (Exception ignored) {}
+        fitToWindow(width, height, obstacle, snake, coin);
+    }
 
-        gameOverLabel.setFont(new Font("Arial", 25 * fullScale));
-        gameWonLabel.setFont(new Font("Arial", 25 * fullScale));
-        drawGrid(coin, snake, obstacle, gc, false, 0);
+    public void toggleFullScreen(Stage stage, Obstacle obstacle, Snake snake, Coin coin) {
+        if (stage != null) {
+            boolean nextState = !stage.isFullScreen();
+            stage.setFullScreen(nextState);
+            scaleToFullscreen(nextState, stage, obstacle, snake, coin);
+        }
+    }
+
+    public boolean isPauseMenuVisible() {
+        return pauseOverlay.isVisible();
+    }
+
+    public void showPauseMenu(boolean show) {
+        pauseOverlay.setVisible(show);
+    }
+
+    public Button getResumeButton() {
+        return resumeButton;
+    }
+
+    public Button getReturnMenuButton() {
+        return returnMenuButton;
     }
 
     public void drawGrid(Coin coin, Snake snake, Obstacle obstacle, GraphicsContext gc, boolean a, int b) {
+        if (gc == null || coin == null || snake == null || obstacle == null) return;
         gc.setFill(game.getColor());
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
@@ -117,6 +213,7 @@ public class GameView {
     }
 
     private void drawGrid(Coin coin, Snake snake, GraphicsContext gc) {
+        if (gc == null || coin == null || snake == null) return;
         gc.setFill(game.getColor());
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
