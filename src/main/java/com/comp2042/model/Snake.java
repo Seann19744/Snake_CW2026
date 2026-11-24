@@ -27,10 +27,16 @@ public class Snake {
     private Image imgInputTail = new Image("resources/views/res/snaketail.png");
     private ImageView imageTail = new ImageView(imgInputTail);
     private int snakeDir = 270;
+    private int growthRate = 1;
 
     public Snake(int x, int y, boolean noBorder, Obstacle obstacle) {
+        this(x, y, noBorder, obstacle, 1);
+    }
+
+    public Snake(int x, int y, boolean noBorder, Obstacle obstacle, int growthRate) {
         this.obstacle = obstacle;
         this.noBorder = noBorder;
+        this.growthRate = growthRate;
         this.head.setLocation(x / 2, y / 2);
         this.body.add(new Point(x / 2 + 1, y / 2));
         this.gx = x;
@@ -101,10 +107,39 @@ public class Snake {
     }
 
     public boolean ateCoin(Coin coin) {
-        if (!head.equals(coin.getPos())) {
+        boolean ate = head.equals(coin.getPos());
+        if (!ate) {
             body.remove(0);
+        } else if (growthRate > 1) {
+            // Adds extra segment(s) when growthRate > 1 (e.g. Hardcore mode)
+            for (int i = 1; i < growthRate; i++) {
+                body.add(0, new Point(body.get(0)));
+            }
         }
-        return head.equals(coin.getPos());
+        return ate;
+    }
+
+    /**
+     * Resets the snake's head and body back to center coordinates.
+     * Useful when advancing to a new level to avoid immediate obstacle collision.
+     *
+     * @param x grid width
+     * @param y grid height
+     */
+    public void resetPosition(int x, int y) {
+        head.setLocation(x / 2, y / 2);
+        body.clear();
+        body.add(new Point(x / 2 + 1, y / 2));
+        dead = false;
+        snakeDir = 270;
+    }
+
+    public int getGrowthRate() {
+        return growthRate;
+    }
+
+    public void setGrowthRate(int growthRate) {
+        this.growthRate = growthRate;
     }
 
     private boolean borderControl() {

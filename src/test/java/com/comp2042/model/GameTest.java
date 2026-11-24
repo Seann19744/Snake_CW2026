@@ -13,29 +13,33 @@ class GameTest {
 
     @BeforeEach
     void setUp() {
-        game = new Game(20, 20, true, Difficulty.NORMAL);
+        game = new Game(20, 20, true, GameMode.CLASSIC);
     }
 
     @Test
-    @DisplayName("Verify Game initialization sets dimensions, speed, and difficulty correctly")
+    @DisplayName("Verify Game initialization sets dimensions, speed, game mode, and level 1")
     void testGameInitialization() {
         assertEquals(20, game.getWidth(), "Width should be 20");
         assertEquals(20, game.getHeight(), "Height should be 20");
         assertTrue(game.isPowerUp(), "PowerUp flag should be true");
-        assertEquals(8.5, game.getSpeed(), 0.001, "Speed should match Difficulty.NORMAL (8.5)");
-        assertFalse(game.isNoBorder(), "noBorder should match Difficulty.NORMAL (false)");
+        assertEquals(GameMode.CLASSIC, game.getGameMode(), "GameMode should be CLASSIC");
+        assertEquals(8.5, game.getSpeed(), 0.001, "Speed should match Classic mode (8.5)");
+        assertFalse(game.isNoBorder(), "noBorder should match Classic mode (false)");
         assertEquals(0, game.getScorePoints(), "Initial score points should be 0");
+        assertEquals(1, game.getCurrentLevel(), "Initial level should be 1");
+        assertEquals(0, game.getLevelCoinsEaten(), "Initial level coins should be 0");
+        assertEquals(0, game.getTotalCoinsEaten(), "Initial total coins should be 0");
     }
 
     @Test
     @DisplayName("Verify grid multiplier calculation based on height")
     void testMultiplierCalculation() {
         // Height <= 50 -> multiplier is 20
-        Game standardGame = new Game(20, 20, false, Difficulty.EASY);
+        Game standardGame = new Game(20, 20, false, GameMode.QUICK);
         assertEquals(20.0, standardGame.getMultiplier(), "Multiplier for height <= 50 should be 20");
 
         // Height > 50 -> multiplier is 10
-        Game largeGame = new Game(60, 60, false, Difficulty.HARD);
+        Game largeGame = new Game(60, 60, false, GameMode.HARDCORE);
         assertEquals(10.0, largeGame.getMultiplier(), "Multiplier for height > 50 should be 10");
     }
 
@@ -47,34 +51,56 @@ class GameTest {
         game.addPoints(15);
 
         assertEquals(15, game.getScorePoints(), "Score points should be 15 after adding 15");
+        assertEquals(2, game.getLevelCoinsEaten(), "Level coins eaten should be 2");
+        assertEquals(2, game.getTotalCoinsEaten(), "Total coins eaten should be 2");
 
         game.resetScore();
         assertEquals(0, game.getScorePoints(), "Score points should reset to 0");
+        assertEquals(1, game.getCurrentLevel(), "Level should reset to 1");
+        assertEquals(0, game.getLevelCoinsEaten(), "Level coins should reset to 0");
     }
 
     @Test
-    @DisplayName("Verify decMaxScore adjusts victory threshold by (num - 1)")
-    void testDecMaxScore() {
-        // Initial maxScore for 20x20 is 20*20 - 2 = 398
-        // Calling decMaxScore(5) reduces maxScore by (5 - 1) = 4 -> 394
-        game.decMaxScore(5);
-        // We verify that reaching 394 triggers gameWon
-        for (int i = 0; i < 394; i++) {
-            assertFalse(game.gameWon(), "Game should not be won before reaching maxScore");
+    @DisplayName("Verify level progression from Level 1 -> Level 2 -> Level 3 and victory on Level 3")
+    void testLevelProgressionAndVictory() {
+        // Level 1: requires 8 coins in Classic mode
+        assertEquals(8, game.getCoinsRequiredForCurrentLevel());
+        for (int i = 0; i < 7; i++) {
+            game.incScore();
+            assertFalse(game.isLevelCompleted(), "Level 1 should not be complete before 8 coins");
+        }
+        game.incScore(); // 8th coin
+        assertTrue(game.isLevelCompleted(), "Level 1 should be complete after 8 coins");
+        assertFalse(game.gameWon(), "Game should not be won after Level 1");
+
+        // Advance to Level 2
+        assertTrue(game.advanceLevel(), "Should advance to Level 2");
+        assertEquals(2, game.getCurrentLevel());
+        assertEquals(0, game.getLevelCoinsEaten());
+        assertEquals(10, game.getCoinsRequiredForCurrentLevel());
+
+        // Level 2: requires 10 coins
+        for (int i = 0; i < 10; i++) {
             game.incScore();
         }
-        assertTrue(game.gameWon(), "Game should be won when score reaches 394");
-    }
+        assertTrue(game.isLevelCompleted());
+        assertFalse(game.gameWon(), "Game should not be won after Level 2");
 
-    @Test
-    @DisplayName("Verify gameWon returns true only when score equals maxScore")
-    void testGameWon() {
-        Game smallGame = new Game(2, 2, false, Difficulty.NORMAL);
-        // For 2x2: maxScore = 2*2 - 2 = 2
-        assertFalse(smallGame.gameWon(), "Game should not be won initially");
-        smallGame.incScore();
-        assertFalse(smallGame.gameWon(), "Game should not be won with score 1");
-        smallGame.incScore();
-        assertTrue(smallGame.gameWon(), "Game should be won when score equals maxScore (2)");
+        // Advance to Level 3
+        assertTrue(game.advanceLevel(), "Should advance to Level 3");
+        assertEquals(3, game.getCurrentLevel());
+        assertEquals(12, game.getCoinsRequiredForCurrentLevel());
+
+        // Level 3: requires 12 coins
+        for (int i = 0; i < 11; i++) {
+            game.incScore();
+            assertFalse(game.gameWon());
+        }
+        game.incScore(); // 12th coin
+        assertTrue(game.isLevelCompleted());
+        assertTrue(game.gameWon(), "Game should be won after completing Level 3!");
+
+        // Cannot advance past Level 3
+        assertFalse(game.advanceLevel(), "Cannot advance beyond max level");
     }
 }

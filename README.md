@@ -38,13 +38,17 @@ mvn javafx:run
 
 The following features, enhancements, and bug fixes have been implemented, tested, and verified to be working properly:
 
-1. **Difficulty Selection System (UI & Logic)**:
-   - Added an interactive `ComboBox<Difficulty>` dropdown on the main menu (`MainMenu.fxml` & `MainMenuController.java`), allowing the player to select the desired difficulty (`EASY`, `NORMAL`, `HARD`) before launching the game.
-   - Designed a type-safe `Difficulty` enum encapsulating game properties:
-     - `EASY`: Speed = 8.5, border wrap-around enabled (`noBorder = true` - snake passes through walls and reappears on the opposite side).
-     - `NORMAL`: Speed = 8.5, fatal borders (`noBorder = false`).
-     - `HARD`: Speed = 13.0, fatal borders (`noBorder = false`).
-   - Integrated difficulty selection seamlessly with `Game.java` and `GameController.java`.
+1. **Game Modes and Playable Levels System (UI, Logic, & Map Layouts)**:
+   - Replaced basic difficulty levels with 3 fully-featured **Game Modes** selectable via a dropdown on the main menu (`MainMenuController.java` & `MainMenu.fxml`):
+     - **Classic Mode**: Standard speed (8.5), fatal outer borders, standard growth (+1 segment per coin), coins to clear levels: 8 -> 10 -> 12 (30 coins total to win).
+     - **Quick Mode**: Standard speed (8.5), border wrap-around enabled (`noBorder = true`), 2 fewer coins per level: 6 -> 8 -> 10 (24 coins total to win).
+     - **Hardcore Mode**: High speed (13.0), fatal borders, +2 coins per level: 10 -> 12 -> 14 (36 coins total to win), and **double snake growth (+2 segments per coin eaten)**.
+   - **Automatic In-Game Level Progression**:
+     - Replaced the legacy 398-coin endless requirement with structured level advancement based on the exact count of coins eaten, decoupling victory from random score luck.
+     - **Level 1 (The Open Field)**: Clean 20x20 open grid.
+     - **Level 2 (Four Pillars)**: 4 static 2x2 stone pillars spawned in quadrants to restrict turning space.
+     - **Level 3 (The Labyrinth)**: Interior corridor barriers dividing the field into interconnected quadrants. Completing Level 3 triggers the victory screen (**"YOU WON!"**).
+   - **Live In-Game HUD**: Displays live mode, level, coin quota, and score: e.g., `[Classic Mode] Level 2/3 | Coins: 4/10 | Score: 45`.
 
 2. **Audio Effects Implementation**:
    - Replaced an unused string path with a functional JavaFX `AudioClip` in `GameController.java` to load `/resources/views/res/coinSound.wav`.
@@ -153,6 +157,11 @@ The following features were considered during design and development but were no
 - **Purpose**: Implements the GoF Factory Pattern for generating `Coin` instances and subclasses.
 - **Justification**: Decouples coin generation from controller classes. Encapsulates probability-based power-up selection and board condition validation. Supports constructor dependency injection with `java.util.Random`, enabling deterministic unit testing.
 
+### 4. `com.comp2042.model.GameMode`
+- **Location**: `src/main/java/com/comp2042/model/GameMode.java`
+- **Purpose**: Type-safe enumeration defining game modes (`QUICK`, `CLASSIC`, `HARDCORE`).
+- **Justification**: Encapsulates speed, wall wrap-around behavior, coin quotas required to clear each level, and snake body growth rate per coin eaten.
+
 ---
 
 ## Modified Java Classes
@@ -230,8 +239,9 @@ src/main/java/com/comp2042/
 │   ├── BlueCoin.java                   (Border pass power-up coin)
 │   ├── Coin.java                       (Base coin entity)
 │   ├── CoinGenerator.java              (GoF Factory Pattern for coin instantiation)
-│   ├── Difficulty.java                 (Game difficulty enumeration)
+│   ├── Difficulty.java                 (Legacy difficulty enumeration)
 │   ├── Game.java                       (Game state, score, speed, grid boundaries)
+│   ├── GameMode.java                   (Game modes: Quick, Classic, Hardcore)
 │   ├── GoldCoin.java                   (High-value bonus coin)
 │   ├── Obstacle.java                   (Obstacle entity and placement algorithms)
 │   ├── RainbowCoin.java                (Speed boost coin)

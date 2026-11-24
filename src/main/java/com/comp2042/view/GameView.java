@@ -61,10 +61,11 @@ public class GameView {
         gameWonLabel.getStylesheets().add(css);
         gameWonLabel.setVisible(false);
 
-        scoreLabel = new Label("Score: " + game.getScorePoints());
+        scoreLabel = new Label();
         scoreLabel.setId("scoreLabel");
         scoreLabel.getStylesheets().add(css);
-        scoreLabel.setFont(new Font("Arial", 20));
+        scoreLabel.setFont(new Font("Arial", 16));
+        updateScoreLabel();
         scoreLabel.setVisible(true);
     }
 
@@ -223,7 +224,13 @@ public class GameView {
     }
 
     public void updateScoreLabel() {
-        scoreLabel.setText("Score: " + game.getScorePoints());
+        scoreLabel.setText(String.format("[%s] Level %d/%d | Coins: %d/%d | Score: %d",
+                game.getGameMode().getDisplayName(),
+                game.getCurrentLevel(),
+                Game.MAX_LEVEL,
+                game.getLevelCoinsEaten(),
+                game.getCoinsRequiredForCurrentLevel(),
+                game.getScorePoints()));
     }
 
 }

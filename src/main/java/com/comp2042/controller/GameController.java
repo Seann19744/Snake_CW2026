@@ -43,6 +43,9 @@ public class GameController {
         this.obstacle = obstacle;
         this.coinGenerator = coinGenerator;
 
+        this.snake.setGrowthRate(game.getGameMode().getGrowthRate());
+        this.obstacle.loadLevelLayout(game.getCurrentLevel());
+
         animation.setCycleCount(Animation.INDEFINITE);
         animation.setRate(game.getSpeed());
 
@@ -69,11 +72,18 @@ public class GameController {
                 coinSound.play();
                 powerCoin();
                 game.incScore();
-                if (game.gameWon()) {
-                    gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
-                    return;
+                if (game.isLevelCompleted()) {
+                    if (game.advanceLevel()) {
+                        loadLevel(game.getCurrentLevel());
+                    } else {
+                        gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
+                        gameView.gameWon();
+                        gameView.updateScoreLabel();
+                        return;
+                    }
+                } else {
+                    newCoin();
                 }
-                newCoin();
             }
 
             keyPressed = false;
@@ -175,20 +185,30 @@ public class GameController {
         animation.jumpTo(Duration.ZERO);
         animation.stop();
 
-        snake = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle);
+        game.resetScore();
+        obstacle.loadLevelLayout(1);
+        snake = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle, game.getGameMode().getGrowthRate());
         coin = coinGenerator.generateCoin(game.getWidth(), game.getHeight(), snake, obstacle, false);
 
         animation.setRate(game.getSpeed());
         key = KeyCode.LEFT;
         lastKey = KeyCode.LEFT;
         keyPressed = false;
-        game.resetScore();
-        obstacle.reset();
 
         gameView.gameWon();
         gameView.gameOver(snake);
         gameView.updateScoreLabel();
 
+        gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
+    }
+
+    private void loadLevel(int level) {
+        obstacle.loadLevelLayout(level);
+        snake.resetPosition(game.getWidth(), game.getHeight());
+        key = KeyCode.LEFT;
+        lastKey = KeyCode.LEFT;
+        newCoin();
+        gameView.updateScoreLabel();
         gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
     }
 
