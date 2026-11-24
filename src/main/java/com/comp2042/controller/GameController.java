@@ -25,6 +25,7 @@ public class GameController {
     public static KeyCode key = KeyCode.LEFT;
     public static KeyCode lastKey = KeyCode.LEFT;
     private boolean keyPressed = false;
+    private boolean gameStarted = false;
 
     private final AudioClip coinSound = new AudioClip(
             getClass().getResource("/resources/views/res/coinSound.wav").toExternalForm()
@@ -112,6 +113,7 @@ public class GameController {
         // Pause Menu toggle with ESC or P
         if (code.equals(KeyCode.ESCAPE) || code.equals(KeyCode.P)) {
             togglePauseMenu();
+            event.consume();
             return;
         }
 
@@ -123,12 +125,14 @@ public class GameController {
         // Fullscreen toggle with F11
         if (code.equals(KeyCode.F11)) {
             gameView.toggleFullScreen(stage, obstacle, snake, coin);
+            event.consume();
             return;
         }
 
         // Arrow keys to start the game
         if (code.isArrowKey()) {
             if (!snake.getDead() && !game.gameWon()) {
+                gameStarted = true;
                 animation.play();
             }
         }
@@ -146,6 +150,10 @@ public class GameController {
             reset();
             gameView.scoreLabel.setText("Score: " + game.getScorePoints());
         }
+    }
+
+    public boolean isGameStarted() {
+        return gameStarted;
     }
 
     public boolean isPauseMenuVisible() {
@@ -171,7 +179,7 @@ public class GameController {
 
     public void hidePauseMenu() {
         gameView.showPauseMenu(false);
-        if (!snake.getDead() && !game.gameWon()) {
+        if (gameStarted && !snake.getDead() && !game.gameWon()) {
             animation.play();
         }
     }
@@ -222,6 +230,7 @@ public class GameController {
         key = KeyCode.LEFT;
         lastKey = KeyCode.LEFT;
         keyPressed = false;
+        gameStarted = false;
 
         gameView.showPauseMenu(false);
         gameView.gameWon();
@@ -236,6 +245,7 @@ public class GameController {
         snake.resetPosition(game.getWidth(), game.getHeight());
         key = KeyCode.LEFT;
         lastKey = KeyCode.LEFT;
+        gameStarted = false;
         newCoin();
         gameView.updateScoreLabel();
         gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);

@@ -93,21 +93,25 @@ class GameControllerTest extends JavaFXTestBase {
     }
 
     @Test
-    @DisplayName("Verify pause menu toggles visibility properly")
+    @DisplayName("Verify pause menu toggles visibility properly without prematurely starting movement")
     void testPauseMenuToggling() {
+        assertFalse(controller.isGameStarted(), "Game should not be started before arrow key");
         assertFalse(controller.isPauseMenuVisible(), "Pause menu should initially be hidden");
 
         controller.showPauseMenu();
         assertTrue(controller.isPauseMenuVisible(), "Pause menu should be visible after showPauseMenu()");
 
+        // Hiding pause menu before arrow key must NOT start the snake moving
         controller.hidePauseMenu();
         assertFalse(controller.isPauseMenuVisible(), "Pause menu should be hidden after hidePauseMenu()");
+        assertFalse(controller.isGameStarted(), "Game should still not be started after unpausing if no arrow key was pressed");
 
         controller.togglePauseMenu();
         assertTrue(controller.isPauseMenuVisible(), "Pause menu should be visible after toggle");
 
         controller.togglePauseMenu();
         assertFalse(controller.isPauseMenuVisible(), "Pause menu should be hidden after second toggle");
+        assertFalse(controller.isGameStarted());
         controller.stopAnimation();
     }
 }

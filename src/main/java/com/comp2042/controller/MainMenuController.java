@@ -58,7 +58,7 @@ public class MainMenuController {
         GameController controller = new GameController(snake, coin, game, gameView, obstacle, gameStage);
 
         StackPane gamePane = new StackPane();
-        gamePane.setStyle("-fx-background-color: #feffe4;");
+        gamePane.setStyle("-fx-background-color: #ffffff;");
         Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
         gameScene = new Scene(gamePane, visualBounds.getWidth(), visualBounds.getHeight());
 

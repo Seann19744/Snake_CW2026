@@ -94,6 +94,7 @@ public class GameView {
     private void setupPauseOverlay() {
         pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.72);");
         pauseOverlay.setVisible(false);
+        pauseOverlay.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         VBox pauseBox = new VBox(15);
         pauseBox.setAlignment(Pos.CENTER);
@@ -196,6 +197,11 @@ public class GameView {
         gc.setFill(game.getColor());
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
+        // Boundary outline separating the playable grid from the white non-playable window area
+        gc.setStroke(Color.web("#b0ab88"));
+        gc.setLineWidth(2 * fullScale);
+        gc.strokeRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
+
         gc.drawImage(coin.getImage(), (coin.getPos().x * game.getMultiplier()) * fullScale, (coin.getPos().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale - 3 * fullScale, game.getMultiplier() * fullScale - 3 * fullScale);
 
         int bodyIndex = 0;
@@ -216,6 +222,11 @@ public class GameView {
         if (gc == null || coin == null || snake == null) return;
         gc.setFill(game.getColor());
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
+
+        // Boundary outline separating the playable grid from the white non-playable window area
+        gc.setStroke(Color.web("#b0ab88"));
+        gc.setLineWidth(2 * fullScale);
+        gc.strokeRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
         gc.drawImage(coin.getImage(), (coin.getPos().x * game.getMultiplier()) * fullScale, (coin.getPos().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale - 3 * fullScale, game.getMultiplier() * fullScale - 3 * fullScale);
 

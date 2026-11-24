@@ -286,3 +286,11 @@ Adhering to clean code principles and Java naming conventions:
 4. **Input Direction Carryover Across Sessions**:
    - **Problem**: Static variables `key` and `lastKey` in `GameController` retained their values from the previous game session upon restarting. If a player was moving DOWN when they exited or died, starting a new game could cause the snake to instantly register DOWN instead of the default LEFT, leading to unexpected turns or collisions.
    - **Solution**: Explicitly reset `key = KeyCode.LEFT` and `lastKey = KeyCode.LEFT` in the `GameController` constructor as well as inside the `reset()` method.
+
+5. **Premature Snake Movement on In-Game Pause Toggle (`ESCAPE` / `P`)**:
+   - **Problem**: When opening and closing the in-game pause menu using `ESCAPE` (or `P`) or clicking "Resume" before the player had initiated movement with an arrow key, the resume logic unconditionally invoked `animation.play()`. This caused the stationary snake to prematurely start moving across the board from its initial spawn position without player intent.
+   - **Solution**: Introduced an explicit `gameStarted` state boolean in `GameController`. The animation timeline is now only resumed if `gameStarted` is `true` (triggered when the player actively presses an arrow key). Reset and level advancement operations reset `gameStarted = false`, ensuring the snake remains stationary until the player initiates directional movement. Additionally consumed the `KeyEvent` (`event.consume()`) on menu toggling to prevent redundant key event propagation.
+
+6. **Playable Arena Visual Boundary Indistinguishability**:
+   - **Problem**: In maximized/windowed fullscreen mode, the outer container margins (`gamePane`) and the playable canvas (`gridCanvas`) both shared the same background color (`#feffe4`). Because there was no visual separation, players could not identify the 20x20 grid borders, making it impossible to anticipate wall collisions in border-enabled game modes.
+   - **Solution**: Set the non-playable letterbox container (`gamePane`) background to pure white (`#ffffff`) and added a crisp perimeter border (`#b0ab88`) around the playable arena canvas in `GameView.drawGrid()`, clearly delineating the playable field from non-playable window margins.
