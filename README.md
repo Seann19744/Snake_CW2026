@@ -162,6 +162,11 @@ The following features were considered during design and development but were no
 - **Purpose**: Type-safe enumeration defining game modes (`QUICK`, `CLASSIC`, `HARDCORE`).
 - **Justification**: Encapsulates speed, wall wrap-around behavior, coin quotas required to clear each level, and snake body growth rate per coin eaten.
 
+### 5. `com.comp2042.model.GameSettings`
+- **Location**: `src/main/java/com/comp2042/model/GameSettings.java`
+- **Purpose**: Singleton configuration manager (GoF Singleton Pattern) managing user preferences such as grid display options.
+- **Justification**: Centralizes application-wide user configuration without polluting controller state. Accessible from both the Main Menu Settings overlay and the in-game Pause Menu Settings view. Enables dynamic real-time toggling of visual features like checkerboard grid lines.
+
 ---
 
 ## Modified Java Classes

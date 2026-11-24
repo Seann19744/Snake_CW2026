@@ -129,6 +129,15 @@ public class GameController {
             return;
         }
 
+        // Grid toggle shortcut with G
+        if (code.equals(KeyCode.G)) {
+            GameSettings.getInstance().toggleGrid();
+            gameView.updateGridButtonText();
+            gameView.redrawGrid();
+            event.consume();
+            return;
+        }
+
         // Arrow keys to start the game
         if (code.isArrowKey()) {
             if (!snake.getDead() && !game.gameWon()) {
