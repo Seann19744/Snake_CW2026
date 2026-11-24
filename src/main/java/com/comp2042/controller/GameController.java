@@ -20,6 +20,7 @@ public class GameController {
     private Game game;
     private Stage stage;
     private Obstacle obstacle;
+    private final CoinGenerator coinGenerator;
 
     public static KeyCode key = KeyCode.LEFT;
     public static KeyCode lastKey = KeyCode.LEFT;
@@ -30,13 +31,18 @@ public class GameController {
     );
 
     public GameController(Snake snake, Coin coin, Game game, GameView gameView, Obstacle obstacle, Stage stage) {
+        this(snake, coin, game, gameView, obstacle, stage, new CoinGenerator());
+    }
+
+    public GameController(Snake snake, Coin coin, Game game, GameView gameView, Obstacle obstacle, Stage stage, CoinGenerator coinGenerator) {
         this.snake = snake;
         this.coin = coin;
         this.gameView = gameView;
         this.game = game;
         this.stage = stage;
-
         this.obstacle = obstacle;
+        this.coinGenerator = coinGenerator;
+
         animation.setCycleCount(Animation.INDEFINITE);
         animation.setRate(game.getSpeed());
 
@@ -170,7 +176,7 @@ public class GameController {
         animation.stop();
 
         snake = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle);
-        coin = new Coin(game.getWidth(), game.getHeight(), snake, obstacle);
+        coin = coinGenerator.generateCoin(game.getWidth(), game.getHeight(), snake, obstacle, false);
 
         animation.setRate(game.getSpeed());
         key = KeyCode.LEFT;
@@ -187,38 +193,10 @@ public class GameController {
     }
 
     private void powerCoin() {
-        animation.setRate(game.getSpeed());
-        snake.ignoreBorders(false);
-        if (coin.getClass().equals(RainbowCoin.class)) {
-            RainbowCoin tempCoin = (RainbowCoin) coin;
-            animation.setRate(game.getSpeed() + tempCoin.getSpeedBonus());
-        } else if (coin.getClass().equals(SilverCoin.class)){
-            Random rnd = new Random();
-            obstacle.newObstacles(snake, coin, rnd.nextInt(game.getWidth() * game.getHeight()/ 20) +3);
-            game.decMaxScore(obstacle.getObstacles().size());
-        } else if (coin.getClass().equals(BlueCoin.class)) {
-            snake.ignoreBorders(true);
-        }
-        game.addPoints(coin.getPoints());
+        coin.applyEffect(game, snake, obstacle, animation);
     }
 
     private void newCoin() {
-        if (game.isPowerUp()) {
-            Random rnd = new Random();
-            int ran = rnd.nextInt(12);
-            if (ran == 1) {
-                coin = new GoldCoin(game.getWidth(), game.getHeight(), snake, obstacle);
-            } else if (ran == 2) {
-                coin = new RainbowCoin(game.getWidth(), game.getHeight(), snake, obstacle);
-            } else if (ran == 3) {
-                coin = new BlueCoin(game.getWidth(), game.getHeight(), snake, obstacle);
-            } else if (ran == 4 && obstacle.getObstacles().size() == 0) {
-                coin = new SilverCoin(game.getWidth(), game.getHeight(), snake, obstacle);
-            } else {
-                coin = new Coin(game.getWidth(), game.getHeight(), snake, obstacle);
-            }
-        } else {
-            coin = new Coin(game.getWidth(), game.getHeight(), snake, obstacle);
-        }
+        coin = coinGenerator.generateCoin(game.getWidth(), game.getHeight(), snake, obstacle, game.isPowerUp());
     }
 }
