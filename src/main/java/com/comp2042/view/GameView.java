@@ -287,7 +287,13 @@ public class GameView {
         gc.setLineWidth(2 * fullScale);
         gc.strokeRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
-        gc.drawImage(coin.getImage(), (coin.getPos().x * game.getMultiplier()) * fullScale, (coin.getPos().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale - 3 * fullScale, game.getMultiplier() * fullScale - 3 * fullScale);
+        double tileSize = game.getMultiplier() * fullScale;
+        double coinPadding = 2 * fullScale;
+        double coinSize = tileSize - (2 * coinPadding);
+        gc.drawImage(coin.getImage(),
+                (coin.getPos().x * tileSize) + coinPadding,
+                (coin.getPos().y * tileSize) + coinPadding,
+                coinSize, coinSize);
 
         int bodyIndex = 0;
         for (Point point : snake.getBody()) {
@@ -329,7 +335,13 @@ public class GameView {
         gc.setLineWidth(2 * fullScale);
         gc.strokeRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
-        gc.drawImage(coin.getImage(), (coin.getPos().x * game.getMultiplier()) * fullScale, (coin.getPos().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale - 3 * fullScale, game.getMultiplier() * fullScale - 3 * fullScale);
+        double tileSize = game.getMultiplier() * fullScale;
+        double coinPadding = 2 * fullScale;
+        double coinSize = tileSize - (2 * coinPadding);
+        gc.drawImage(coin.getImage(),
+                (coin.getPos().x * tileSize) + coinPadding,
+                (coin.getPos().y * tileSize) + coinPadding,
+                coinSize, coinSize);
 
         int bodyIndex = 0;
         for (Point point : snake.getBody()) {
