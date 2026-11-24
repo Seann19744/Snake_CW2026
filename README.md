@@ -100,6 +100,16 @@ The following features, enhancements, and bug fixes have been implemented, teste
     - Renamed cryptic method `valKey()` to descriptive boolean predicate `isValidTurn()`.
     - Corrected typographical error `initalizeMainMenu()` to `initializeMainMenu()` in `ViewManager.java`.
 
+13. **Design Pattern: GoF Factory Pattern (`CoinGenerator`)**:
+    - Extracted coin creation out of `GameController` into a dedicated `CoinGenerator` class (`com.comp2042.model.CoinGenerator`).
+    - Encapsulates probability distributions and board condition checks (e.g., ensuring `SilverCoin` only spawns when the board has no obstacles).
+    - Enables dependency injection of `Random` for deterministic unit testing.
+
+14. **SOLID Refactoring: Polymorphic Power-Up Effects (Open-Closed Principle)**:
+    - Replaced the hardcoded class-type checking ladder (`if (coin.getClass().equals(RainbowCoin.class)) ...`) in `GameController.powerCoin()` with a polymorphic `applyEffect(Game, Snake, Obstacle, Timeline)` method across the `Coin` hierarchy.
+    - Each coin subclass encapsulates its own effect (`RainbowCoin` adds speed bonus, `BlueCoin` enables border-crossing, `SilverCoin` spawns obstacles, `GoldCoin` adds 15 points).
+    - New coin types can now be introduced without modifying existing controller logic, fully conforming to the Open-Closed Principle (OCP) and Single Responsibility Principle (SRP).
+
 ---
 
 ## Implemented but not Working Properly
@@ -138,6 +148,11 @@ The following features were considered during design and development but were no
   - `noBorder` (boolean): `true` for `EASY` (enabling wall wrap-around), `false` for `NORMAL` and `HARD`.
   - Provides a clean data model that integrates directly with JavaFX UI controls such as `ComboBox<Difficulty>`.
 
+### 3. `com.comp2042.model.CoinGenerator`
+- **Location**: `src/main/java/com/comp2042/model/CoinGenerator.java`
+- **Purpose**: Implements the GoF Factory Pattern for generating `Coin` instances and subclasses.
+- **Justification**: Decouples coin generation from controller classes. Encapsulates probability-based power-up selection and board condition validation. Supports constructor dependency injection with `java.util.Random`, enabling deterministic unit testing.
+
 ---
 
 ## Modified Java Classes
@@ -159,6 +174,8 @@ The following features were considered during design and development but were no
 
 ### 4. `com.comp2042.controller.GameController`
 - Moved to package `com.comp2042.controller` and updated model and view imports.
+- **Factory Pattern Integration**: Injected `CoinGenerator` to handle coin spawning in `newCoin()` and `reset()`, removing hardcoded random coin instantiation from the controller.
+- **Polymorphic Power-Up Handling (OCP)**: Refactored `powerCoin()` to delegate directly to `coin.applyEffect(game, snake, obstacle, animation)`, completely removing fragile `getClass().equals(...)` conditionals and conforming to the Open-Closed Principle.
 - **Rainbow Coin Bug Fix**: Corrected condition in `newCoin()` from duplicate `ran == 1` to `ran == 2`, making `RainbowCoin` spawnable during gameplay.
 - **Direction Reversal Bug Fix**: In `isValidTurn()` (formerly `valKey()`), corrected the check for `KeyCode.DOWN` from `!this.key.equals(KeyCode.DOWN)` to `!this.key.equals(KeyCode.UP)`, preventing instant 180° suicide turns across all four directions.
 - **Audio Integration**: Replaced unused String variable `coinSoundPath` with a loaded `AudioClip` (`/resources/views/res/coinSound.wav`) played whenever `snake.ateCoin(coin)` is true.
@@ -194,6 +211,7 @@ The following features were considered during design and development but were no
 ### 10. `com.comp2042.model.Coin` and Subclasses (`GoldCoin`, `SilverCoin`, `BlueCoin`, `RainbowCoin`)
 - Moved to package `com.comp2042.model`.
 - Updated constructors and method parameters from `Snake snek` to `Snake snake`.
+- Implemented polymorphic `applyEffect(Game, Snake, Obstacle, Timeline)` across all coin types, encapsulating power-up behaviors within the coin models rather than external controller conditionals.
 
 ---
 
@@ -211,6 +229,7 @@ src/main/java/com/comp2042/
 ├── model/                              [Model Layer]
 │   ├── BlueCoin.java                   (Border pass power-up coin)
 │   ├── Coin.java                       (Base coin entity)
+│   ├── CoinGenerator.java              (GoF Factory Pattern for coin instantiation)
 │   ├── Difficulty.java                 (Game difficulty enumeration)
 │   ├── Game.java                       (Game state, score, speed, grid boundaries)
 │   ├── GoldCoin.java                   (High-value bonus coin)

@@ -1,5 +1,6 @@
 package com.comp2042.model;
 
+import javafx.animation.Timeline;
 import javafx.scene.image.Image;
 
 import java.awt.*;
@@ -32,5 +33,21 @@ public class Coin {
 
     public Image getImage() {
         return image;
+    }
+
+    /**
+     * Applies the effect of this coin when eaten by the snake.
+     * By default, resets speed, resets border-passing, and awards points.
+     * Subclasses override this method to provide polymorphic power-up behavior (Open-Closed Principle).
+     *
+     * @param game the current Game instance
+     * @param snake the Snake instance
+     * @param obstacle the Obstacle instance
+     * @param animation the game loop Timeline
+     */
+    public void applyEffect(Game game, Snake snake, Obstacle obstacle, Timeline animation) {
+        animation.setRate(game.getSpeed());
+        snake.ignoreBorders(false);
+        game.addPoints(getPoints());
     }
 }
