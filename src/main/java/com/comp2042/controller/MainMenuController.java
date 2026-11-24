@@ -19,15 +19,15 @@ public class MainMenuController {
     private static final boolean POWER_UP = true;
 
     @FXML
-    private ComboBox<Difficulty> difficultyBox;
+    private ComboBox<GameMode> difficultyBox;
 
     @FXML
     /**
-     * Have dropdown bar display all difficulty stages
+     * Have dropdown bar display all game modes.
      */
     public void initialize() {
-        difficultyBox.getItems().setAll(Difficulty.values());
-        difficultyBox.setValue(Difficulty.NORMAL);
+        difficultyBox.getItems().setAll(GameMode.values());
+        difficultyBox.setValue(GameMode.CLASSIC);
     }
 
     private Scene gameScene;
@@ -35,20 +35,20 @@ public class MainMenuController {
     private ViewManager viewManager = Main.getViewManager();
 
     public void handleStart() {
-        Difficulty difficulty = difficultyBox.getValue();
+        GameMode gameMode = difficultyBox.getValue();
         viewManager.initGameStage();
 
         Stage gameStage = viewManager.getGameStage();
-        launchSnake(gameStage, difficulty);
+        launchSnake(gameStage, gameMode);
         gameStage.setScene(gameScene);
         viewManager.getPrimaryStage().close();
         gameStage.show();
     }
 
-    private void launchSnake(Stage gameStage, Difficulty difficulty) {
-        Game game = new Game(X_VALUE, Y_VALUE, POWER_UP, difficulty);
+    private void launchSnake(Stage gameStage, GameMode gameMode) {
+        Game game = new Game(X_VALUE, Y_VALUE, POWER_UP, gameMode);
         Obstacle obstacle = new Obstacle(game.getWidth(), game.getHeight());
-        Snake snake = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle);
+        Snake snake = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle, gameMode.getGrowthRate());
         Coin coin = new Coin(game.getWidth(), game.getHeight(), snake, obstacle);
 
         GameView gameView = new GameView(game);

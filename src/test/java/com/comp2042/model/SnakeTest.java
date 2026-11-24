@@ -121,6 +121,20 @@ class SnakeTest extends JavaFXTestBase {
         assertTrue(snake.getDead(), "Snake must die upon hitting an obstacle");
     }
 
+    @Test
+    @DisplayName("Verify Hardcore growth rate (2x) increases snake body length by 2 segments per coin")
+    void testHardcoreGrowthRate() {
+        Snake hardcoreSnake = new Snake(20, 20, false, obstacle, 2);
+        assertEquals(2, hardcoreSnake.getGrowthRate());
+        assertEquals(1, hardcoreSnake.getBody().size(), "Initial body size is 1");
+
+        CoinMock coin = new CoinMock(hardcoreSnake.getHead());
+        assertTrue(hardcoreSnake.ateCoin(coin));
+
+        // After eating coin with growthRate = 2, body should have 2 segments (growth of +2)
+        assertEquals(2, hardcoreSnake.getBody().size(), "Body size must increase by 2 segments for 2x growth rate");
+    }
+
     /**
      * Helper mock for Coin to test specific coordinates in ateCoin
      */

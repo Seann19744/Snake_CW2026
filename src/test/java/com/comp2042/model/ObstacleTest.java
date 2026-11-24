@@ -75,4 +75,21 @@ class ObstacleTest extends JavaFXTestBase {
         obstacle.newObstacles(snake, coin, 10);
         assertEquals(currentCount, obstacle.getObstacles().size(), "Obstacle count should not increase once > 50");
     }
+
+    @Test
+    @DisplayName("Verify loadLevelLayout sets distinct obstacle patterns per level")
+    void testLoadLevelLayout() {
+        // Level 1: empty arena
+        obstacle.loadLevelLayout(1);
+        assertTrue(obstacle.getObstacles().isEmpty(), "Level 1 should have 0 static obstacles");
+
+        // Level 2: Four Pillars (4 blocks of 2x2 = 16 obstacles)
+        obstacle.loadLevelLayout(2);
+        assertEquals(16, obstacle.getObstacles().size(), "Level 2 should have 16 pillar obstacle points");
+
+        // Level 3: The Labyrinth
+        obstacle.loadLevelLayout(3);
+        assertFalse(obstacle.getObstacles().isEmpty(), "Level 3 must have labyrinth corridor walls");
+        assertFalse(obstacle.getObstacles().contains(new Point(10, 10)), "Center must be clear for snake traversal");
+    }
 }
