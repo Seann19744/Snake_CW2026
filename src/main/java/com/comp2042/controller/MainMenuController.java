@@ -8,6 +8,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.layout.StackPane;
 import javafx.scene.control.ComboBox;
 import javafx.stage.Screen;
@@ -24,12 +25,47 @@ public class MainMenuController {
     private ComboBox<GameMode> difficultyBox;
 
     @FXML
+    private StackPane settingsOverlay;
+
+    @FXML
+    private Button btn_gridToggle;
+
+    @FXML
     /**
      * Have dropdown bar display all game modes.
      */
     public void initialize() {
         difficultyBox.getItems().setAll(GameMode.values());
         difficultyBox.setValue(GameMode.CLASSIC);
+        updateGridButton();
+    }
+
+    @FXML
+    public void handleOpenSettings() {
+        updateGridButton();
+        if (settingsOverlay != null) {
+            settingsOverlay.setVisible(true);
+        }
+    }
+
+    @FXML
+    public void handleCloseSettings() {
+        if (settingsOverlay != null) {
+            settingsOverlay.setVisible(false);
+        }
+    }
+
+    @FXML
+    public void handleToggleGrid() {
+        GameSettings.getInstance().toggleGrid();
+        updateGridButton();
+    }
+
+    private void updateGridButton() {
+        if (btn_gridToggle != null) {
+            boolean enabled = GameSettings.getInstance().isGridEnabled();
+            btn_gridToggle.setText(enabled ? "Grid: ON" : "Grid: OFF");
+        }
     }
 
     private Scene gameScene;
@@ -78,12 +114,12 @@ public class MainMenuController {
         gamePane.setAlignment(gameView.scoreLabel, Pos.BOTTOM_CENTER);
         gamePane.setAlignment(gameView.pauseOverlay, Pos.CENTER);
 
-        // Dynamically scale on window resize or fullscreen toggle
+        // Dynamically scale on window resize or fullscreen toggle using live controller state
         gameScene.widthProperty().addListener((obs, oldV, newV) ->
-                gameView.fitToWindow(newV.doubleValue(), gameScene.getHeight(), obstacle, snake, coin)
+                controller.handleResize(newV.doubleValue(), gameScene.getHeight())
         );
         gameScene.heightProperty().addListener((obs, oldV, newV) ->
-                gameView.fitToWindow(gameScene.getWidth(), newV.doubleValue(), obstacle, snake, coin)
+                controller.handleResize(gameScene.getWidth(), newV.doubleValue())
         );
     }
 

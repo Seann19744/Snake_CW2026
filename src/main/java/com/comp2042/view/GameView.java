@@ -2,10 +2,7 @@ package com.comp2042.view;
 
 import com.comp2042.controller.GameController;
 import com.comp2042.controller.MainMenuController;
-import com.comp2042.model.Coin;
-import com.comp2042.model.Game;
-import com.comp2042.model.Obstacle;
-import com.comp2042.model.Snake;
+import com.comp2042.model.*;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -39,6 +36,15 @@ public class GameView {
     public final StackPane pauseOverlay = new StackPane();
     private final Button resumeButton = new Button("Resume");
     private final Button returnMenuButton = new Button("Main Menu");
+    private final Button pauseSettingsButton = new Button("Settings");
+    private final Button gridToggleButton = new Button("Grid: ON");
+    private final Button settingsBackButton = new Button("Back");
+    private final VBox pauseBox = new VBox(15);
+    private final VBox pauseSettingsBox = new VBox(15);
+
+    private Coin currentCoin;
+    private Snake currentSnake;
+    private Obstacle currentObstacle;
 
     private Game game;
     private double initX;
@@ -96,9 +102,8 @@ public class GameView {
         pauseOverlay.setVisible(false);
         pauseOverlay.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-        VBox pauseBox = new VBox(15);
         pauseBox.setAlignment(Pos.CENTER);
-        pauseBox.setMaxSize(300, 250);
+        pauseBox.setMaxSize(300, 280);
 
         Label pauseTitle = new Label("GAME PAUSED");
         pauseTitle.setId("pauseTitle");
@@ -111,12 +116,53 @@ public class GameView {
         resumeButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
         resumeButton.setPrefSize(140, 40);
 
+        pauseSettingsButton.getStyleClass().add("startAndQuitBtn");
+        pauseSettingsButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
+        pauseSettingsButton.setPrefSize(140, 40);
+
         returnMenuButton.getStyleClass().add("startAndQuitBtn");
         returnMenuButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
         returnMenuButton.setPrefSize(140, 40);
 
-        pauseBox.getChildren().addAll(pauseTitle, pauseHint, resumeButton, returnMenuButton);
-        pauseOverlay.getChildren().add(pauseBox);
+        pauseBox.getChildren().setAll(pauseTitle, pauseHint, resumeButton, pauseSettingsButton, returnMenuButton);
+
+        // Settings sub-menu within pause overlay
+        pauseSettingsBox.setAlignment(Pos.CENTER);
+        pauseSettingsBox.setMaxSize(300, 280);
+        pauseSettingsBox.setVisible(false);
+
+        Label settingsTitle = new Label("SETTINGS");
+        settingsTitle.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 32px; -fx-text-fill: #ffffff;");
+
+        gridToggleButton.getStyleClass().add("startAndQuitBtn");
+        gridToggleButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
+        gridToggleButton.setPrefSize(140, 40);
+        updateGridButtonText();
+
+        settingsBackButton.getStyleClass().add("startAndQuitBtn");
+        settingsBackButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
+        settingsBackButton.setPrefSize(140, 40);
+
+        pauseSettingsBox.getChildren().setAll(settingsTitle, gridToggleButton, settingsBackButton);
+
+        pauseSettingsButton.setOnAction(e -> {
+            updateGridButtonText();
+            pauseBox.setVisible(false);
+            pauseSettingsBox.setVisible(true);
+        });
+
+        gridToggleButton.setOnAction(e -> {
+            GameSettings.getInstance().toggleGrid();
+            updateGridButtonText();
+            redrawGrid();
+        });
+
+        settingsBackButton.setOnAction(e -> {
+            pauseSettingsBox.setVisible(false);
+            pauseBox.setVisible(true);
+        });
+
+        pauseOverlay.getChildren().setAll(pauseBox, pauseSettingsBox);
     }
 
     public void fitToWindow(double windowWidth, double windowHeight, Obstacle obstacle, Snake snake, Coin coin) {
@@ -182,6 +228,28 @@ public class GameView {
 
     public void showPauseMenu(boolean show) {
         pauseOverlay.setVisible(show);
+        if (show) {
+            pauseBox.setVisible(true);
+            pauseSettingsBox.setVisible(false);
+            updateGridButtonText();
+            pauseOverlay.toFront();
+        } else {
+            pauseBox.setVisible(false);
+            pauseSettingsBox.setVisible(false);
+        }
+    }
+
+    public void updateGridButtonText() {
+        boolean enabled = GameSettings.getInstance().isGridEnabled();
+        gridToggleButton.setText(enabled ? "Grid: ON" : "Grid: OFF");
+    }
+
+    public void redrawGrid() {
+        if (gc != null && currentCoin != null && currentSnake != null && currentObstacle != null) {
+            drawGrid(currentCoin, currentSnake, currentObstacle, gc, false, 0);
+        } else if (gc != null && currentCoin != null && currentSnake != null) {
+            drawGrid(currentCoin, currentSnake, gc);
+        }
     }
 
     public Button getResumeButton() {
@@ -194,15 +262,39 @@ public class GameView {
 
     public void drawGrid(Coin coin, Snake snake, Obstacle obstacle, GraphicsContext gc, boolean a, int b) {
         if (gc == null || coin == null || snake == null || obstacle == null) return;
+        this.currentCoin = coin;
+        this.currentSnake = snake;
+        this.currentObstacle = obstacle;
+
+        gc.clearRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
         gc.setFill(game.getColor());
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
+
+        // Checkerboard pattern (alternating tiles when grid is enabled)
+        if (GameSettings.getInstance().isGridEnabled()) {
+            double tileSize = game.getMultiplier() * fullScale;
+            gc.setFill(Color.web("#f1efd2"));
+            for (int x = 0; x < game.getWidth(); x++) {
+                for (int y = 0; y < game.getHeight(); y++) {
+                    if ((x + y) % 2 == 1) {
+                        gc.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                    }
+                }
+            }
+        }
 
         // Boundary outline separating the playable grid from the white non-playable window area
         gc.setStroke(Color.web("#b0ab88"));
         gc.setLineWidth(2 * fullScale);
         gc.strokeRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
-        gc.drawImage(coin.getImage(), (coin.getPos().x * game.getMultiplier()) * fullScale, (coin.getPos().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale - 3 * fullScale, game.getMultiplier() * fullScale - 3 * fullScale);
+        double tileSize = game.getMultiplier() * fullScale;
+        double coinPadding = 2 * fullScale;
+        double coinSize = tileSize - (2 * coinPadding);
+        gc.drawImage(coin.getImage(),
+                (coin.getPos().x * tileSize) + coinPadding,
+                (coin.getPos().y * tileSize) + coinPadding,
+                coinSize, coinSize);
 
         int bodyIndex = 0;
         for (Point point : snake.getBody()) {
@@ -220,15 +312,38 @@ public class GameView {
 
     private void drawGrid(Coin coin, Snake snake, GraphicsContext gc) {
         if (gc == null || coin == null || snake == null) return;
+        this.currentCoin = coin;
+        this.currentSnake = snake;
+
+        gc.clearRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
         gc.setFill(game.getColor());
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
+
+        // Checkerboard pattern (alternating tiles when grid is enabled)
+        if (GameSettings.getInstance().isGridEnabled()) {
+            double tileSize = game.getMultiplier() * fullScale;
+            gc.setFill(Color.web("#f1efd2"));
+            for (int x = 0; x < game.getWidth(); x++) {
+                for (int y = 0; y < game.getHeight(); y++) {
+                    if ((x + y) % 2 == 1) {
+                        gc.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                    }
+                }
+            }
+        }
 
         // Boundary outline separating the playable grid from the white non-playable window area
         gc.setStroke(Color.web("#b0ab88"));
         gc.setLineWidth(2 * fullScale);
         gc.strokeRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
-        gc.drawImage(coin.getImage(), (coin.getPos().x * game.getMultiplier()) * fullScale, (coin.getPos().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale - 3 * fullScale, game.getMultiplier() * fullScale - 3 * fullScale);
+        double tileSize = game.getMultiplier() * fullScale;
+        double coinPadding = 2 * fullScale;
+        double coinSize = tileSize - (2 * coinPadding);
+        gc.drawImage(coin.getImage(),
+                (coin.getPos().x * tileSize) + coinPadding,
+                (coin.getPos().y * tileSize) + coinPadding,
+                coinSize, coinSize);
 
         int bodyIndex = 0;
         for (Point point : snake.getBody()) {

@@ -114,4 +114,27 @@ class GameControllerTest extends JavaFXTestBase {
         assertFalse(controller.isGameStarted());
         controller.stopAnimation();
     }
+
+    @Test
+    @DisplayName("Verify G key toggles GameSettings gridEnabled")
+    void testGridToggleWithGKey() {
+        com.comp2042.model.GameSettings.getInstance().setGridEnabled(true);
+        assertTrue(com.comp2042.model.GameSettings.getInstance().isGridEnabled());
+
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.G, false, false, false, false
+        ));
+        assertFalse(com.comp2042.model.GameSettings.getInstance().isGridEnabled(), "G key should toggle grid to false");
+
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.G, false, false, false, false
+        ));
+        assertTrue(com.comp2042.model.GameSettings.getInstance().isGridEnabled(), "G key should toggle grid back to true");
+    }
+
+    @Test
+    @DisplayName("Verify handleResize invokes fitToWindow without throwing exceptions")
+    void testHandleResize() {
+        assertDoesNotThrow(() -> controller.handleResize(1200, 800));
+    }
 }

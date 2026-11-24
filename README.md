@@ -162,6 +162,11 @@ The following features were considered during design and development but were no
 - **Purpose**: Type-safe enumeration defining game modes (`QUICK`, `CLASSIC`, `HARDCORE`).
 - **Justification**: Encapsulates speed, wall wrap-around behavior, coin quotas required to clear each level, and snake body growth rate per coin eaten.
 
+### 5. `com.comp2042.model.GameSettings`
+- **Location**: `src/main/java/com/comp2042/model/GameSettings.java`
+- **Purpose**: Singleton configuration manager (GoF Singleton Pattern) managing user preferences such as grid display options.
+- **Justification**: Centralizes application-wide user configuration without polluting controller state. Accessible from both the Main Menu Settings overlay and the in-game Pause Menu Settings view. Enables dynamic real-time toggling of visual features like checkerboard grid lines.
+
 ---
 
 ## Modified Java Classes
@@ -294,3 +299,11 @@ Adhering to clean code principles and Java naming conventions:
 6. **Playable Arena Visual Boundary Indistinguishability**:
    - **Problem**: In maximized/windowed fullscreen mode, the outer container margins (`gamePane`) and the playable canvas (`gridCanvas`) both shared the same background color (`#feffe4`). Because there was no visual separation, players could not identify the 20x20 grid borders, making it impossible to anticipate wall collisions in border-enabled game modes.
    - **Solution**: Set the non-playable letterbox container (`gamePane`) background to pure white (`#ffffff`) and added a crisp perimeter border (`#b0ab88`) around the playable arena canvas in `GameView.drawGrid()`, clearly delineating the playable field from non-playable window margins.
+
+7. **Opaque White Background Box on Spawned Coin Sprites**:
+   - **Problem**: When rendering spawned coins (`redcoin.png`, `bluecoin.png`, `goldcoin.png`, `rainbowcoin.png`, `silvercoin.png`) on top of the newly implemented checkerboard grid pattern, an unwanted opaque white square box appeared around the circular coin sprites. Pixel analysis revealed the original image assets lacked an alpha transparency channel on their corner pixels (`A=255, R~248, G~250, B~250`), producing visible square white artifacts over darker checkered tiles.
+   - **Solution**: Processed all five coin PNG assets to replace the solid near-white background pixels outside the circular coin diameter ($radius > 530px$) with 100% alpha transparency (`A=0`), including smooth anti-aliased perimeter edge blending. Additionally updated `GameView.drawGrid()` to center each coin sprite proportionally inside its grid tile.
+
+8. **Stale Entity Ghosting on Window Resize and Fullscreen Spam (`F11`)**:
+   - **Problem**: When rapidly toggling fullscreen via `F11` or resizing the window, ghost duplicate images of coins and snake segments appeared at their initial starting positions in the background. Investigation showed that the JavaFX `Scene` dimension change listeners registered in `MainMenuController` captured static closure references to the initial `coin` and `snake` local variables instantiated at match launch. Whenever `fitToWindow()` was triggered by resize events, it redrew these obsolete, stale entity references instead of the controller's active live entities.
+   - **Solution**: Delegated window resize events to a dedicated `handleResize(width, height)` handler in `GameController`, which supplies the authoritative, currently active `coin`, `snake`, and `obstacle` references. Additionally added `gc.clearRect(...)` to `GameView.drawGrid()` prior to redrawing, guaranteeing a clean canvas without lingering render artifacts.
