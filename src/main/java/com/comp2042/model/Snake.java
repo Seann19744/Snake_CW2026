@@ -44,51 +44,65 @@ public class Snake {
     }
 
     public void move(char dir) {
-        body.add(new Point(head));
+        Point prevHead = new Point(head);
+        body.add(prevHead);
         switch (dir) {
             case 'U':
                 snakeDir = 0;
                 head.translate(0, -1);
-                if (borderControl() && (!ignoreBorders && !noBorder) || obstacle.getObstacles().contains(head)) {
-                    head.translate(0, 1);
-                    dead = true;
-                } else if (borderControl() && (ignoreBorders || noBorder)) {
-                    head.setLocation(head.getX(), gy - 1);
+                if (borderControl()) {
+                    if (!ignoreBorders && !noBorder) {
+                        head.setLocation(prevHead);
+                        dead = true;
+                    } else {
+                        head.setLocation(head.getX(), gy - 1);
+                    }
                 }
                 break;
 
             case 'D':
                 snakeDir = 180;
                 head.translate(0, 1);
-                if (borderControl() && (!ignoreBorders && !noBorder) || obstacle.getObstacles().contains(head)) {
-                    head.translate(0, -1);
-                    dead = true;
-                } else if (borderControl() && (ignoreBorders || noBorder)) {
-                    head.setLocation(head.getX(), 0);
+                if (borderControl()) {
+                    if (!ignoreBorders && !noBorder) {
+                        head.setLocation(prevHead);
+                        dead = true;
+                    } else {
+                        head.setLocation(head.getX(), 0);
+                    }
                 }
                 break;
 
             case 'L':
                 snakeDir = 270;
                 head.translate(-1, 0);
-                if (borderControl() && (!ignoreBorders && !noBorder) || obstacle.getObstacles().contains(head)) {
-                    head.translate(1, 0);
-                    dead = true;
-                } else if (borderControl() && (ignoreBorders || noBorder)) {
-                    head.setLocation(gx - 1, head.getY());
+                if (borderControl()) {
+                    if (!ignoreBorders && !noBorder) {
+                        head.setLocation(prevHead);
+                        dead = true;
+                    } else {
+                        head.setLocation(gx - 1, head.getY());
+                    }
                 }
                 break;
 
             case 'R':
                 snakeDir = 90;
                 head.translate(1, 0);
-                if (borderControl() && (!ignoreBorders && !noBorder) || obstacle.getObstacles().contains(head)) {
-                    head.translate(-1, 0);
-                    dead = true;
-                } else if (borderControl() && (ignoreBorders || noBorder)) {
-                    head.setLocation(0, head.getY());
+                if (borderControl()) {
+                    if (!ignoreBorders && !noBorder) {
+                        head.setLocation(prevHead);
+                        dead = true;
+                    } else {
+                        head.setLocation(0, head.getY());
+                    }
                 }
                 break;
+        }
+
+        if (!dead && obstacle.getObstacles().contains(head)) {
+            head.setLocation(prevHead);
+            dead = true;
         }
 
         if (body.size() > 4 && hitSelf() && !body.get(0).equals(head)) {

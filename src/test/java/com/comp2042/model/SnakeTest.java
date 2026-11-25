@@ -135,6 +135,26 @@ class SnakeTest extends JavaFXTestBase {
         assertEquals(2, hardcoreSnake.getBody().size(), "Body size must increase by 2 segments for 2x growth rate");
     }
 
+    @Test
+    @DisplayName("Verify wrap-around onto an edge obstacle causes death")
+    void testWrapAroundOntoEdgeObstacleCausesDeath() {
+        Obstacle edgeObstacle = new Obstacle(4, 4);
+        // Place obstacle at right edge (3, 2)
+        edgeObstacle.getObstacles().add(new Point(3, 2));
+
+        Snake wrappingSnake = new Snake(4, 4, true, edgeObstacle);
+        // Starts at (2, 2) -> move LEFT to (1, 2) -> move LEFT to (0, 2)
+        wrappingSnake.move('L');
+        wrappingSnake.move('L');
+        assertFalse(wrappingSnake.getDead());
+        assertEquals(new Point(0, 2), wrappingSnake.getHead());
+
+        // Move LEFT from (0, 2): wraps around to (3, 2), which has an obstacle!
+        wrappingSnake.move('L');
+        assertTrue(wrappingSnake.getDead(), "Wrapping onto an edge obstacle must kill the snake");
+        assertEquals(new Point(0, 2), wrappingSnake.getHead(), "Head should revert to pre-collision position (0, 2)");
+    }
+
     /**
      * Helper mock for Coin to test specific coordinates in ateCoin
      */
