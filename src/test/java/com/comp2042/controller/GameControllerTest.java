@@ -268,4 +268,32 @@ class GameControllerTest extends JavaFXTestBase {
         GameView customView = new GameView(customGame);
         assertEquals(0, customView.getTurnAt(39, 29));
     }
+
+    @Test
+    @DisplayName("Verify two-slot input queue buffers rapid second turn within one tick for smooth U-turns")
+    void testTwoSlotInputQueueForRapidUTurn() {
+        // Initially facing LEFT; press UP then immediately RIGHT within the same tick
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false, false, false, false
+        ));
+        controller.stopAnimation();
+        assertEquals(KeyCode.UP, GameController.key, "First input (UP) should apply immediately for the current tick");
+        assertEquals(0, controller.getQueuedInputCount(), "Queue is empty after first input applies");
+
+        // Second rapid input (RIGHT) before onTick() runs must be buffered in inputQueue, not dropped
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.RIGHT, false, false, false, false
+        ));
+        assertEquals(1, controller.getQueuedInputCount(), "Second rapid input (RIGHT) must be buffered in queue");
+
+        // Tick 1 moves UP and clears keyPressed; Tick 2 dequeues RIGHT and moves RIGHT
+        controller.onTick();
+        assertEquals(KeyCode.UP, GameController.key, "Tick 1 should move UP");
+        assertEquals(1, controller.getQueuedInputCount(), "RIGHT remains queued for Tick 2");
+
+        controller.onTick();
+        assertEquals(KeyCode.RIGHT, GameController.key, "Tick 2 must dequeue and apply RIGHT to complete the U-turn");
+        assertEquals(0, controller.getQueuedInputCount(), "Input queue should now be empty");
+        controller.stopAnimation();
+    }
 }

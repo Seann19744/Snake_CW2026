@@ -11,6 +11,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Random;
 
 public class GameController {
@@ -25,6 +27,7 @@ public class GameController {
     public static KeyCode key = KeyCode.LEFT;
     public static KeyCode lastKey = KeyCode.LEFT;
     private boolean keyPressed = false;
+    private final Deque<KeyCode> inputQueue = new ArrayDeque<>(2);
     private GameState gameState = GameState.READY;
     private GameState prePauseState = GameState.READY;
 
@@ -81,6 +84,15 @@ public class GameController {
             }
             animation.stop();
             return;
+        }
+
+        if (!keyPressed && !inputQueue.isEmpty()) {
+            KeyCode queuedKey = inputQueue.pollFirst();
+            if (isValidTurn(queuedKey) && !queuedKey.equals(key)) {
+                lastKey = key;
+                key = queuedKey;
+                gameView.turnDir(snake);
+            }
         }
 
         if (key.equals(KeyCode.LEFT)) {
@@ -167,17 +179,26 @@ public class GameController {
         }
 
         // Arrow keys to start/resume movement from READY or LEVEL_CLEARED and steer the snake
-        if (isValidTurn(code)) {
-            if (!keyPressed && !code.equals(key)) {
-                lastKey = key;
-                key = code;
-                keyPressed = true;
-                gameView.turnDir(snake);
-            }
-            if ((gameState == GameState.READY || gameState == GameState.LEVEL_CLEARED)
-                    && !snake.getDead() && !game.gameWon()) {
-                gameState = GameState.RUNNING;
-                animation.play();
+        if (code.isArrowKey()) {
+            if (!keyPressed && inputQueue.isEmpty()) {
+                if (isValidTurn(code)) {
+                    if (!code.equals(key)) {
+                        lastKey = key;
+                        key = code;
+                        keyPressed = true;
+                        gameView.turnDir(snake);
+                    }
+                    if ((gameState == GameState.READY || gameState == GameState.LEVEL_CLEARED)
+                            && !snake.getDead() && !game.gameWon()) {
+                        gameState = GameState.RUNNING;
+                        animation.playFromStart();
+                    }
+                }
+            } else if (inputQueue.size() < 2) {
+                KeyCode referenceKey = inputQueue.isEmpty() ? key : inputQueue.peekLast();
+                if (isValidTurnFrom(referenceKey, code) && !code.equals(referenceKey)) {
+                    inputQueue.addLast(code);
+                }
             }
         }
 
@@ -256,18 +277,28 @@ public class GameController {
      * @return true if the snake may turn in the direction, false otherwise.
      */
     boolean isValidTurn(KeyCode key) {
-        // Rejects any key that is not arrow key button (Up, Down, Left, Right)
-        if (!key.isArrowKey()) return false;
-        else {
-            // Checks the opposite direction of the snake moving before moving the snake
-            // This is so that the snake does not overlap itself
-            if (key.equals(KeyCode.LEFT)) if (!this.key.equals(KeyCode.RIGHT)) return true;
-            if (key.equals(KeyCode.RIGHT)) if (!this.key.equals(KeyCode.LEFT)) return true;
-            if (key.equals(KeyCode.DOWN)) if (!this.key.equals(KeyCode.UP)) return true;
-            if (key.equals(KeyCode.UP)) return !this.key.equals(KeyCode.DOWN);
-            // Safety net to ignore invalid turns
-            return false;
-        }
+        return isValidTurnFrom(this.key, key);
+    }
+
+    /**
+     * Checks whether transitioning from {@code currentDir} to {@code candidateKey}
+     * is a legal direction change (rejects non-arrow keys and 180-degree reversals).
+     *
+     * @param currentDir the direction the snake is currently facing or queued to face
+     * @param candidateKey the new key pressed by the player
+     * @return true if valid, false otherwise
+     */
+    boolean isValidTurnFrom(KeyCode currentDir, KeyCode candidateKey) {
+        if (candidateKey == null || !candidateKey.isArrowKey()) return false;
+        if (candidateKey.equals(KeyCode.LEFT)) return !KeyCode.RIGHT.equals(currentDir);
+        if (candidateKey.equals(KeyCode.RIGHT)) return !KeyCode.LEFT.equals(currentDir);
+        if (candidateKey.equals(KeyCode.DOWN)) return !KeyCode.UP.equals(currentDir);
+        if (candidateKey.equals(KeyCode.UP)) return !KeyCode.DOWN.equals(currentDir);
+        return false;
+    }
+
+    public int getQueuedInputCount() {
+        return inputQueue.size();
     }
 
     private void reset() {
@@ -284,6 +315,7 @@ public class GameController {
         key = KeyCode.LEFT;
         lastKey = KeyCode.LEFT;
         keyPressed = false;
+        inputQueue.clear();
         gameState = GameState.READY;
         prePauseState = GameState.READY;
 
@@ -303,6 +335,7 @@ public class GameController {
         key = KeyCode.LEFT;
         lastKey = KeyCode.LEFT;
         keyPressed = false;
+        inputQueue.clear();
         gameView.resetTurnArray();
         obstacle.loadLevelLayout(level);
         snake.resetPosition(game.getWidth(), game.getHeight());
