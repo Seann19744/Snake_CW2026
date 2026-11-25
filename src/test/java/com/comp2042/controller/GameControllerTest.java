@@ -236,4 +236,36 @@ class GameControllerTest extends JavaFXTestBase {
         assertTrue(hudText.contains("[Classic Mode] Level 1/3 | Coins: 0/8 | Score: 0"),
                 "TAB reset should display full HUD string, got: " + hudText);
     }
+
+    @Test
+    @DisplayName("Verify turnArray is sized from game dimensions and cleared on TAB reset and loadLevel")
+    void testTurnArrayClearedOnResetAndNewLevel() {
+        // Turn UP at initial head position (10, 10)
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false, false, false, false
+        ));
+        controller.stopAnimation();
+        assertNotEquals(0, gameView.getTurnAt(10, 10), "Turn at (10, 10) should be recorded in turnArray");
+
+        // Pressing TAB reset must clear turnArray
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.TAB, false, false, false, false
+        ));
+        assertEquals(0, gameView.getTurnAt(10, 10), "turnArray must be cleared on TAB reset");
+
+        // Record another turn at (10, 10), then call loadLevel(2)
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.DOWN, false, false, false, false
+        ));
+        controller.stopAnimation();
+        assertNotEquals(0, gameView.getTurnAt(10, 10));
+
+        controller.loadLevel(2);
+        assertEquals(0, gameView.getTurnAt(10, 10), "turnArray must be cleared when advancing to a new level");
+
+        // Verify custom game dimensions (e.g. 40x30) size turnArray properly without MainMenuController coupling
+        Game customGame = new Game(40, 30, false, Difficulty.NORMAL);
+        GameView customView = new GameView(customGame);
+        assertEquals(0, customView.getTurnAt(39, 29));
+    }
 }

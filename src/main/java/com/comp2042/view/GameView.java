@@ -1,7 +1,6 @@
 package com.comp2042.view;
 
 import com.comp2042.controller.GameController;
-import com.comp2042.controller.MainMenuController;
 import com.comp2042.model.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -55,11 +54,20 @@ public class GameView {
     private double initY;
     private double fullScale = 1;
     private boolean fullsize = false;
-    private int[][] turnArray = new int[MainMenuController.getxValue()][MainMenuController.getyValue()];
+    private int[][] turnArray;
 
     public GameView(Game game) {
         this.game = game;
+        this.turnArray = new int[game.getWidth()][game.getHeight()];
         setupPauseOverlay();
+    }
+
+    public void resetTurnArray() {
+        this.turnArray = new int[game.getWidth()][game.getHeight()];
+    }
+
+    public int getTurnAt(int x, int y) {
+        return turnArray[x][y];
     }
 
     public void makeScene(Scene scene, Snake snake, Coin coin) {

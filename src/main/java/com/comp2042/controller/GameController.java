@@ -287,6 +287,7 @@ public class GameController {
         gameState = GameState.READY;
         prePauseState = GameState.READY;
 
+        gameView.resetTurnArray();
         gameView.showPauseMenu(false);
         gameView.gameWon();
         gameView.gameOver(snake);
@@ -302,6 +303,7 @@ public class GameController {
         key = KeyCode.LEFT;
         lastKey = KeyCode.LEFT;
         keyPressed = false;
+        gameView.resetTurnArray();
         obstacle.loadLevelLayout(level);
         snake.resetPosition(game.getWidth(), game.getHeight());
         newCoin();
