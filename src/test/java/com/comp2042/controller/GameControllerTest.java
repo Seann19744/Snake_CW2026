@@ -155,4 +155,28 @@ class GameControllerTest extends JavaFXTestBase {
         assertFalse(gameView.isPauseHelpVisible(), "Clicking Back should close How to Play screen");
         assertTrue(gameView.getPauseHelpButton().isVisible(), "? button should be visible again on pause menu");
     }
+
+    @Test
+    @DisplayName("Verify arrow keys do not start animation after game is won")
+    void testArrowKeysIgnoredWhenGameWon() {
+        Game wonGame = new Game(20, 20, false, Difficulty.EASY);
+        // Complete all 3 levels in Quick/Easy mode (6, 8, 10 coins)
+        for (int i = 0; i < 6; i++) wonGame.incScore();
+        wonGame.advanceLevel();
+        for (int i = 0; i < 8; i++) wonGame.incScore();
+        wonGame.advanceLevel();
+        for (int i = 0; i < 10; i++) wonGame.incScore();
+        assertTrue(wonGame.gameWon(), "Game should be marked as won");
+
+        Obstacle obs = new Obstacle(20, 20);
+        Snake snk = new Snake(20, 20, true, obs);
+        Coin cn = new Coin(20, 20, snk, obs);
+        GameView gv = new GameView(wonGame);
+        GameController wonController = new GameController(snk, cn, wonGame, gv, obs, null);
+
+        wonController.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, false, false, false, false
+        ));
+        assertFalse(wonController.isAnimationRunning(), "Animation must not start or run when game is already won");
+    }
 }

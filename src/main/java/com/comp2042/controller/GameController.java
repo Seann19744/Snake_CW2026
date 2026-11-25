@@ -57,8 +57,11 @@ public class GameController {
         lastKey = KeyCode.LEFT;
     }
 
-    private final Timeline animation = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
-        if (snake.getDead()) {
+    private final Timeline animation = new Timeline(new KeyFrame(Duration.seconds(1), event -> onTick()));
+
+    void onTick() {
+        if (snake.getDead() || game.gameWon()) {
+            animation.stop();
             return;
         } else {
 
@@ -80,6 +83,7 @@ public class GameController {
                     if (game.advanceLevel()) {
                         loadLevel(game.getCurrentLevel());
                     } else {
+                        animation.stop();
                         gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
                         gameView.gameWon();
                         gameView.updateScoreLabel();
@@ -100,7 +104,7 @@ public class GameController {
             gameView.gameOver(snake);
             gameView.updateScoreLabel();
         }
-    }));
+    }
 
     /**
      * Runs everytime a key is pressed while game window is focused.
@@ -180,6 +184,10 @@ public class GameController {
     public void showPauseMenu() {
         animation.stop();
         gameView.showPauseMenu(true);
+    }
+
+    public boolean isAnimationRunning() {
+        return animation.getStatus() == Animation.Status.RUNNING;
     }
 
     public void stopAnimation() {
