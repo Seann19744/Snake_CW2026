@@ -171,6 +171,11 @@ The following features were considered during design and development but were no
 - **Purpose**: Singleton configuration manager (GoF Singleton Pattern) managing user preferences such as grid display options and persistent high score storage (`highscore.txt`).
 - **Justification**: Centralizes application-wide user configuration and persistent record tracking without polluting controller state. Accessible from both the Main Menu and active gameplay sessions. Automatically loads the saved high score on startup (`loadHighScore()`) and writes new records to `highscore.txt` when beaten (`updateHighScore(int)`).
 
+### 6. `com.comp2042.model.GameState`
+- **Location**: `src/main/java/com/comp2042/model/GameState.java`
+- **Purpose**: Type-safe enumeration defining the lifecycle phases of a game session (`READY`, `RUNNING`, `PAUSED`, `LEVEL_CLEARED`, `WON`, `DEAD`).
+- **Justification**: Replaces fragmented boolean flags (`gameStarted`, overlay visibility checks) with an explicit finite state machine in `GameController`, ensuring deterministic transitions when starting a match, clearing levels, pausing/resuming, winning, or dying.
+
 ---
 
 ## Modified Java Classes
@@ -324,3 +329,7 @@ Adhering to clean code principles and Java naming conventions:
 9. **Continued Snake Movement After Victory (`YOU WON!`)**:
    - **Problem**: When the player collected the final coin of Level 3, the win branch in `GameController` displayed the `"YOU WON!"` overlay and returned from the tick callback without calling `animation.stop()`, while the top of the `Timeline` tick only checked `snake.getDead()`. Consequently, the snake continued moving across the board on subsequent ticks after winning, allowing it to collide with walls/obstacles (triggering `"GAME OVER"` on top of `"YOU WON!"`) or re-consume the final coin.
    - **Solution**: Extracted the `Timeline` tick body into `onTick()`, invoked `animation.stop()` immediately inside the final level victory branch, and guarded `onTick()` with `if (snake.getDead() || game.gameWon()) { animation.stop(); return; }` so the game loop halts cleanly upon victory.
+
+10. **Level Transition Failure to Pause, Snake Length Reset, and Broken Pause Resume**:
+    - **Problem**: When advancing to a new level, `GameController.loadLevel()` reset `gameStarted = false` without stopping the `Timeline` animation, causing the snake to immediately move left from the center of the new level without player input. Because `gameStarted` was `false` while the timeline was running, pausing and clicking "Resume" failed to restart movement. Furthermore, `Snake.resetPosition()` cleared the body list to a single segment, wiping out the player's accumulated snake length between levels.
+    - **Solution**: Introduced the `GameState` enum (`READY`, `RUNNING`, `PAUSED`, `LEVEL_CLEARED`, `WON`, `DEAD`) in `GameController` (with `prePauseState` restoration on pause/resume) and called `animation.stop()` in `loadLevel()` with `gameState = GameState.LEVEL_CLEARED`. Updated `Snake.resetPosition()` to stack all accumulated body segments onto the initial spawn tail tile `(x / 2 + 1, y / 2)` so the snake preserves its full length and smoothly uncoils from the center spawn block as it moves in the new level.

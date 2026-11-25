@@ -179,4 +179,49 @@ class GameControllerTest extends JavaFXTestBase {
         ));
         assertFalse(wonController.isAnimationRunning(), "Animation must not start or run when game is already won");
     }
+
+    @Test
+    @DisplayName("Verify loadLevel pauses game in LEVEL_CLEARED, resets head to center spawn, and stacks body segments to uncoil")
+    void testLoadLevelPausesAndStacksSnakeOnSpawnToUncoil() {
+        Game game = new Game(20, 20, false, Difficulty.EASY);
+        Obstacle obs = new Obstacle(20, 20);
+        Snake snk = new Snake(20, 20, true, obs);
+        // Move and grow the snake so it is away from center and has 3 body segments
+        snk.move('L'); // head at (9, 10), body has (10, 10) and (11, 10) -> size 2
+        snk.move('U'); // head at (9, 9), body has (9, 10), (10, 10), (11, 10) -> size 3
+        int bodySizeBeforeNewLevel = snk.getBody().size();
+        assertEquals(3, bodySizeBeforeNewLevel);
+
+        Coin cn = new Coin(20, 20, snk, obs);
+        GameView gv = new GameView(game);
+        GameController ctrl = new GameController(snk, cn, game, gv, obs, null);
+
+        // Start the game first
+        ctrl.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false, false, false, false
+        ));
+        assertEquals(com.comp2042.model.GameState.RUNNING, ctrl.getGameState());
+
+        // Advance to Level 2
+        ctrl.loadLevel(2);
+
+        // Game must pause in LEVEL_CLEARED state and all 16 Level 2 obstacles must spawn intact
+        assertEquals(com.comp2042.model.GameState.LEVEL_CLEARED, ctrl.getGameState(), "State must be LEVEL_CLEARED");
+        assertFalse(ctrl.isAnimationRunning(), "Timeline animation must stop when entering a new level");
+        assertEquals(16, obs.getObstacles().size(), "All 16 Level 2 pillar obstacles must spawn intact");
+
+        // Snake head must be at center spawn (10, 10), with all 3 body segments stacked on spawn block (11, 10)
+        assertEquals(new java.awt.Point(10, 10), snk.getHead(), "Snake head must reset to center spawn (10, 10)");
+        assertEquals(bodySizeBeforeNewLevel, snk.getBody().size(), "Snake length must not reset on new level");
+        for (java.awt.Point segment : snk.getBody()) {
+            assertEquals(new java.awt.Point(11, 10), segment, "All body segments must initially be stacked on spawn block (11, 10)");
+        }
+
+        // Pressing a valid arrow key unpauses and resumes movement
+        ctrl.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, false, false, false, false
+        ));
+        assertEquals(com.comp2042.model.GameState.RUNNING, ctrl.getGameState(), "Arrow key should resume game to RUNNING");
+        ctrl.stopAnimation();
+    }
 }

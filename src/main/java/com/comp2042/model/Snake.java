@@ -120,16 +120,19 @@ public class Snake {
     }
 
     /**
-     * Resets the snake's head and body back to center coordinates.
-     * Useful when advancing to a new level to avoid immediate obstacle collision.
+     * Resets the snake's head to the center spawn block while stacking all existing
+     * body segments onto the initial tail block so they uncoil as the snake moves.
      *
      * @param x grid width
      * @param y grid height
      */
     public void resetPosition(int x, int y) {
+        int preservedSize = Math.max(1, body.size());
         head.setLocation(x / 2, y / 2);
         body.clear();
-        body.add(new Point(x / 2 + 1, y / 2));
+        for (int i = 0; i < preservedSize; i++) {
+            body.add(new Point(x / 2 + 1, y / 2));
+        }
         dead = false;
         snakeDir = 270;
     }

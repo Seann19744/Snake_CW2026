@@ -472,6 +472,11 @@ public class GameView {
      * @param index the segment's position in the body list, where 0 is the tail
      */
     private void drawBody(Snake snake, Point point, int index) {
+        // Skip drawing duplicate segments that are still stacked on the same spawn/tail cell
+        if (index > 0 && point.equals(snake.getBody().get(index - 1))) {
+            return;
+        }
+
         Image rotatedImage;
         if (snake.getBody().size() <= 1) {
             snake.getImageViewTail().setRotate(snake.getSnakeDir());
@@ -479,12 +484,19 @@ public class GameView {
             params.setFill(Color.TRANSPARENT);
             rotatedImage = snake.getImageViewTail().snapshot(params, null);
         } else if (index == 0) {
+            Point nextPoint = snake.getHead();
+            for (int k = 1; k < snake.getBody().size(); k++) {
+                if (!snake.getBody().get(k).equals(point)) {
+                    nextPoint = snake.getBody().get(k);
+                    break;
+                }
+            }
             int rotateTail;
-            if (snake.getBody().get(1).getX() == snake.getBody().get(0).getX() && snake.getBody().get(1).getY() == snake.getBody().get(0).getY() - 1) {
+            if (nextPoint.getX() == point.getX() && nextPoint.getY() == point.getY() - 1) {
                 rotateTail = 0;
-            } else if (snake.getBody().get(1).getX() == snake.getBody().get(0).getX() && snake.getBody().get(1).getY() == snake.getBody().get(0).getY() + 1) {
+            } else if (nextPoint.getX() == point.getX() && nextPoint.getY() == point.getY() + 1) {
                 rotateTail = 180;
-            } else if (snake.getBody().get(1).getX() == snake.getBody().get(0).getX() - 1 && snake.getBody().get(1).getY() == snake.getBody().get(0).getY()) {
+            } else if (nextPoint.getX() == point.getX() - 1 && nextPoint.getY() == point.getY()) {
                 rotateTail = 270;
             } else {
                 rotateTail = 90;
