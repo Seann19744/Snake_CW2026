@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameControllerTest extends JavaFXTestBase {
 
     private GameController controller;
+    private GameView gameView;
 
     @BeforeEach
     void setUp() {
@@ -26,7 +27,7 @@ class GameControllerTest extends JavaFXTestBase {
         Obstacle obstacle = new Obstacle(20, 20);
         Snake snake = new Snake(20, 20, false, obstacle);
         Coin coin = new Coin(20, 20, snake, obstacle);
-        GameView gameView = new GameView(game);
+        gameView = new GameView(game);
 
         controller = new GameController(snake, coin, game, gameView, obstacle, null);
     }
@@ -136,5 +137,22 @@ class GameControllerTest extends JavaFXTestBase {
     @DisplayName("Verify handleResize invokes fitToWindow without throwing exceptions")
     void testHandleResize() {
         assertDoesNotThrow(() -> controller.handleResize(1200, 800));
+    }
+
+    @Test
+    @DisplayName("Verify top-right ? help button in pause menu opens and closes How to Play screen")
+    void testPauseHelpButtonOverlay() {
+        controller.showPauseMenu();
+        assertTrue(controller.isPauseMenuVisible());
+        assertFalse(gameView.isPauseHelpVisible(), "Help screen should initially be hidden when pause menu opens");
+        assertTrue(gameView.getPauseHelpButton().isVisible(), "Top-right ? button should be visible on pause menu");
+
+        gameView.getPauseHelpButton().fire();
+        assertTrue(gameView.isPauseHelpVisible(), "Clicking ? button should open How to Play screen");
+        assertFalse(gameView.getPauseHelpButton().isVisible(), "? button should hide while How to Play is open");
+
+        gameView.getHelpBackButton().fire();
+        assertFalse(gameView.isPauseHelpVisible(), "Clicking Back should close How to Play screen");
+        assertTrue(gameView.getPauseHelpButton().isVisible(), "? button should be visible again on pause menu");
     }
 }

@@ -3,6 +3,7 @@ package com.comp2042.view;
 import com.comp2042.controller.GameController;
 import com.comp2042.controller.MainMenuController;
 import com.comp2042.model.*;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
@@ -37,10 +38,13 @@ public class GameView {
     private final Button resumeButton = new Button("Resume");
     private final Button returnMenuButton = new Button("Main Menu");
     private final Button pauseSettingsButton = new Button("Settings");
+    private final Button pauseHelpButton = new Button("?");
     private final Button gridToggleButton = new Button("Grid: ON");
     private final Button settingsBackButton = new Button("Back");
+    private final Button helpBackButton = new Button("Back");
     private final VBox pauseBox = new VBox(15);
     private final VBox pauseSettingsBox = new VBox(15);
+    private final VBox pauseHelpBox = new VBox(14);
 
     private Coin currentCoin;
     private Snake currentSnake;
@@ -55,7 +59,7 @@ public class GameView {
 
     public GameView(Game game) {
         this.game = game;
-        pauseOverlay.setVisible(false);
+        setupPauseOverlay();
     }
 
     public void makeScene(Scene scene, Snake snake, Coin coin) {
@@ -86,8 +90,6 @@ public class GameView {
         updateScoreLabel();
         scoreLabel.setVisible(true);
 
-        setupPauseOverlay();
-
         if (scene != null) {
             fitToWindow(scene.getWidth(), scene.getHeight(), obstacle, snake, coin);
         } else if (obstacle != null) {
@@ -98,7 +100,11 @@ public class GameView {
     }
 
     private void setupPauseOverlay() {
-        pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.72);");
+        String css = "resources/views/styling.css";
+        if (!pauseOverlay.getStylesheets().contains(css)) {
+            pauseOverlay.getStylesheets().add(css);
+        }
+        pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.78);");
         pauseOverlay.setVisible(false);
         pauseOverlay.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
@@ -126,6 +132,15 @@ public class GameView {
 
         pauseBox.getChildren().setAll(pauseTitle, pauseHint, resumeButton, pauseSettingsButton, returnMenuButton);
 
+        // Top-right '?' help button in pause menu
+        pauseHelpButton.getStyleClass().add("startAndQuitBtn");
+        pauseHelpButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 18px; -fx-background-size: 100% 100%;");
+        pauseHelpButton.setPrefSize(40, 40);
+        pauseHelpButton.setMinSize(40, 40);
+        pauseHelpButton.setMaxSize(40, 40);
+        StackPane.setAlignment(pauseHelpButton, Pos.TOP_RIGHT);
+        StackPane.setMargin(pauseHelpButton, new Insets(15, 15, 0, 0));
+
         // Settings sub-menu within pause overlay
         pauseSettingsBox.setAlignment(Pos.CENTER);
         pauseSettingsBox.setMaxSize(300, 280);
@@ -145,10 +160,61 @@ public class GameView {
 
         pauseSettingsBox.getChildren().setAll(settingsTitle, gridToggleButton, settingsBackButton);
 
+        // Help / How to Play sub-menu within pause overlay
+        pauseHelpBox.setAlignment(Pos.CENTER);
+        pauseHelpBox.setMaxSize(540, 420);
+        pauseHelpBox.setVisible(false);
+
+        Label helpTitle = new Label("HOW TO PLAY");
+        helpTitle.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 28px; -fx-text-fill: #ffffff;");
+
+        VBox controlsSection = new VBox(6);
+        controlsSection.setAlignment(Pos.CENTER_LEFT);
+        controlsSection.setMaxWidth(500);
+        Label controlsHeader = new Label("CONTROLS");
+        controlsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-text-fill: #feffe4; -fx-underline: true;");
+        controlsSection.getChildren().addAll(
+                controlsHeader,
+                createHelpLabel("• Arrow Keys: Start moving and steer the snake"),
+                createHelpLabel("• ESC or P: Pause the game and open the pause menu"),
+                createHelpLabel("• G: Toggle the checkerboard grid on or off"),
+                createHelpLabel("• F11: Switch between windowed and fullscreen mode"),
+                createHelpLabel("• TAB: Instantly restart the current match")
+        );
+
+        VBox coinsSection = new VBox(6);
+        coinsSection.setAlignment(Pos.CENTER_LEFT);
+        coinsSection.setMaxWidth(500);
+        Label coinsHeader = new Label("COINS & GOAL");
+        coinsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-text-fill: #feffe4; -fx-underline: true;");
+        coinsSection.getChildren().addAll(
+                coinsHeader,
+                createHelpLabel("• Red Coin: +5 points | Gold Coin: +15 bonus points"),
+                createHelpLabel("• Rainbow Coin: +5 points and boosts movement speed"),
+                createHelpLabel("• Blue Coin: +5 points and lets you pass through walls"),
+                createHelpLabel("• Silver Coin: +5 points and spawns obstacle blocks"),
+                createHelpLabel("• Clear all 3 levels by collecting target coins without crashing!")
+        );
+
+        helpBackButton.getStyleClass().add("startAndQuitBtn");
+        helpBackButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
+        helpBackButton.setPrefSize(140, 40);
+
+        pauseHelpBox.getChildren().setAll(helpTitle, controlsSection, coinsSection, helpBackButton);
+
         pauseSettingsButton.setOnAction(e -> {
             updateGridButtonText();
             pauseBox.setVisible(false);
+            pauseHelpBox.setVisible(false);
+            pauseHelpButton.setVisible(false);
             pauseSettingsBox.setVisible(true);
+        });
+
+        pauseHelpButton.setOnAction(e -> {
+            pauseBox.setVisible(false);
+            pauseSettingsBox.setVisible(false);
+            pauseHelpButton.setVisible(false);
+            pauseHelpBox.setVisible(true);
         });
 
         gridToggleButton.setOnAction(e -> {
@@ -159,10 +225,26 @@ public class GameView {
 
         settingsBackButton.setOnAction(e -> {
             pauseSettingsBox.setVisible(false);
+            pauseHelpBox.setVisible(false);
             pauseBox.setVisible(true);
+            pauseHelpButton.setVisible(true);
         });
 
-        pauseOverlay.getChildren().setAll(pauseBox, pauseSettingsBox);
+        helpBackButton.setOnAction(e -> {
+            pauseHelpBox.setVisible(false);
+            pauseSettingsBox.setVisible(false);
+            pauseBox.setVisible(true);
+            pauseHelpButton.setVisible(true);
+        });
+
+        pauseOverlay.getChildren().setAll(pauseBox, pauseSettingsBox, pauseHelpBox, pauseHelpButton);
+    }
+
+    private Label createHelpLabel(String text) {
+        Label lbl = new Label(text);
+        lbl.setWrapText(true);
+        lbl.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 13px; -fx-text-fill: #ffffff;");
+        return lbl;
     }
 
     public void fitToWindow(double windowWidth, double windowHeight, Obstacle obstacle, Snake snake, Coin coin) {
@@ -231,12 +313,28 @@ public class GameView {
         if (show) {
             pauseBox.setVisible(true);
             pauseSettingsBox.setVisible(false);
+            pauseHelpBox.setVisible(false);
+            pauseHelpButton.setVisible(true);
             updateGridButtonText();
             pauseOverlay.toFront();
         } else {
             pauseBox.setVisible(false);
             pauseSettingsBox.setVisible(false);
+            pauseHelpBox.setVisible(false);
+            pauseHelpButton.setVisible(false);
         }
+    }
+
+    public boolean isPauseHelpVisible() {
+        return pauseHelpBox.isVisible();
+    }
+
+    public Button getPauseHelpButton() {
+        return pauseHelpButton;
+    }
+
+    public Button getHelpBackButton() {
+        return helpBackButton;
     }
 
     public void updateGridButtonText() {

@@ -37,6 +37,9 @@ public class MainMenuController {
     private StackPane settingsOverlay;
 
     @FXML
+    private StackPane helpOverlay;
+
+    @FXML
     private Button btn_gridToggle;
 
     @FXML
@@ -97,6 +100,20 @@ public class MainMenuController {
     public void handleCloseSettings() {
         if (settingsOverlay != null) {
             settingsOverlay.setVisible(false);
+        }
+    }
+
+    @FXML
+    public void handleOpenHelp() {
+        if (helpOverlay != null) {
+            helpOverlay.setVisible(true);
+        }
+    }
+
+    @FXML
+    public void handleCloseHelp() {
+        if (helpOverlay != null) {
+            helpOverlay.setVisible(false);
         }
     }
 

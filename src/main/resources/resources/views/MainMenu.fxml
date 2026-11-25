@@ -16,6 +16,7 @@
         <Label id="title" alignment="CENTER" contentDisplay="CENTER" layoutY="90.0" prefHeight="35.0" prefWidth="550.0" text="Snake Game" textAlignment="CENTER" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
         <Button fx:id="btn_start" layoutY="170.0" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleStart" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Start" textFill="WHITE" AnchorPane.leftAnchor="217.5" />
         <Button fx:id="btn_settings" layoutY="230.0" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleOpenSettings" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Settings" textFill="WHITE" AnchorPane.leftAnchor="217.5" />
+        <Button fx:id="btn_help" maxHeight="40.0" maxWidth="40.0" minHeight="40.0" minWidth="40.0" mnemonicParsing="false" onAction="#handleOpenHelp" prefHeight="40.0" prefWidth="40.0" style="-fx-background-size: 100% 100%; -fx-font-size: 18px;" styleClass="startAndQuitBtn" text="?" textFill="WHITE" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0" />
 
         <StackPane fx:id="difficultyOverlay" visible="false" style="-fx-background-color: #feffe4;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -61,6 +62,40 @@
                         <Label text="SETTINGS" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 32px;" />
                         <Button fx:id="btn_gridToggle" mnemonicParsing="false" onAction="#handleToggleGrid" prefHeight="40.0" prefWidth="140.0" styleClass="startAndQuitBtn" text="Grid: ON" textFill="WHITE" />
                         <Button fx:id="btn_settingsBack" mnemonicParsing="false" onAction="#handleCloseSettings" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Back" textFill="WHITE" />
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+
+        <StackPane fx:id="helpOverlay" visible="false" style="-fx-background-color: #feffe4;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <children>
+                <VBox alignment="CENTER" spacing="12.0" maxWidth="500.0">
+                    <children>
+                        <Label text="HOW TO PLAY" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 24px;" />
+
+                        <VBox alignment="CENTER_LEFT" spacing="5.0" maxWidth="480.0">
+                            <children>
+                                <Label text="CONTROLS" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-underline: true;" />
+                                <Label text="• Arrow Keys: Start moving and steer the snake" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" />
+                                <Label text="• ESC or P: Pause the game and open the pause menu" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" />
+                                <Label text="• G: Toggle the checkerboard grid on or off" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" />
+                                <Label text="• F11: Switch between windowed and fullscreen mode" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" />
+                                <Label text="• TAB: Instantly restart the current match" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" />
+                            </children>
+                        </VBox>
+
+                        <VBox alignment="CENTER_LEFT" spacing="5.0" maxWidth="480.0">
+                            <children>
+                                <Label text="COINS &amp; GOAL" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-underline: true;" />
+                                <Label text="• Red Coin: +5 points | Gold Coin: +15 bonus points" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" />
+                                <Label text="• Rainbow Coin: +5 points and boosts movement speed" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" />
+                                <Label text="• Blue Coin: +5 points and lets you pass through walls" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" />
+                                <Label text="• Silver Coin: +5 points and spawns obstacle blocks" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" />
+                                <Label text="• Clear all 3 levels by collecting the target coins without crashing!" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" />
+                            </children>
+                        </VBox>
+
+                        <Button fx:id="btn_helpBack" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleCloseHelp" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Back" textFill="WHITE" />
                     </children>
                 </VBox>
             </children>
