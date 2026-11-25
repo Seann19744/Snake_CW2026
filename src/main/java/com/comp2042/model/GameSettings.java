@@ -20,12 +20,10 @@ public class GameSettings {
     private boolean gridEnabled = true;
     private int highScore = 0;
     private Path highScoreFile = DEFAULT_HIGH_SCORE_FILE;
+    private boolean persistenceEnabled = true;
 
     private GameSettings() {
         loadHighScore();
-        if (highScoreFile != null && !Files.exists(highScoreFile)) {
-            saveHighScore();
-        }
     }
 
     public static GameSettings getInstance() {
@@ -50,25 +48,41 @@ public class GameSettings {
 
     /**
      * Updates the best score if the provided score exceeds the current record,
-     * and persists the new record to disk so it remains after closing the game.
+     * and persists the new record to disk when persistence is enabled.
      *
      * @param score the newly achieved score
      */
     public void updateHighScore(int score) {
         if (score > this.highScore) {
             this.highScore = score;
-            saveHighScore();
+            if (persistenceEnabled) {
+                saveHighScore();
+            }
         }
     }
 
     /**
-     * Configures the file path used to persist the high score and loads any existing record from it.
+     * Configures the file path used to persist the high score, enables disk persistence,
+     * and loads any existing record from that file.
      *
-     * @param highScoreFile path to the high score file, or null to disable disk writes during in-memory tests
+     * @param highScoreFile path to the high score file (if null, reverts to DEFAULT_HIGH_SCORE_FILE)
      */
     public void setHighScoreFile(Path highScoreFile) {
-        this.highScoreFile = highScoreFile;
+        this.highScoreFile = (highScoreFile != null) ? highScoreFile : DEFAULT_HIGH_SCORE_FILE;
+        this.persistenceEnabled = (highScoreFile != null);
         loadHighScore();
+    }
+
+    public Path getHighScoreFile() {
+        return highScoreFile;
+    }
+
+    public boolean isPersistenceEnabled() {
+        return persistenceEnabled;
+    }
+
+    public void setPersistenceEnabled(boolean persistenceEnabled) {
+        this.persistenceEnabled = persistenceEnabled;
     }
 
     /**
@@ -87,7 +101,8 @@ public class GameSettings {
             } else {
                 this.highScore = 0;
             }
-        } catch (IOException | NumberFormatException ignored) {
+        } catch (IOException | NumberFormatException e) {
+            System.err.println("Warning: Failed to read high score from " + highScoreFile + ": " + e.getMessage());
             this.highScore = 0;
         }
     }
@@ -98,13 +113,19 @@ public class GameSettings {
         }
         try {
             Files.writeString(highScoreFile, Integer.toString(this.highScore), StandardCharsets.UTF_8);
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            System.err.println("Warning: Failed to save high score to " + highScoreFile + ": " + e.getMessage());
         }
     }
 
+    /**
+     * Resets settings to their clean in-memory defaults and disables disk writes
+     * so automated unit tests never overwrite the player's saved highscore.txt file.
+     */
     public void resetDefaults() {
         this.gridEnabled = true;
         this.highScore = 0;
-        this.highScoreFile = null;
+        this.highScoreFile = DEFAULT_HIGH_SCORE_FILE;
+        this.persistenceEnabled = false;
     }
 }
