@@ -496,30 +496,12 @@ public class GameView {
 
         Image segmentImage;
         int angle;
-        if (snake.getBody().size() <= 1) {
+        if (index == 0) {
             segmentImage = snake.getImageViewTail().getImage();
-            angle = snake.getSnakeDir();
-        } else if (index == 0) {
-            Point nextPoint = snake.getHead();
-            for (int k = 1; k < snake.getBody().size(); k++) {
-                if (!snake.getBody().get(k).equals(point)) {
-                    nextPoint = snake.getBody().get(k);
-                    break;
-                }
-            }
-            if (nextPoint.getX() == point.getX() && nextPoint.getY() == point.getY() - 1) {
-                angle = 0;
-            } else if (nextPoint.getX() == point.getX() && nextPoint.getY() == point.getY() + 1) {
-                angle = 180;
-            } else if (nextPoint.getX() == point.getX() - 1 && nextPoint.getY() == point.getY()) {
-                angle = 270;
-            } else {
-                angle = 90;
-            }
-            segmentImage = snake.getImageViewTail().getImage();
-        } else if (index > 0 && (turnArray[(int) snake.getBody().get(index).getX()][(int) snake.getBody().get(index).getY()] != 0)) {
+            angle = snake.getTailDir();
+        } else if (turnArray[(int) point.getX()][(int) point.getY()] != 0) {
             segmentImage = snake.getImageViewTurn().getImage();
-            angle = 90 * turnArray[(int) snake.getBody().get(index).getX()][(int) snake.getBody().get(index).getY()];
+            angle = 90 * turnArray[(int) point.getX()][(int) point.getY()];
         } else {
             segmentImage = snake.getImageViewBody().getImage();
             angle = snake.getBodyDir(index);

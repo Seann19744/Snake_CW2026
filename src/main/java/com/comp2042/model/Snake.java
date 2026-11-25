@@ -13,6 +13,7 @@ public class Snake {
     private boolean dead = false;
     private final Point head = new Point();
     private final ArrayList<Point> body = new ArrayList<>();
+    private final ArrayList<Integer> bodyDirs = new ArrayList<>();
     private final int gx;
     private final int gy;
     private boolean ignoreBorders = false;
@@ -39,13 +40,13 @@ public class Snake {
         this.growthRate = growthRate;
         this.head.setLocation(x / 2, y / 2);
         this.body.add(new Point(x / 2 + 1, y / 2));
+        this.bodyDirs.add(270);
         this.gx = x;
         this.gy = y;
     }
 
     public void move(char dir) {
         Point prevHead = new Point(head);
-        body.add(prevHead);
         switch (dir) {
             case 'U':
                 snakeDir = 0;
@@ -100,6 +101,9 @@ public class Snake {
                 break;
         }
 
+        body.add(prevHead);
+        bodyDirs.add(snakeDir);
+
         if (!dead && obstacle.getObstacles().contains(head)) {
             head.setLocation(prevHead);
             dead = true;
@@ -110,24 +114,34 @@ public class Snake {
         }
     }
 
+    public int getTailDir() {
+        if (bodyDirs.isEmpty()) {
+            return snakeDir;
+        }
+        return bodyDirs.get(0);
+    }
+
     public int getBodyDir(int bodyCount) {
-        if (bodyCount == 0) {
-            return 0;
-        } else if (body.get(bodyCount).getY() == body.get(bodyCount - 1).getY()) {
-            return 270;
-        } else {
+        if (bodyCount < 0 || bodyCount >= bodyDirs.size()) {
             return 0;
         }
+        int dir = bodyDirs.get(bodyCount);
+        return (dir == 90 || dir == 270) ? 270 : 0;
     }
 
     public boolean ateCoin(Coin coin) {
         boolean ate = head.equals(coin.getPos());
         if (!ate) {
             body.remove(0);
+            if (!bodyDirs.isEmpty()) {
+                bodyDirs.remove(0);
+            }
         } else if (growthRate > 1) {
             // Adds extra segment(s) when growthRate > 1 (e.g. Hardcore mode)
+            int tailDir = getTailDir();
             for (int i = 1; i < growthRate; i++) {
                 body.add(0, new Point(body.get(0)));
+                bodyDirs.add(0, tailDir);
             }
         }
         return ate;
@@ -144,8 +158,10 @@ public class Snake {
         int preservedSize = Math.max(1, body.size());
         head.setLocation(x / 2, y / 2);
         body.clear();
+        bodyDirs.clear();
         for (int i = 0; i < preservedSize; i++) {
             body.add(new Point(x / 2 + 1, y / 2));
+            bodyDirs.add(270);
         }
         dead = false;
         snakeDir = 270;
