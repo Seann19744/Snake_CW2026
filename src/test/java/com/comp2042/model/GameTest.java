@@ -46,16 +46,19 @@ class GameTest {
     @Test
     @DisplayName("Verify score incrementation and point addition")
     void testScoreAndPoints() {
+        GameSettings.getInstance().resetDefaults();
         game.incScore();
         game.incScore();
         game.addPoints(15);
 
         assertEquals(15, game.getScorePoints(), "Score points should be 15 after adding 15");
+        assertEquals(15, GameSettings.getInstance().getHighScore(), "Session high score should automatically update when points are added");
         assertEquals(2, game.getLevelCoinsEaten(), "Level coins eaten should be 2");
         assertEquals(2, game.getTotalCoinsEaten(), "Total coins eaten should be 2");
 
         game.resetScore();
         assertEquals(0, game.getScorePoints(), "Score points should reset to 0");
+        assertEquals(15, GameSettings.getInstance().getHighScore(), "Resetting match score must preserve session high score");
         assertEquals(1, game.getCurrentLevel(), "Level should reset to 1");
         assertEquals(0, game.getLevelCoinsEaten(), "Level coins should reset to 0");
     }

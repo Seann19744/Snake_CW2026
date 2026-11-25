@@ -108,6 +108,7 @@ public class Game {
 
     public void addPoints(int n) {
         scorePoints += n;
+        GameSettings.getInstance().updateHighScore(scorePoints);
     }
 
     public int getScorePoints() {
