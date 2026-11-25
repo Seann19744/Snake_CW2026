@@ -9,8 +9,8 @@ import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
-import javafx.scene.control.ComboBox;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
@@ -22,7 +22,16 @@ public class MainMenuController {
     private static final boolean POWER_UP = true;
 
     @FXML
-    private ComboBox<GameMode> difficultyBox;
+    private StackPane difficultyOverlay;
+
+    @FXML
+    private Label lbl_quickDesc;
+
+    @FXML
+    private Label lbl_classicDesc;
+
+    @FXML
+    private Label lbl_hardcoreDesc;
 
     @FXML
     private StackPane settingsOverlay;
@@ -32,12 +41,48 @@ public class MainMenuController {
 
     @FXML
     /**
-     * Have dropdown bar display all game modes.
+     * Initialize main menu labels and settings button states.
      */
     public void initialize() {
-        difficultyBox.getItems().setAll(GameMode.values());
-        difficultyBox.setValue(GameMode.CLASSIC);
+        if (lbl_quickDesc != null) {
+            lbl_quickDesc.setText(GameMode.QUICK.getDescription());
+        }
+        if (lbl_classicDesc != null) {
+            lbl_classicDesc.setText(GameMode.CLASSIC.getDescription());
+        }
+        if (lbl_hardcoreDesc != null) {
+            lbl_hardcoreDesc.setText(GameMode.HARDCORE.getDescription());
+        }
         updateGridButton();
+    }
+
+    @FXML
+    public void handleStart() {
+        if (difficultyOverlay != null) {
+            difficultyOverlay.setVisible(true);
+        }
+    }
+
+    @FXML
+    public void handleCloseDifficulty() {
+        if (difficultyOverlay != null) {
+            difficultyOverlay.setVisible(false);
+        }
+    }
+
+    @FXML
+    public void handleQuickMode() {
+        startGame(GameMode.QUICK);
+    }
+
+    @FXML
+    public void handleClassicMode() {
+        startGame(GameMode.CLASSIC);
+    }
+
+    @FXML
+    public void handleHardcoreMode() {
+        startGame(GameMode.HARDCORE);
     }
 
     @FXML
@@ -72,8 +117,10 @@ public class MainMenuController {
 
     private ViewManager viewManager = Main.getViewManager();
 
-    public void handleStart() {
-        GameMode gameMode = difficultyBox.getValue();
+    public void startGame(GameMode gameMode) {
+        if (difficultyOverlay != null) {
+            difficultyOverlay.setVisible(false);
+        }
         viewManager.initGameStage();
 
         Stage gameStage = viewManager.getGameStage();
