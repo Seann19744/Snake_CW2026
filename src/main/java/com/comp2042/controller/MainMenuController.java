@@ -4,6 +4,7 @@ import com.comp2042.Main;
 import com.comp2042.model.*;
 import com.comp2042.view.GameView;
 import com.comp2042.view.ViewManager;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
@@ -115,6 +116,14 @@ public class MainMenuController {
         if (helpOverlay != null) {
             helpOverlay.setVisible(false);
         }
+    }
+
+    @FXML
+    public void handleQuit() {
+        if (viewManager != null && viewManager.getPrimaryStage() != null) {
+            viewManager.getPrimaryStage().close();
+        }
+        Platform.exit();
     }
 
     @FXML
