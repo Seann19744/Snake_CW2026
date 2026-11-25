@@ -28,9 +28,9 @@ public class GameView {
     public Canvas gridCanvas;
     public GraphicsContext gc;
 
-    public Label gameOverLabel;
-    public Label gameWonLabel;
-    public Label scoreLabel;
+    public Label gameOverLabel = new Label("GAME OVER");
+    public Label gameWonLabel = new Label("YOU WON!");
+    public Label scoreLabel = new Label();
     private boolean gameOverVis = false;
     private boolean gameWonVis = false;
 

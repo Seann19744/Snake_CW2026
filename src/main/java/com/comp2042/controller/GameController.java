@@ -184,7 +184,6 @@ public class GameController {
         // Reset the game
         if (code.equals(KeyCode.TAB)) {
             reset();
-            gameView.scoreLabel.setText("Score: " + game.getScorePoints());
         }
     }
 

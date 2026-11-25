@@ -224,4 +224,16 @@ class GameControllerTest extends JavaFXTestBase {
         assertEquals(com.comp2042.model.GameState.RUNNING, ctrl.getGameState(), "Arrow key should resume game to RUNNING");
         ctrl.stopAnimation();
     }
+
+    @Test
+    @DisplayName("Verify TAB reset preserves the full HUD format on scoreLabel instead of overwriting with 'Score: 0'")
+    void testTabResetPreservesFullHudText() {
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.TAB, false, false, false, false
+        ));
+        String hudText = gameView.scoreLabel.getText();
+        assertNotEquals("Score: 0", hudText, "TAB must not overwrite HUD with legacy 'Score: 0'");
+        assertTrue(hudText.contains("[Classic Mode] Level 1/3 | Coins: 0/8 | Score: 0"),
+                "TAB reset should display full HUD string, got: " + hudText);
+    }
 }
