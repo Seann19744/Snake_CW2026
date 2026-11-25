@@ -20,7 +20,7 @@ class GameModeTest {
         assertEquals(10, mode.getCoinsRequired(3), "Level 3 should require 10 coins (12 - 2)");
         assertEquals(1, mode.getGrowthRate(), "Quick mode should have standard 1x growth rate");
         assertNotNull(mode.getDescription());
-        assertTrue(mode.getDescription().contains("Borderless Wrap"));
+        assertTrue(mode.getDescription().contains("pass safely through screen edges"));
     }
 
     @Test
@@ -35,7 +35,7 @@ class GameModeTest {
         assertEquals(12, mode.getCoinsRequired(3), "Level 3 should require 12 coins");
         assertEquals(1, mode.getGrowthRate(), "Classic mode should have standard 1x growth rate");
         assertNotNull(mode.getDescription());
-        assertTrue(mode.getDescription().contains("Solid Borders"));
+        assertTrue(mode.getDescription().contains("solid, deadly walls"));
     }
 
     @Test
@@ -50,7 +50,7 @@ class GameModeTest {
         assertEquals(14, mode.getCoinsRequired(3), "Level 3 should require 14 coins (12 + 2)");
         assertEquals(2, mode.getGrowthRate(), "Hardcore mode must increase snake by 2 segments per coin");
         assertNotNull(mode.getDescription());
-        assertTrue(mode.getDescription().contains("Double Growth"));
+        assertTrue(mode.getDescription().contains("2 body segments"));
     }
 
     @Test

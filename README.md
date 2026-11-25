@@ -39,7 +39,7 @@ mvn javafx:run
 The following features, enhancements, and bug fixes have been implemented, tested, and verified to be working properly:
 
 1. **Game Modes and Playable Levels System (UI, Logic, & Map Layouts)**:
-   - Replaced basic difficulty levels with 3 fully-featured **Game Modes** selectable via a dropdown on the main menu (`MainMenuController.java` & `MainMenu.fxml`):
+   - Replaced basic difficulty levels and the legacy main menu dropdown with a dedicated **Select Difficulty Screen** (`difficultyOverlay` in `MainMenu.fxml` & `MainMenuController.java`) triggered upon clicking **Start**, displaying each mode button on the left alongside a natural-English rule summary on the right:
      - **Classic Mode**: Standard speed (8.5), fatal outer borders, standard growth (+1 segment per coin), coins to clear levels: 8 -> 10 -> 12 (30 coins total to win).
      - **Quick Mode**: Standard speed (8.5), border wrap-around enabled (`noBorder = true`), 2 fewer coins per level: 6 -> 8 -> 10 (24 coins total to win).
      - **Hardcore Mode**: High speed (13.0), fatal borders, +2 coins per level: 10 -> 12 -> 14 (36 coins total to win), and **double snake growth (+2 segments per coin eaten)**.
@@ -160,7 +160,7 @@ The following features were considered during design and development but were no
 ### 4. `com.comp2042.model.GameMode`
 - **Location**: `src/main/java/com/comp2042/model/GameMode.java`
 - **Purpose**: Type-safe enumeration defining game modes (`QUICK`, `CLASSIC`, `HARDCORE`).
-- **Justification**: Encapsulates speed, wall wrap-around behavior, coin quotas required to clear each level, and snake body growth rate per coin eaten.
+- **Justification**: Encapsulates speed, wall wrap-around behavior, coin quotas required to clear each level, snake body growth rate per coin eaten, and human-readable mode descriptions (`getDescription()`) displayed on the difficulty selection screen.
 
 ### 5. `com.comp2042.model.GameSettings`
 - **Location**: `src/main/java/com/comp2042/model/GameSettings.java`
@@ -177,14 +177,14 @@ The following features were considered during design and development but were no
 
 ### 2. `com.comp2042.controller.MainMenuController`
 - Moved to package `com.comp2042.controller`.
-- Added FXML binding `@FXML private ComboBox<Difficulty> difficultyBox`.
-- Added `initialize()` method to populate `difficultyBox` with all `Difficulty.values()` and set `Difficulty.NORMAL` as the default selection.
-- Refactored `handleStart()` and `launchSnake(Stage, Difficulty)` to retrieve the player's chosen difficulty from the dropdown and pass it to the `Game` constructor.
+- Replaced the main menu `ComboBox` dropdown with a dedicated **Select Difficulty** overlay (`difficultyOverlay`) opened via `handleStart()`.
+- Added handlers (`handleQuickMode()`, `handleClassicMode()`, `handleHardcoreMode()`, `handleCloseDifficulty()`) and dynamic description labels (`lbl_quickDesc`, `lbl_classicDesc`, `lbl_hardcoreDesc`) populated from `GameMode.getDescription()`.
+- Refactored `startGame(GameMode)` and `launchSnake(Stage, GameMode)` to launch the game directly with the selected `GameMode`.
 - Replaced hardcoded char constant `DIFFICULTY = 'N'` with dynamic selection.
 
 ### 3. `src/main/resources/resources/views/MainMenu.fxml`
 - Updated `fx:controller` attribute to match the new package path: `com.comp2042.controller.MainMenuController`.
-- Added a `<ComboBox fx:id="difficultyBox" .../>` component positioned below the Start button to provide an intuitive user interface for difficulty selection.
+- Replaced the `<ComboBox>` dropdown with a structured `<StackPane fx:id="difficultyOverlay">` screen containing left-aligned `startAndQuitBtn` mode buttons (`Quick`, `Classic`, `Hardcore`) paired with right-aligned wrapped English description labels in `HBox` rows, plus a `Back` navigation button.
 
 ### 4. `com.comp2042.controller.GameController`
 - Moved to package `com.comp2042.controller` and updated model and view imports.

@@ -4,6 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -16,30 +17,34 @@
         <Button fx:id="btn_start" layoutY="170.0" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleStart" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Start" textFill="WHITE" AnchorPane.leftAnchor="217.5" />
         <Button fx:id="btn_settings" layoutY="230.0" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleOpenSettings" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Settings" textFill="WHITE" AnchorPane.leftAnchor="217.5" />
 
-        <StackPane fx:id="difficultyOverlay" visible="false" style="-fx-background-color: rgba(254, 255, 228, 0.98);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <StackPane fx:id="difficultyOverlay" visible="false" style="-fx-background-color: #feffe4;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
-                <VBox alignment="CENTER" spacing="12.0" maxWidth="520.0">
+                <VBox alignment="CENTER" spacing="22.0" maxWidth="500.0">
                     <children>
                         <Label text="SELECT DIFFICULTY" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 26px;" />
 
-                        <VBox alignment="CENTER" spacing="3.0">
+                        <VBox alignment="CENTER_LEFT" spacing="18.0" maxWidth="490.0">
                             <children>
-                                <Button fx:id="btn_quickMode" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleQuickMode" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Quick" textFill="WHITE" />
-                                <Label fx:id="lbl_quickDesc" alignment="CENTER" text="Normal Speed | Borderless Wrap | Growth +1 | 6/8/10 Coins" textAlignment="CENTER" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px;" />
-                            </children>
-                        </VBox>
+                                <HBox alignment="CENTER_LEFT" spacing="18.0">
+                                    <children>
+                                        <Button fx:id="btn_quickMode" maxWidth="115.0" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleQuickMode" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Quick" textFill="WHITE" />
+                                        <Label fx:id="lbl_quickDesc" alignment="CENTER_LEFT" maxWidth="355.0" prefWidth="355.0" text="Travel at standard speed and pass safely through screen edges. Every coin adds 1 body segment (6, 8, and 10 coins per level)." textAlignment="LEFT" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px; -fx-line-spacing: 2px;" />
+                                    </children>
+                                </HBox>
 
-                        <VBox alignment="CENTER" spacing="3.0">
-                            <children>
-                                <Button fx:id="btn_classicMode" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleClassicMode" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Classic" textFill="WHITE" />
-                                <Label fx:id="lbl_classicDesc" alignment="CENTER" text="Normal Speed | Solid Borders | Growth +1 | 8/10/12 Coins" textAlignment="CENTER" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px;" />
-                            </children>
-                        </VBox>
+                                <HBox alignment="CENTER_LEFT" spacing="18.0">
+                                    <children>
+                                        <Button fx:id="btn_classicMode" maxWidth="115.0" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleClassicMode" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" text="Classic" textFill="WHITE" />
+                                        <Label fx:id="lbl_classicDesc" alignment="CENTER_LEFT" maxWidth="355.0" prefWidth="355.0" text="Travel at standard speed within solid, deadly walls. Every coin adds 1 body segment (8, 10, and 12 coins per level)." textAlignment="LEFT" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px; -fx-line-spacing: 2px;" />
+                                    </children>
+                                </HBox>
 
-                        <VBox alignment="CENTER" spacing="3.0">
-                            <children>
-                                <Button fx:id="btn_hardcoreMode" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleHardcoreMode" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" style="-fx-font-size: 15px;" text="Hardcore" textFill="WHITE" />
-                                <Label fx:id="lbl_hardcoreDesc" alignment="CENTER" text="Fast Speed | Solid Borders | Double Growth (+2) | 10/12/14 Coins" textAlignment="CENTER" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px;" />
+                                <HBox alignment="CENTER_LEFT" spacing="18.0">
+                                    <children>
+                                        <Button fx:id="btn_hardcoreMode" maxWidth="115.0" minHeight="40.0" minWidth="115.0" mnemonicParsing="false" onAction="#handleHardcoreMode" prefHeight="40.0" prefWidth="115.0" styleClass="startAndQuitBtn" style="-fx-font-size: 15px;" text="Hardcore" textFill="WHITE" />
+                                        <Label fx:id="lbl_hardcoreDesc" alignment="CENTER_LEFT" maxWidth="355.0" prefWidth="355.0" text="Race at high speed within solid, deadly walls. Every coin adds 2 body segments (10, 12, and 14 coins per level)." textAlignment="LEFT" wrapText="true" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px; -fx-line-spacing: 2px;" />
+                                    </children>
+                                </HBox>
                             </children>
                         </VBox>
 
@@ -49,7 +54,7 @@
             </children>
         </StackPane>
 
-        <StackPane fx:id="settingsOverlay" visible="false" style="-fx-background-color: rgba(254, 255, 228, 0.96);" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <StackPane fx:id="settingsOverlay" visible="false" style="-fx-background-color: #feffe4;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
                 <VBox alignment="CENTER" spacing="20.0" maxWidth="320.0">
                     <children>

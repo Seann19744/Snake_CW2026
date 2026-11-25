@@ -7,11 +7,11 @@ package com.comp2042.model;
  */
 public enum GameMode {
     QUICK("Quick Mode", 8.5, true, 6, 8, 10, 1,
-            "Normal Speed | Borderless Wrap | Growth +1 | 6/8/10 Coins"),
+            "Travel at standard speed and pass safely through screen edges. Every coin adds 1 body segment (6, 8, and 10 coins per level)."),
     CLASSIC("Classic Mode", 8.5, false, 8, 10, 12, 1,
-            "Normal Speed | Solid Borders | Growth +1 | 8/10/12 Coins"),
+            "Travel at standard speed within solid, deadly walls. Every coin adds 1 body segment (8, 10, and 12 coins per level)."),
     HARDCORE("Hardcore Mode", 13.0, false, 10, 12, 14, 2,
-            "Fast Speed | Solid Borders | Double Growth (+2) | 10/12/14 Coins");
+            "Race at high speed within solid, deadly walls. Every coin adds 2 body segments (10, 12, and 14 coins per level).");
 
     private final String displayName;
     private final double speed;
