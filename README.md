@@ -181,14 +181,16 @@ The following features were considered during design and development but were no
 - Added handlers (`handleQuickMode()`, `handleClassicMode()`, `handleHardcoreMode()`, `handleCloseDifficulty()`) and dynamic description labels (`lbl_quickDesc`, `lbl_classicDesc`, `lbl_hardcoreDesc`) populated from `GameMode.getDescription()`.
 - Added top-right `?` help button handlers (`handleOpenHelp()`, `handleCloseHelp()`) controlling the **How to Play** overlay (`helpOverlay`).
 - Added `handleQuit()` handler for the main menu **Quit** button to cleanly close the stage and exit the JavaFX application via `Platform.exit()`.
+- Added `drawPixelArtBackground()` on `menuBgCanvas` to render a retro 25x25 checkerboard tile grid (`#feffe4` / `#f1efd2`), double-layered pixel arcade border with corner rivets, and decorative pixel-art snake and coin sprites.
 - Refactored `startGame(GameMode)` and `launchSnake(Stage, GameMode)` to launch the game directly with the selected `GameMode`.
 - Replaced hardcoded char constant `DIFFICULTY = 'N'` with dynamic selection.
 
-### 3. `src/main/resources/resources/views/MainMenu.fxml`
+### 3. `src/main/resources/resources/views/MainMenu.fxml` & `styling.css`
 - Updated `fx:controller` attribute to match the new package path: `com.comp2042.controller.MainMenuController`.
 - Replaced the `<ComboBox>` dropdown with a structured `<StackPane fx:id="difficultyOverlay">` screen containing left-aligned `startAndQuitBtn` mode buttons (`Quick`, `Classic`, `Hardcore`) paired with right-aligned wrapped English description labels in `HBox` rows, plus a `Back` navigation button.
-- Added a top-right `?` button (`btn_help`) and `<StackPane fx:id="helpOverlay">` explaining all keyboard controls (`Arrow Keys`, `ESC/P`, `G`, `F11`, `TAB`) and coin power-up effects.
+- Added a top-right `?` button (`btn_help`) and `<StackPane fx:id="helpOverlay">` explaining all keyboard controls (`Arrow Keys`, `ESC/P`, `G`, `F11`, `TAB`) and coin power-up effects with embedded `16x16` pixel coin sprite icons.
 - Added a harmonized **Quit** button (`btn_quit`) styled with `startAndQuitBtn` and aligned below **Start** and **Settings**.
+- Redesigned the menu theme in `MainMenu.fxml` and `styling.css` with a background `<Canvas fx:id="menuBgCanvas">`, retro 8-bit bordered dialog cards (`.pixel-card`), cartridge-style slot containers (`.pixel-slot`), shaded pixel headers (`.pixel-header`), harmonized `130x40` buttons, golden hover highlights (`#ffe66d`), and tactile 8-bit button press offsets.
 
 ### 4. `com.comp2042.controller.GameController`
 - Moved to package `com.comp2042.controller` and updated model and view imports.
@@ -216,7 +218,7 @@ The following features were considered during design and development but were no
 - Moved to package `com.comp2042.view`.
 - Fixed fullscreen distortion: removed duplicate `* fullScale` in `drawHead()` and `drawBody()`, eliminating the bug where snake body parts were scaled quadratically.
 - Renamed parameter `snek` to `snake` in methods (`turnDir`, `gameOver`, `drawGrid`, `drawHead`, `drawBody`).
-- Added in-game pause overlay (`pauseOverlay`) with a Settings sub-menu (`pauseSettingsBox`) and a top-right `?` help button (`pauseHelpButton`) opening an in-game **How to Play** overlay (`pauseHelpBox`).
+- Added in-game pause overlay (`pauseOverlay`) with a Settings sub-menu (`pauseSettingsBox`) and a top-right `?` help button (`pauseHelpButton`) opening an in-game **How to Play** overlay (`pauseHelpBox`), styled with matching 8-bit `.pixel-card` and `.pixel-slot` arcade panels and harmonized `130x40` buttons.
 
 ### 8. `com.comp2042.view.ViewManager`
 - Moved to package `com.comp2042.view`.

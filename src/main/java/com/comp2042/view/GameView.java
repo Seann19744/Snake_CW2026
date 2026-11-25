@@ -104,31 +104,30 @@ public class GameView {
         if (!pauseOverlay.getStylesheets().contains(css)) {
             pauseOverlay.getStylesheets().add(css);
         }
-        pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.78);");
+        pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.65);");
         pauseOverlay.setVisible(false);
         pauseOverlay.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         pauseBox.setAlignment(Pos.CENTER);
-        pauseBox.setMaxSize(300, 280);
+        pauseBox.setMaxSize(340, 310);
+        pauseBox.setPadding(new Insets(22, 28, 22, 28));
+        pauseBox.getStyleClass().add("pixel-card");
 
         Label pauseTitle = new Label("GAME PAUSED");
         pauseTitle.setId("pauseTitle");
-        pauseTitle.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 32px; -fx-text-fill: #ffffff;");
+        pauseTitle.getStyleClass().add("pixel-header");
 
         Label pauseHint = new Label("Press ESC or P to resume");
-        pauseHint.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-text-fill: #cccccc;");
+        pauseHint.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px; -fx-text-fill: #6e6a50;");
 
         resumeButton.getStyleClass().add("startAndQuitBtn");
-        resumeButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
-        resumeButton.setPrefSize(140, 40);
+        resumeButton.setPrefSize(130, 40);
 
         pauseSettingsButton.getStyleClass().add("startAndQuitBtn");
-        pauseSettingsButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
-        pauseSettingsButton.setPrefSize(140, 40);
+        pauseSettingsButton.setPrefSize(130, 40);
 
         returnMenuButton.getStyleClass().add("startAndQuitBtn");
-        returnMenuButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
-        returnMenuButton.setPrefSize(140, 40);
+        returnMenuButton.setPrefSize(130, 40);
 
         pauseBox.getChildren().setAll(pauseTitle, pauseHint, resumeButton, pauseSettingsButton, returnMenuButton);
 
@@ -139,66 +138,67 @@ public class GameView {
         pauseHelpButton.setMinSize(40, 40);
         pauseHelpButton.setMaxSize(40, 40);
         StackPane.setAlignment(pauseHelpButton, Pos.TOP_RIGHT);
-        StackPane.setMargin(pauseHelpButton, new Insets(15, 15, 0, 0));
+        StackPane.setMargin(pauseHelpButton, new Insets(16, 16, 0, 0));
 
         // Settings sub-menu within pause overlay
         pauseSettingsBox.setAlignment(Pos.CENTER);
-        pauseSettingsBox.setMaxSize(300, 280);
+        pauseSettingsBox.setMaxSize(330, 250);
+        pauseSettingsBox.setPadding(new Insets(22, 25, 22, 25));
+        pauseSettingsBox.getStyleClass().add("pixel-card");
         pauseSettingsBox.setVisible(false);
 
         Label settingsTitle = new Label("SETTINGS");
-        settingsTitle.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 32px; -fx-text-fill: #ffffff;");
+        settingsTitle.getStyleClass().add("pixel-header");
 
         gridToggleButton.getStyleClass().add("startAndQuitBtn");
-        gridToggleButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
-        gridToggleButton.setPrefSize(140, 40);
+        gridToggleButton.setPrefSize(130, 40);
         updateGridButtonText();
 
         settingsBackButton.getStyleClass().add("startAndQuitBtn");
-        settingsBackButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
-        settingsBackButton.setPrefSize(140, 40);
+        settingsBackButton.setPrefSize(130, 40);
 
         pauseSettingsBox.getChildren().setAll(settingsTitle, gridToggleButton, settingsBackButton);
 
         // Help / How to Play sub-menu within pause overlay
         pauseHelpBox.setAlignment(Pos.CENTER);
-        pauseHelpBox.setMaxSize(540, 420);
+        pauseHelpBox.setMaxSize(520, 390);
+        pauseHelpBox.setPadding(new Insets(16, 20, 16, 20));
+        pauseHelpBox.getStyleClass().add("pixel-card");
         pauseHelpBox.setVisible(false);
 
         Label helpTitle = new Label("HOW TO PLAY");
-        helpTitle.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 28px; -fx-text-fill: #ffffff;");
+        helpTitle.getStyleClass().add("pixel-header");
 
-        VBox controlsSection = new VBox(6);
+        VBox controlsSection = new VBox(5);
         controlsSection.setAlignment(Pos.CENTER_LEFT);
-        controlsSection.setMaxWidth(500);
+        controlsSection.setMaxWidth(480);
+        controlsSection.getStyleClass().add("pixel-slot");
         Label controlsHeader = new Label("CONTROLS");
-        controlsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-text-fill: #feffe4; -fx-underline: true;");
+        controlsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-text-fill: #2d572c; -fx-underline: true;");
         controlsSection.getChildren().addAll(
                 controlsHeader,
                 createHelpLabel("• Arrow Keys: Start moving and steer the snake"),
                 createHelpLabel("• ESC or P: Pause the game and open the pause menu"),
-                createHelpLabel("• G: Toggle the checkerboard grid on or off"),
-                createHelpLabel("• F11: Switch between windowed and fullscreen mode"),
-                createHelpLabel("• TAB: Instantly restart the current match")
+                createHelpLabel("• G: Toggle grid on/off  |  F11: Fullscreen  |  TAB: Restart")
         );
 
-        VBox coinsSection = new VBox(6);
+        VBox coinsSection = new VBox(5);
         coinsSection.setAlignment(Pos.CENTER_LEFT);
-        coinsSection.setMaxWidth(500);
+        coinsSection.setMaxWidth(480);
+        coinsSection.getStyleClass().add("pixel-slot");
         Label coinsHeader = new Label("COINS & GOAL");
-        coinsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-text-fill: #feffe4; -fx-underline: true;");
+        coinsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-text-fill: #2d572c; -fx-underline: true;");
         coinsSection.getChildren().addAll(
                 coinsHeader,
-                createHelpLabel("• Red Coin: +5 points | Gold Coin: +15 bonus points"),
-                createHelpLabel("• Rainbow Coin: +5 points and boosts movement speed"),
-                createHelpLabel("• Blue Coin: +5 points and lets you pass through walls"),
-                createHelpLabel("• Silver Coin: +5 points and spawns obstacle blocks"),
+                createHelpLabel("• Red Coin: +5 points  |  Gold Coin: +15 bonus points"),
+                createHelpLabel("• Rainbow Coin: +5 points & boosts movement speed"),
+                createHelpLabel("• Blue Coin: +5 points & lets you pass through walls"),
+                createHelpLabel("• Silver Coin: +5 points & spawns obstacle blocks"),
                 createHelpLabel("• Clear all 3 levels by collecting target coins without crashing!")
         );
 
         helpBackButton.getStyleClass().add("startAndQuitBtn");
-        helpBackButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 16px; -fx-background-size: 100% 100%;");
-        helpBackButton.setPrefSize(140, 40);
+        helpBackButton.setPrefSize(130, 40);
 
         pauseHelpBox.getChildren().setAll(helpTitle, controlsSection, coinsSection, helpBackButton);
 
@@ -243,7 +243,7 @@ public class GameView {
     private Label createHelpLabel(String text) {
         Label lbl = new Label(text);
         lbl.setWrapText(true);
-        lbl.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 13px; -fx-text-fill: #ffffff;");
+        lbl.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px; -fx-text-fill: #2b2b2b;");
         return lbl;
     }
 
