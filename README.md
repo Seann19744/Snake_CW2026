@@ -265,6 +265,8 @@ src/main/java/com/comp2042/
 │   ├── Difficulty.java                 (Legacy difficulty enumeration)
 │   ├── Game.java                       (Game state, score, speed, grid boundaries)
 │   ├── GameMode.java                   (Game modes: Quick, Classic, Hardcore)
+│   ├── GameSettings.java               (GoF Singleton for grid preference & high score)
+│   ├── GameState.java                  (Lifecycle phase enumeration)
 │   ├── GoldCoin.java                   (High-value bonus coin)
 │   ├── Obstacle.java                   (Obstacle entity and placement algorithms)
 │   ├── RainbowCoin.java                (Speed boost coin)
@@ -361,3 +363,7 @@ Adhering to clean code principles and Java naming conventions:
 17. **High Score File Git Tracking and Unit Test Disk Side Effects**:
     - **Problem**: Tracking the runtime `highscore.txt` save file in Git caused working tree modifications whenever a player beat their high score. Additionally, because `Game.addPoints()` called `GameSettings.getInstance().updateHighScore()`, running JUnit tests (such as `CoinTest`) before `GameSettingsTest` wrote test scores directly to the player's real `highscore.txt` file, while `resetDefaults()` set `highScoreFile = null`, making behavior dependent on test execution order.
     - **Solution**: Added `highscore.txt` to `.gitignore`, logged I/O errors in `loadHighScore()` and `saveHighScore()`, and introduced a `persistenceEnabled` flag in `GameSettings` (disabled automatically during unit tests via `JavaFXTestBase` and `resetDefaults()` while keeping `highScoreFile = DEFAULT_HIGH_SCORE_FILE`).
+
+18. **Package Directory Mismatch on `Launcher.java` and Misplaced Javadoc Annotation Order**:
+    - **Problem**: `Launcher.java` declared `package com.comp2042;` at the top of the file but was physically located inside the `src/main/java/com/comp2042/view/` subdirectory instead of `src/main/java/com/comp2042/`. Additionally, in `MainMenuController.java`, the `/** ... */` Javadoc comment on `initialize()` was placed *below* the `@FXML` annotation rather than above it, preventing the `javadoc` documentation tool from attaching the description to the method.
+    - **Solution**: Moved `Launcher.java` to its proper root package directory `src/main/java/com/comp2042/Launcher.java` with full class and method Javadoc comments, and reordered the Javadoc block above `@FXML` on `MainMenuController.initialize()`.

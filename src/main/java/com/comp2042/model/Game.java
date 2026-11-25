@@ -40,12 +40,13 @@ public class Game {
      * Backward-compatible constructor mapping legacy Difficulty to GameMode.
      */
     public Game(int x, int y, boolean powerUp, Difficulty difficulty) {
-        this(x, y, powerUp, difficulty == Difficulty.EASY ? GameMode.QUICK :
-                (difficulty == Difficulty.HARD ? GameMode.HARDCORE : GameMode.CLASSIC));
+        this(x, y, powerUp, difficulty == Difficulty.EASY ? GameMode.QUICK
+                : (difficulty == Difficulty.HARD ? GameMode.HARDCORE : GameMode.CLASSIC));
     }
 
     /**
-     * Returns whether the player has won the entire game (completed the final level).
+     * Returns whether the player has won the entire game (completed the final
+     * level).
      */
     public boolean gameWon() {
         return currentLevel == MAX_LEVEL && isLevelCompleted();
@@ -61,7 +62,8 @@ public class Game {
     /**
      * Advances to the next level if not already at MAX_LEVEL.
      *
-     * @return true if successfully advanced to a new level, false if already at MAX_LEVEL
+     * @return true if successfully advanced to a new level, false if already at
+     *         MAX_LEVEL
      */
     public boolean advanceLevel() {
         if (currentLevel < MAX_LEVEL) {

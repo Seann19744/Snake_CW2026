@@ -53,10 +53,11 @@ public class MainMenuController {
     @FXML
     private Label lbl_highScore;
 
-    @FXML
     /**
-     * Initialize main menu pixel art background canvas, labels, and settings button states.
+     * Initializes the main menu pixel-art background canvas, mode description labels,
+     * high score display, and settings button states.
      */
+    @FXML
     public void initialize() {
         drawPixelArtBackground();
         if (lbl_quickDesc != null) {
