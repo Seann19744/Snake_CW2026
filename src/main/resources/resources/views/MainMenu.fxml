@@ -19,7 +19,20 @@
     <children>
         <Canvas fx:id="menuBgCanvas" height="400.0" width="550.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 
-        <StackPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <StackPane mouseTransparent="true" prefHeight="40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="16.0">
+            <children>
+                <HBox alignment="CENTER" maxHeight="36.0" maxWidth="215.0" spacing="8.0" styleClass="pixel-badge">
+                    <children>
+                        <ImageView fitHeight="18.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
+                            <image><Image url="@res/goldcoin.png" /></image>
+                        </ImageView>
+                        <Label fx:id="lbl_highScore" alignment="CENTER" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-text-fill: #2d572c;" text="BEST SCORE: 0" />
+                    </children>
+                </HBox>
+            </children>
+        </StackPane>
+
+        <StackPane translateY="12.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
                 <VBox alignment="CENTER" maxHeight="285.0" maxWidth="350.0" spacing="20.0" styleClass="pixel-card">
                     <padding>

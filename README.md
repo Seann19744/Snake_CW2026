@@ -114,6 +114,10 @@ The following features, enhancements, and bug fixes have been implemented, teste
     - Each coin subclass encapsulates its own effect (`RainbowCoin` adds speed bonus, `BlueCoin` enables border-crossing, `SilverCoin` spawns obstacles, `GoldCoin` adds 15 points).
     - New coin types can now be introduced without modifying existing controller logic, fully conforming to the Open-Closed Principle (OCP) and Single Responsibility Principle (SRP).
 
+15. **Persistent Best Score Tracking & Pixel Art Main Menu Display**:
+    - Added persistent high score tracking in `GameSettings` (`highscore.txt` in the project root directory), automatically saving new high score records whenever points are earned (`Game.addPoints(int)`) and reloading them on application startup.
+    - Displays a top-centered retro `.pixel-badge` banner (`BEST SCORE: <score>`) with a pixel gold coin icon on the Main Menu that automatically refreshes when returning from a game session.
+
 ---
 
 ## Implemented but not Working Properly
@@ -126,8 +130,8 @@ The following features, enhancements, and bug fixes have been implemented, teste
 
 The following features were considered during design and development but were not implemented in this release:
 
-1. **Persistent High Scores / Leaderboard**:
-   - The game currently displays the live session score on screen (`updateScoreLabel()`), but scores are not saved to a local file (e.g., JSON/CSV) or database between application restarts.
+1. **Multi-Player / Online Leaderboard**:
+   - The game saves and displays the local player's persistent best score (`highscore.txt`), but an online multi-user leaderboard with player name entry was left for future enhancements.
 2. **Custom Grid Dimensions Configuration**:
    - Although the `Game` and `Obstacle` models support variable grid dimensions (`X_VALUE`, `Y_VALUE`), the UI currently launches with the standard 20x20 grid layout and does not expose a slider or text input in the main menu for custom board sizing.
 3. **Sound Effects for Collisions and Game Over**:
@@ -164,8 +168,8 @@ The following features were considered during design and development but were no
 
 ### 5. `com.comp2042.model.GameSettings`
 - **Location**: `src/main/java/com/comp2042/model/GameSettings.java`
-- **Purpose**: Singleton configuration manager (GoF Singleton Pattern) managing user preferences such as grid display options.
-- **Justification**: Centralizes application-wide user configuration without polluting controller state. Accessible from both the Main Menu Settings overlay and the in-game Pause Menu Settings view. Enables dynamic real-time toggling of visual features like checkerboard grid lines.
+- **Purpose**: Singleton configuration manager (GoF Singleton Pattern) managing user preferences such as grid display options and persistent high score storage (`highscore.txt`).
+- **Justification**: Centralizes application-wide user configuration and persistent record tracking without polluting controller state. Accessible from both the Main Menu and active gameplay sessions. Automatically loads the saved high score on startup (`loadHighScore()`) and writes new records to `highscore.txt` when beaten (`updateHighScore(int)`).
 
 ---
 
@@ -182,6 +186,7 @@ The following features were considered during design and development but were no
 - Added top-right `?` help button handlers (`handleOpenHelp()`, `handleCloseHelp()`) controlling the **How to Play** overlay (`helpOverlay`).
 - Added `handleQuit()` handler for the main menu **Quit** button to cleanly close the stage and exit the JavaFX application via `Platform.exit()`.
 - Added `drawPixelArtBackground()` on `menuBgCanvas` to render a retro 25x25 checkerboard tile grid (`#feffe4` / `#f1efd2`), double-layered pixel arcade border with corner rivets, and decorative pixel-art snake and coin sprites.
+- Added `lbl_highScore` binding and `updateHighScoreLabel()` (with a `showingProperty()` stage listener) to display the persistent best score at the top of the Main Menu.
 - Refactored `startGame(GameMode)` and `launchSnake(Stage, GameMode)` to launch the game directly with the selected `GameMode`.
 - Replaced hardcoded char constant `DIFFICULTY = 'N'` with dynamic selection.
 
@@ -190,7 +195,7 @@ The following features were considered during design and development but were no
 - Replaced the `<ComboBox>` dropdown with a structured `<StackPane fx:id="difficultyOverlay">` screen containing left-aligned `startAndQuitBtn` mode buttons (`Quick`, `Classic`, `Hardcore`) paired with right-aligned wrapped English description labels in `HBox` rows, plus a `Back` navigation button.
 - Added a top-right `?` button (`btn_help`) and `<StackPane fx:id="helpOverlay">` explaining all keyboard controls (`Arrow Keys`, `ESC/P`, `G`, `F11`, `TAB`) and coin power-up effects with embedded `16x16` pixel coin sprite icons.
 - Added a harmonized **Quit** button (`btn_quit`) styled with `startAndQuitBtn` and aligned below **Start** and **Settings**.
-- Redesigned the menu theme in `MainMenu.fxml` and `styling.css` with a background `<Canvas fx:id="menuBgCanvas">`, retro 8-bit bordered dialog cards (`.pixel-card`), cartridge-style slot containers (`.pixel-slot`), shaded pixel headers (`.pixel-header`), harmonized `130x40` buttons, golden hover highlights (`#ffe66d`), and tactile 8-bit button press offsets.
+- Redesigned the menu theme in `MainMenu.fxml` and `styling.css` with a background `<Canvas fx:id="menuBgCanvas">`, retro 8-bit bordered dialog cards (`.pixel-card`), cartridge-style slot containers (`.pixel-slot`), top-centered high score badge (`.pixel-badge` with `lbl_highScore`), shaded pixel headers (`.pixel-header`), harmonized `130x40` buttons, golden hover highlights (`#ffe66d`), and tactile 8-bit button press offsets.
 
 ### 4. `com.comp2042.controller.GameController`
 - Moved to package `com.comp2042.controller` and updated model and view imports.
@@ -208,6 +213,7 @@ The following features were considered during design and development but were no
 - Moved to package `com.comp2042.model`.
 - Removed duplicate assignment statement `this.powerUp = powerUp;` in the constructor.
 - Refactored constructor signature from `Game(int x, int y, boolean powerUp, char difficulty)` to `Game(int x, int y, boolean powerUp, Difficulty difficulty)`, extracting speed and border properties safely from the enum.
+- Updated `addPoints(int)` to notify `GameSettings.getInstance().updateHighScore(scorePoints)` so new high score records are immediately persisted to `highscore.txt`.
 
 ### 6. `com.comp2042.model.Obstacle`
 - Moved to package `com.comp2042.model`.

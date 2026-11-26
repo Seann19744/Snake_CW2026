@@ -51,6 +51,9 @@ public class MainMenuController {
     private Button btn_gridToggle;
 
     @FXML
+    private Label lbl_highScore;
+
+    @FXML
     /**
      * Initialize main menu pixel art background canvas, labels, and settings button states.
      */
@@ -66,6 +69,21 @@ public class MainMenuController {
             lbl_hardcoreDesc.setText(GameMode.HARDCORE.getDescription());
         }
         updateGridButton();
+        updateHighScoreLabel();
+
+        if (viewManager != null && viewManager.getPrimaryStage() != null) {
+            viewManager.getPrimaryStage().showingProperty().addListener((obs, wasShowing, isNowShowing) -> {
+                if (isNowShowing) {
+                    updateHighScoreLabel();
+                }
+            });
+        }
+    }
+
+    public void updateHighScoreLabel() {
+        if (lbl_highScore != null) {
+            lbl_highScore.setText("BEST SCORE: " + GameSettings.getInstance().getHighScore());
+        }
     }
 
     /**
