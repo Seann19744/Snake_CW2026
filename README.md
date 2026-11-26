@@ -180,6 +180,7 @@ The following features were considered during design and development but were no
 - Replaced the main menu `ComboBox` dropdown with a dedicated **Select Difficulty** overlay (`difficultyOverlay`) opened via `handleStart()`.
 - Added handlers (`handleQuickMode()`, `handleClassicMode()`, `handleHardcoreMode()`, `handleCloseDifficulty()`) and dynamic description labels (`lbl_quickDesc`, `lbl_classicDesc`, `lbl_hardcoreDesc`) populated from `GameMode.getDescription()`.
 - Added top-right `?` help button handlers (`handleOpenHelp()`, `handleCloseHelp()`) controlling the **How to Play** overlay (`helpOverlay`).
+- Added `handleQuit()` handler for the main menu **Quit** button to cleanly close the stage and exit the JavaFX application via `Platform.exit()`.
 - Refactored `startGame(GameMode)` and `launchSnake(Stage, GameMode)` to launch the game directly with the selected `GameMode`.
 - Replaced hardcoded char constant `DIFFICULTY = 'N'` with dynamic selection.
 
@@ -187,6 +188,7 @@ The following features were considered during design and development but were no
 - Updated `fx:controller` attribute to match the new package path: `com.comp2042.controller.MainMenuController`.
 - Replaced the `<ComboBox>` dropdown with a structured `<StackPane fx:id="difficultyOverlay">` screen containing left-aligned `startAndQuitBtn` mode buttons (`Quick`, `Classic`, `Hardcore`) paired with right-aligned wrapped English description labels in `HBox` rows, plus a `Back` navigation button.
 - Added a top-right `?` button (`btn_help`) and `<StackPane fx:id="helpOverlay">` explaining all keyboard controls (`Arrow Keys`, `ESC/P`, `G`, `F11`, `TAB`) and coin power-up effects.
+- Added a harmonized **Quit** button (`btn_quit`) styled with `startAndQuitBtn` and aligned below **Start** and **Settings**.
 
 ### 4. `com.comp2042.controller.GameController`
 - Moved to package `com.comp2042.controller` and updated model and view imports.
