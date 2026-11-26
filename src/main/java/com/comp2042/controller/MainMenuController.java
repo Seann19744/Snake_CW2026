@@ -9,9 +9,13 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.fxml.FXML;
@@ -21,6 +25,9 @@ public class MainMenuController {
     private static final int X_VALUE = 20;
     private static final int Y_VALUE = 20;
     private static final boolean POWER_UP = true;
+
+    @FXML
+    private Canvas menuBgCanvas;
 
     @FXML
     private StackPane difficultyOverlay;
@@ -45,9 +52,10 @@ public class MainMenuController {
 
     @FXML
     /**
-     * Initialize main menu labels and settings button states.
+     * Initialize main menu pixel art background canvas, labels, and settings button states.
      */
     public void initialize() {
+        drawPixelArtBackground();
         if (lbl_quickDesc != null) {
             lbl_quickDesc.setText(GameMode.QUICK.getDescription());
         }
@@ -58,6 +66,74 @@ public class MainMenuController {
             lbl_hardcoreDesc.setText(GameMode.HARDCORE.getDescription());
         }
         updateGridButton();
+    }
+
+    /**
+     * Draws a retro pixel-art checkerboard grid, arcade border frame, and decorative pixel sprites
+     * across the main menu background canvas to match the in-game arena aesthetic.
+     */
+    private void drawPixelArtBackground() {
+        if (menuBgCanvas == null) {
+            return;
+        }
+        GraphicsContext gc = menuBgCanvas.getGraphicsContext2D();
+        double width = menuBgCanvas.getWidth();
+        double height = menuBgCanvas.getHeight();
+        double tileSize = 25.0;
+
+        // Base cream fill
+        gc.setFill(Color.web("#feffe4"));
+        gc.fillRect(0, 0, width, height);
+
+        // Checkerboard alternating tiles matching the game grid
+        gc.setFill(Color.web("#f1efd2"));
+        int cols = (int) (width / tileSize);
+        int rows = (int) (height / tileSize);
+        for (int x = 0; x < cols; x++) {
+            for (int y = 0; y < rows; y++) {
+                if ((x + y) % 2 == 1) {
+                    gc.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                }
+            }
+        }
+
+        // Decorative pixel-art snake & coins along the perimeter tiles
+        try {
+            Image headImg = new Image("resources/views/res/snakehead.png");
+            Image bodyImg = new Image("resources/views/res/snakebody.png");
+            Image tailImg = new Image("resources/views/res/snaketail.png");
+            Image redCoinImg = new Image("resources/views/res/redcoin.png");
+            Image goldCoinImg = new Image("resources/views/res/goldcoin.png");
+            Image rainbowCoinImg = new Image("resources/views/res/rainbowcoin.png");
+
+            // Bottom-left pixel snake moving left towards a gold coin
+            gc.drawImage(goldCoinImg, 2 * tileSize + 2, 14 * tileSize + 2, tileSize - 4, tileSize - 4);
+            gc.drawImage(headImg, 5 * tileSize, 14 * tileSize, tileSize, tileSize);
+            gc.drawImage(bodyImg, 6 * tileSize, 14 * tileSize, tileSize, tileSize);
+            gc.drawImage(bodyImg, 7 * tileSize, 14 * tileSize, tileSize, tileSize);
+            gc.drawImage(tailImg, 8 * tileSize, 14 * tileSize, tileSize, tileSize);
+
+            // Top-left & bottom-right decorative pixel coins
+            gc.drawImage(redCoinImg, 2 * tileSize + 2, 1 * tileSize + 2, tileSize - 4, tileSize - 4);
+            gc.drawImage(rainbowCoinImg, 18 * tileSize + 2, 14 * tileSize + 2, tileSize - 4, tileSize - 4);
+        } catch (Exception ignored) {
+        }
+
+        // Chunky retro pixel-art arcade border around the window
+        gc.setStroke(Color.web("#4a4a4a"));
+        gc.setLineWidth(6);
+        gc.strokeRect(3, 3, width - 6, height - 6);
+
+        gc.setStroke(Color.web("#b0ab88"));
+        gc.setLineWidth(2);
+        gc.strokeRect(8, 8, width - 16, height - 16);
+
+        // Pixel corner rivets
+        gc.setFill(Color.web("#4a4a4a"));
+        gc.fillRect(6, 6, 8, 8);
+        gc.fillRect(width - 14, 6, 8, 8);
+        gc.fillRect(6, height - 14, 8, 8);
+        gc.fillRect(width - 14, height - 14, 8, 8);
     }
 
     @FXML
