@@ -171,6 +171,11 @@ The following features were considered during design and development but were no
 - **Purpose**: Singleton configuration manager (GoF Singleton Pattern) managing user preferences such as grid display options and persistent high score storage (`highscore.txt`).
 - **Justification**: Centralizes application-wide user configuration and persistent record tracking without polluting controller state. Accessible from both the Main Menu and active gameplay sessions. Automatically loads the saved high score on startup (`loadHighScore()`) and writes new records to `highscore.txt` when beaten (`updateHighScore(int)`).
 
+### 6. `com.comp2042.model.GameState`
+- **Location**: `src/main/java/com/comp2042/model/GameState.java`
+- **Purpose**: Type-safe enumeration defining the lifecycle phases of a game session (`READY`, `RUNNING`, `PAUSED`, `LEVEL_CLEARED`, `WON`, `DEAD`).
+- **Justification**: Replaces fragmented boolean flags (`gameStarted`, overlay visibility checks) with an explicit finite state machine in `GameController`, ensuring deterministic transitions when starting a match, clearing levels, pausing/resuming, winning, or dying.
+
 ---
 
 ## Modified Java Classes
@@ -260,6 +265,8 @@ src/main/java/com/comp2042/
 │   ├── Difficulty.java                 (Legacy difficulty enumeration)
 │   ├── Game.java                       (Game state, score, speed, grid boundaries)
 │   ├── GameMode.java                   (Game modes: Quick, Classic, Hardcore)
+│   ├── GameSettings.java               (GoF Singleton for grid preference & high score)
+│   ├── GameState.java                  (Lifecycle phase enumeration)
 │   ├── GoldCoin.java                   (High-value bonus coin)
 │   ├── Obstacle.java                   (Obstacle entity and placement algorithms)
 │   ├── RainbowCoin.java                (Speed boost coin)
@@ -320,3 +327,43 @@ Adhering to clean code principles and Java naming conventions:
 8. **Stale Entity Ghosting on Window Resize and Fullscreen Spam (`F11`)**:
    - **Problem**: When rapidly toggling fullscreen via `F11` or resizing the window, ghost duplicate images of coins and snake segments appeared at their initial starting positions in the background. Investigation showed that the JavaFX `Scene` dimension change listeners registered in `MainMenuController` captured static closure references to the initial `coin` and `snake` local variables instantiated at match launch. Whenever `fitToWindow()` was triggered by resize events, it redrew these obsolete, stale entity references instead of the controller's active live entities.
    - **Solution**: Delegated window resize events to a dedicated `handleResize(width, height)` handler in `GameController`, which supplies the authoritative, currently active `coin`, `snake`, and `obstacle` references. Additionally added `gc.clearRect(...)` to `GameView.drawGrid()` prior to redrawing, guaranteeing a clean canvas without lingering render artifacts.
+
+9. **Continued Snake Movement After Victory (`YOU WON!`)**:
+   - **Problem**: When the player collected the final coin of Level 3, the win branch in `GameController` displayed the `"YOU WON!"` overlay and returned from the tick callback without calling `animation.stop()`, while the top of the `Timeline` tick only checked `snake.getDead()`. Consequently, the snake continued moving across the board on subsequent ticks after winning, allowing it to collide with walls/obstacles (triggering `"GAME OVER"` on top of `"YOU WON!"`) or re-consume the final coin.
+   - **Solution**: Extracted the `Timeline` tick body into `onTick()`, invoked `animation.stop()` immediately inside the final level victory branch, and guarded `onTick()` with `if (snake.getDead() || game.gameWon()) { animation.stop(); return; }` so the game loop halts cleanly upon victory.
+
+10. **Level Transition Failure to Pause, Snake Length Reset, and Broken Pause Resume**:
+    - **Problem**: When advancing to a new level, `GameController.loadLevel()` reset `gameStarted = false` without stopping the `Timeline` animation, causing the snake to immediately move left from the center of the new level without player input. Because `gameStarted` was `false` while the timeline was running, pausing and clicking "Resume" failed to restart movement. Furthermore, `Snake.resetPosition()` cleared the body list to a single segment, wiping out the player's accumulated snake length between levels.
+    - **Solution**: Introduced the `GameState` enum (`READY`, `RUNNING`, `PAUSED`, `LEVEL_CLEARED`, `WON`, `DEAD`) in `GameController` (with `prePauseState` restoration on pause/resume) and called `animation.stop()` in `loadLevel()` with `gameState = GameState.LEVEL_CLEARED`. Updated `Snake.resetPosition()` to stack all accumulated body segments onto the initial spawn tail tile `(x / 2 + 1, y / 2)` so the snake preserves its full length and smoothly uncoils from the center spawn block as it moves in the new level.
+
+11. **`TAB` Reset Overwriting Full In-Game HUD Label**:
+    - **Problem**: Pressing `TAB` in `GameController.handle()` invoked `reset()`, which properly updated `scoreLabel` to the complete HUD format (`[Classic Mode] Level 1/3 | Coins: 0/8 | Score: 0`) via `gameView.updateScoreLabel()`, but the next statement in `handle()` immediately overwrote `gameView.scoreLabel` with the legacy `"Score: 0"` string.
+    - **Solution**: Removed the redundant `gameView.scoreLabel.setText("Score: " + game.getScorePoints())` statement from the `KeyCode.TAB` branch in `GameController.handle()`, preserving the full HUD format upon match reset.
+
+12. **Stale Corner Sprites in `turnArray` Across Resets and Levels**:
+    - **Problem**: `GameView.turnArray` was allocated in a field initializer using static `MainMenuController` constants (`MainMenuController.getxValue()`, `getyValue()`) before the `Game` model existed, and was only cleared cell-by-cell when the snake's tail (`body.get(0)`) passed over a corner tile. If a player reset the match (`TAB`) or cleared a level after turning—before the tail reached the corner coordinate—the non-zero turn code remained stuck in `turnArray[x][y]`, causing bent corner sprites to render on a straight snake body whenever the snake later crossed that tile.
+    - **Solution**: Initialized `turnArray = new int[game.getWidth()][game.getHeight()]` inside the `GameView(Game)` constructor (decoupling `GameView` from `MainMenuController`) and added `resetTurnArray()`, invoking it in both `GameController.reset()` and `GameController.loadLevel()`.
+
+13. **Border Wrap-Around Bypassing Obstacle Collision Detection**:
+    - **Problem**: In `Snake.move(char dir)`, the obstacle collision check (`obstacle.getObstacles().contains(head)`) was evaluated inside the `if` branch prior to the `else if` branch that wrapped `head` across the grid boundary when `noBorder` or `ignoreBorders` was active. When the snake crossed a border, `head` temporarily held an out-of-bounds coordinate (e.g., `(-1, y)`), which never matched any in-bounds obstacle, and then wrapped onto the opposite edge (e.g., `(gx - 1, y)`) without re-checking for obstacles—allowing the snake to pass straight through border obstacles.
+    - **Solution**: Restructured `Snake.move(char dir)` to resolve boundary wrapping first and then evaluate `if (!dead && obstacle.getObstacles().contains(head))` against the final destination coordinate, reverting `head` to `prevHead` and marking `dead = true` upon collision.
+
+14. **Unfair Silver-Coin Obstacle Spawns and Duplicate Obstacle Coordinates**:
+    - **Problem**: `Obstacle.newObstacles()` only rejected candidate coordinates matching `coin.getPos()`, `snake.getBody()`, or `snake.getHead()`. It did not check `obstacles.contains(p)` (allowing duplicate obstacle entries on the same tile) and did not maintain any safety distance in front of the snake's moving head, allowing obstacles to spawn 1 tile ahead of the head and cause unavoidable instant death.
+    - **Solution**: Updated `Obstacle.newObstacles()` to reject existing obstacle tiles (`obstacles.contains(p)`) and added `isTooCloseToHead(Point, Point)` to enforce a 2-tile safety buffer around `snake.getHead()` (accounting for border wrap-around distance).
+
+15. **Dropped Fast Directional Inputs on Quick U-Turns and `ImageView.snapshot()` Render Stutter**:
+    - **Problem**: `GameController` used a single boolean lock (`keyPressed = true`) to block additional key presses within the same `Timeline` tick (~118ms at speed 8.5). When a player rapidly pressed two perpendicular keys (e.g., `UP` then `RIGHT` while traveling `LEFT`) to perform a tight 1-tile U-turn, the second input arrived before `onTick()` cleared `keyPressed` and was silently dropped. Additionally, `GameView.drawHead()` and `drawBody()` invoked `ImageView.snapshot()` for every snake segment on every tick, allocating dozens of offscreen textures per frame.
+    - **Solution**: Added a 2-slot FIFO input queue (`Deque<KeyCode> inputQueue = new ArrayDeque<>(2)`) in `GameController` that validates rapid second turns against the preceding queued direction (`isValidTurnFrom()`) and dequeues one turn per tick. Replaced all `ImageView.snapshot()` calls in `GameView` with direct hardware-accelerated canvas rotation (`drawRotatedImage()` using `gc.save()`, `gc.translate()`, `gc.rotate()`, `gc.drawImage()`, `gc.restore()`).
+
+16. **Tail and Body Sprite Rotation Glitches on Screen-Wrap Borders and Hardcore Double Growth**:
+    - **Problem**: `GameView.drawBody()` and `Snake.getBodyDir()` inferred segment orientation by comparing neighboring segment coordinates (`next.y == point.y - 1`, etc.), falling back to `90°` (pointing right) whenever none of the three `±1` comparisons matched. When the snake wrapped across the top, bottom, or left border (where adjacent segments were 19 tiles apart across the grid), or when `+2` growth in Hardcore Mode duplicated the tail coordinate (`point.y == next.y` even during vertical movement), the tail and body rotation snapped sideways to `90°` / `270°`.
+    - **Solution**: Added a parallel `ArrayList<Integer> bodyDirs` in `Snake` to store the true movement direction (`0°`, `90°`, `180°`, `270°`) of every segment alongside `body`, and updated `GameView.drawBody()` to read tail and body angles directly from `snake.getTailDir()` and `snake.getBodyDir(index)`.
+
+17. **High Score File Git Tracking and Unit Test Disk Side Effects**:
+    - **Problem**: Tracking the runtime `highscore.txt` save file in Git caused working tree modifications whenever a player beat their high score. Additionally, because `Game.addPoints()` called `GameSettings.getInstance().updateHighScore()`, running JUnit tests (such as `CoinTest`) before `GameSettingsTest` wrote test scores directly to the player's real `highscore.txt` file, while `resetDefaults()` set `highScoreFile = null`, making behavior dependent on test execution order.
+    - **Solution**: Added `highscore.txt` to `.gitignore`, logged I/O errors in `loadHighScore()` and `saveHighScore()`, and introduced a `persistenceEnabled` flag in `GameSettings` (disabled automatically during unit tests via `JavaFXTestBase` and `resetDefaults()` while keeping `highScoreFile = DEFAULT_HIGH_SCORE_FILE`).
+
+18. **Package Directory Mismatch on `Launcher.java` and Misplaced Javadoc Annotation Order**:
+    - **Problem**: `Launcher.java` declared `package com.comp2042;` at the top of the file but was physically located inside the `src/main/java/com/comp2042/view/` subdirectory instead of `src/main/java/com/comp2042/`. Additionally, in `MainMenuController.java`, the `/** ... */` Javadoc comment on `initialize()` was placed *below* the `@FXML` annotation rather than above it, preventing the `javadoc` documentation tool from attaching the description to the method.
+    - **Solution**: Moved `Launcher.java` to its proper root package directory `src/main/java/com/comp2042/Launcher.java` with full class and method Javadoc comments, and reordered the Javadoc block above `@FXML` on `MainMenuController.initialize()`.

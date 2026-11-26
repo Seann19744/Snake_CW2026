@@ -11,6 +11,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Random;
 
 public class GameController {
@@ -25,7 +27,9 @@ public class GameController {
     public static KeyCode key = KeyCode.LEFT;
     public static KeyCode lastKey = KeyCode.LEFT;
     private boolean keyPressed = false;
-    private boolean gameStarted = false;
+    private final Deque<KeyCode> inputQueue = new ArrayDeque<>(2);
+    private GameState gameState = GameState.READY;
+    private GameState prePauseState = GameState.READY;
 
     private final AudioClip coinSound = new AudioClip(
             getClass().getResource("/resources/views/res/coinSound.wav").toExternalForm()
@@ -47,6 +51,15 @@ public class GameController {
         this.snake.setGrowthRate(game.getGameMode().getGrowthRate());
         this.obstacle.loadLevelLayout(game.getCurrentLevel());
 
+        if (this.snake.getDead()) {
+            this.gameState = GameState.DEAD;
+        } else if (this.game.gameWon()) {
+            this.gameState = GameState.WON;
+        } else {
+            this.gameState = GameState.READY;
+        }
+        this.prePauseState = this.gameState;
+
         this.gameView.getResumeButton().setOnAction(e -> hidePauseMenu());
         this.gameView.getReturnMenuButton().setOnAction(e -> returnToMainMenu());
 
@@ -57,50 +70,77 @@ public class GameController {
         lastKey = KeyCode.LEFT;
     }
 
-    private final Timeline animation = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+    private final Timeline animation = new Timeline(new KeyFrame(Duration.seconds(1), event -> onTick()));
+
+    void onTick() {
         if (snake.getDead()) {
+            gameState = GameState.DEAD;
+            animation.stop();
             return;
-        } else {
-
-            if (key.equals(KeyCode.LEFT)) {
-                snake.move('L');
-            } else if (key.equals(KeyCode.RIGHT)) {
-                snake.move('R');
-            } else if (key.equals(KeyCode.UP)) {
-                snake.move('U');
-            } else if (key.equals(KeyCode.DOWN)) {
-                snake.move('D');
-            }
-
-            if (!snake.getDead() && snake.ateCoin(coin)) {
-                coinSound.play();
-                powerCoin();
-                game.incScore();
-                if (game.isLevelCompleted()) {
-                    if (game.advanceLevel()) {
-                        loadLevel(game.getCurrentLevel());
-                    } else {
-                        gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
-                        gameView.gameWon();
-                        gameView.updateScoreLabel();
-                        return;
-                    }
-                } else {
-                    newCoin();
-                }
-            }
-
-            keyPressed = false;
-
-            if (!snake.getDead() || snake.hitSelf()) {
-                gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
-            }
-
-            gameView.gameWon();
-            gameView.gameOver(snake);
-            gameView.updateScoreLabel();
         }
-    }));
+        if (game.gameWon() || gameState != GameState.RUNNING) {
+            if (game.gameWon()) {
+                gameState = GameState.WON;
+            }
+            animation.stop();
+            return;
+        }
+
+        if (!keyPressed && !inputQueue.isEmpty()) {
+            KeyCode queuedKey = inputQueue.pollFirst();
+            if (isValidTurn(queuedKey) && !queuedKey.equals(key)) {
+                lastKey = key;
+                key = queuedKey;
+                gameView.turnDir(snake);
+            }
+        }
+
+        if (key.equals(KeyCode.LEFT)) {
+            snake.move('L');
+        } else if (key.equals(KeyCode.RIGHT)) {
+            snake.move('R');
+        } else if (key.equals(KeyCode.UP)) {
+            snake.move('U');
+        } else if (key.equals(KeyCode.DOWN)) {
+            snake.move('D');
+        }
+
+        if (!snake.getDead() && snake.ateCoin(coin)) {
+            coinSound.play();
+            powerCoin();
+            game.incScore();
+            if (game.isLevelCompleted()) {
+                if (game.advanceLevel()) {
+                    loadLevel(game.getCurrentLevel());
+                    return;
+                } else {
+                    gameState = GameState.WON;
+                    animation.stop();
+                    gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
+                    gameView.gameWon();
+                    gameView.updateScoreLabel();
+                    return;
+                }
+            } else {
+                newCoin();
+            }
+        }
+
+        keyPressed = false;
+
+        if (!snake.getDead() || snake.hitSelf()) {
+            gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
+        }
+
+        if (snake.getDead()) {
+            gameState = GameState.DEAD;
+            animation.stop();
+        }
+
+        gameView.gameWon();
+        gameView.gameOver(snake);
+        gameView.updateScoreLabel();
+    }
 
     /**
      * Runs everytime a key is pressed while game window is focused.
@@ -138,31 +178,42 @@ public class GameController {
             return;
         }
 
-        // Arrow keys to start the game
+        // Arrow keys to start/resume movement from READY or LEVEL_CLEARED and steer the snake
         if (code.isArrowKey()) {
-            if (!snake.getDead() && !game.gameWon()) {
-                gameStarted = true;
-                animation.play();
+            if (!keyPressed && inputQueue.isEmpty()) {
+                if (isValidTurn(code)) {
+                    if (!code.equals(key)) {
+                        lastKey = key;
+                        key = code;
+                        keyPressed = true;
+                        gameView.turnDir(snake);
+                    }
+                    if ((gameState == GameState.READY || gameState == GameState.LEVEL_CLEARED)
+                            && !snake.getDead() && !game.gameWon()) {
+                        gameState = GameState.RUNNING;
+                        animation.playFromStart();
+                    }
+                }
+            } else if (inputQueue.size() < 2) {
+                KeyCode referenceKey = inputQueue.isEmpty() ? key : inputQueue.peekLast();
+                if (isValidTurnFrom(referenceKey, code) && !code.equals(referenceKey)) {
+                    inputQueue.addLast(code);
+                }
             }
-        }
-
-        // Snake changing direction using method isValidTurn
-        if (isValidTurn(code) && !keyPressed) {
-            lastKey = key;
-            key = code;
-            keyPressed = true;
-            gameView.turnDir(snake);
         }
 
         // Reset the game
         if (code.equals(KeyCode.TAB)) {
             reset();
-            gameView.scoreLabel.setText("Score: " + game.getScorePoints());
         }
     }
 
     public boolean isGameStarted() {
-        return gameStarted;
+        return gameState == GameState.RUNNING;
+    }
+
+    public GameState getGameState() {
+        return gameState;
     }
 
     public boolean isPauseMenuVisible() {
@@ -178,8 +229,16 @@ public class GameController {
     }
 
     public void showPauseMenu() {
+        if (gameState != GameState.PAUSED) {
+            prePauseState = gameState;
+            gameState = GameState.PAUSED;
+        }
         animation.stop();
         gameView.showPauseMenu(true);
+    }
+
+    public boolean isAnimationRunning() {
+        return animation.getStatus() == Animation.Status.RUNNING;
     }
 
     public void stopAnimation() {
@@ -188,7 +247,10 @@ public class GameController {
 
     public void hidePauseMenu() {
         gameView.showPauseMenu(false);
-        if (gameStarted && !snake.getDead() && !game.gameWon()) {
+        if (gameState == GameState.PAUSED) {
+            gameState = prePauseState;
+        }
+        if (gameState == GameState.RUNNING && !snake.getDead() && !game.gameWon()) {
             animation.play();
         }
     }
@@ -215,18 +277,28 @@ public class GameController {
      * @return true if the snake may turn in the direction, false otherwise.
      */
     boolean isValidTurn(KeyCode key) {
-        // Rejects any key that is not arrow key button (Up, Down, Left, Right)
-        if (!key.isArrowKey()) return false;
-        else {
-            // Checks the opposite direction of the snake moving before moving the snake
-            // This is so that the snake does not overlap itself
-            if (key.equals(KeyCode.LEFT)) if (!this.key.equals(KeyCode.RIGHT)) return true;
-            if (key.equals(KeyCode.RIGHT)) if (!this.key.equals(KeyCode.LEFT)) return true;
-            if (key.equals(KeyCode.DOWN)) if (!this.key.equals(KeyCode.UP)) return true;
-            if (key.equals(KeyCode.UP)) return !this.key.equals(KeyCode.DOWN);
-            // Safety net to ignore invalid turns
-            return false;
-        }
+        return isValidTurnFrom(this.key, key);
+    }
+
+    /**
+     * Checks whether transitioning from {@code currentDir} to {@code candidateKey}
+     * is a legal direction change (rejects non-arrow keys and 180-degree reversals).
+     *
+     * @param currentDir the direction the snake is currently facing or queued to face
+     * @param candidateKey the new key pressed by the player
+     * @return true if valid, false otherwise
+     */
+    boolean isValidTurnFrom(KeyCode currentDir, KeyCode candidateKey) {
+        if (candidateKey == null || !candidateKey.isArrowKey()) return false;
+        if (candidateKey.equals(KeyCode.LEFT)) return !KeyCode.RIGHT.equals(currentDir);
+        if (candidateKey.equals(KeyCode.RIGHT)) return !KeyCode.LEFT.equals(currentDir);
+        if (candidateKey.equals(KeyCode.DOWN)) return !KeyCode.UP.equals(currentDir);
+        if (candidateKey.equals(KeyCode.UP)) return !KeyCode.DOWN.equals(currentDir);
+        return false;
+    }
+
+    public int getQueuedInputCount() {
+        return inputQueue.size();
     }
 
     private void reset() {
@@ -243,8 +315,11 @@ public class GameController {
         key = KeyCode.LEFT;
         lastKey = KeyCode.LEFT;
         keyPressed = false;
-        gameStarted = false;
+        inputQueue.clear();
+        gameState = GameState.READY;
+        prePauseState = GameState.READY;
 
+        gameView.resetTurnArray();
         gameView.showPauseMenu(false);
         gameView.gameWon();
         gameView.gameOver(snake);
@@ -253,12 +328,17 @@ public class GameController {
         gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
     }
 
-    private void loadLevel(int level) {
-        obstacle.loadLevelLayout(level);
-        snake.resetPosition(game.getWidth(), game.getHeight());
+    void loadLevel(int level) {
+        animation.stop();
+        gameState = GameState.LEVEL_CLEARED;
+        prePauseState = GameState.LEVEL_CLEARED;
         key = KeyCode.LEFT;
         lastKey = KeyCode.LEFT;
-        gameStarted = false;
+        keyPressed = false;
+        inputQueue.clear();
+        gameView.resetTurnArray();
+        obstacle.loadLevelLayout(level);
+        snake.resetPosition(game.getWidth(), game.getHeight());
         newCoin();
         gameView.updateScoreLabel();
         gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);

@@ -135,6 +135,63 @@ class SnakeTest extends JavaFXTestBase {
         assertEquals(2, hardcoreSnake.getBody().size(), "Body size must increase by 2 segments for 2x growth rate");
     }
 
+    @Test
+    @DisplayName("Verify wrap-around onto an edge obstacle causes death")
+    void testWrapAroundOntoEdgeObstacleCausesDeath() {
+        Obstacle edgeObstacle = new Obstacle(4, 4);
+        // Place obstacle at right edge (3, 2)
+        edgeObstacle.getObstacles().add(new Point(3, 2));
+
+        Snake wrappingSnake = new Snake(4, 4, true, edgeObstacle);
+        // Starts at (2, 2) -> move LEFT to (1, 2) -> move LEFT to (0, 2)
+        wrappingSnake.move('L');
+        wrappingSnake.move('L');
+        assertFalse(wrappingSnake.getDead());
+        assertEquals(new Point(0, 2), wrappingSnake.getHead());
+
+        // Move LEFT from (0, 2): wraps around to (3, 2), which has an obstacle!
+        wrappingSnake.move('L');
+        assertTrue(wrappingSnake.getDead(), "Wrapping onto an edge obstacle must kill the snake");
+        assertEquals(new Point(0, 2), wrappingSnake.getHead(), "Head should revert to pre-collision position (0, 2)");
+    }
+
+    @Test
+    @DisplayName("Verify tail and body directions are preserved per segment across wrap edges and Hardcore growth")
+    void testPerSegmentDirectionAcrossWrapAndHardcoreGrowth() {
+        // 1. Test vertical movement in Hardcore mode (+2 growth duplicating tail cell)
+        Snake hardcoreSnake = new Snake(10, 10, true, obstacle, 2);
+        // Move UP twice so the entire snake is aligned vertically facing UP (0 degrees)
+        hardcoreSnake.move('U');
+        hardcoreSnake.ateCoin(new CoinMock(new Point(0, 0))); // didn't eat
+        hardcoreSnake.move('U');
+        // Eat a coin while moving UP: tail cell is duplicated for 2x growth
+        assertTrue(hardcoreSnake.ateCoin(new CoinMock(hardcoreSnake.getHead())));
+        assertEquals(0, hardcoreSnake.getTailDir(), "Tail direction must remain 0 (UP) when tail cell is duplicated in Hardcore mode");
+        assertEquals(0, hardcoreSnake.getBodyDir(1), "Body segment above duplicated tail must remain 0 (vertical), not 270 (horizontal)");
+
+        // 2. Test tail direction when straddling a top wrap edge (y = 0 -> y = 9)
+        Snake wrapSnake = new Snake(10, 10, true, obstacle, 1);
+        // Head starts at (5, 5). Move UP to y = 0 and eat a coin so body length is 2
+        for (int i = 0; i < 5; i++) {
+            wrapSnake.move('U');
+            if (i < 4) {
+                wrapSnake.ateCoin(new CoinMock(new Point(9, 9)));
+            } else {
+                // Eat coin at (5, 0) so snake has 2 body segments: tail at (5, 2), neck at (5, 1), head at (5, 0)
+                wrapSnake.ateCoin(new CoinMock(new Point(5, 0)));
+            }
+        }
+        // Move UP across the top border: head wraps to (5, 9), neck is at (5, 0), tail is at (5, 1)
+        wrapSnake.move('U');
+        wrapSnake.ateCoin(new CoinMock(new Point(9, 9)));
+        // Move UP again: head is at (5, 8), neck is at (5, 9), tail is at (5, 0) straddling the wrap edge!
+        wrapSnake.move('U');
+        wrapSnake.ateCoin(new CoinMock(new Point(9, 9)));
+        assertEquals(new Point(5, 0), wrapSnake.getBody().get(0), "Tail should be at top edge (5, 0)");
+        assertEquals(new Point(5, 9), wrapSnake.getBody().get(1), "Segment ahead of tail wrapped to (5, 9)");
+        assertEquals(0, wrapSnake.getTailDir(), "Tail straddling top wrap edge must still point UP (0°), not fall back to 90°");
+    }
+
     /**
      * Helper mock for Coin to test specific coordinates in ateCoin
      */

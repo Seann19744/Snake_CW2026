@@ -31,14 +31,45 @@ public class Obstacle {
             return;
         }
         Random rnd = new Random();
+        int maxAttempts = x * y * 4;
         // Store each obstacle's coordinates
         Point p;
-        for (int i=0; i<amount; i++) {
+        for (int i = 0; i < amount; i++) {
+            int attempts = 0;
             do {
                 p = new Point(rnd.nextInt(x), rnd.nextInt(y));
-            } while (coin.getPos().equals(p) || snake.getBody().contains(p) || snake.getHead().equals(p));
-            obstacles.add(p);
+                attempts++;
+            } while (attempts < maxAttempts && (coin.getPos().equals(p)
+                    || snake.getBody().contains(p)
+                    || snake.getHead().equals(p)
+                    || obstacles.contains(p)
+                    || isTooCloseToHead(p, snake.getHead())));
+
+            if (!coin.getPos().equals(p)
+                    && !snake.getBody().contains(p)
+                    && !snake.getHead().equals(p)
+                    && !obstacles.contains(p)
+                    && !isTooCloseToHead(p, snake.getHead())) {
+                obstacles.add(p);
+            }
         }
+    }
+
+    /**
+     * Checks whether a candidate obstacle tile is within a 2-tile safety radius
+     * around the snake's head (accounting for border wrap-around) to prevent
+     * unfair unavoidable collisions immediately after eating a Silver Coin.
+     *
+     * @param candidate the candidate obstacle position
+     * @param head the snake's current head position
+     * @return true if the candidate is too close to the snake's head
+     */
+    public boolean isTooCloseToHead(Point candidate, Point head) {
+        int rawDx = Math.abs(candidate.x - head.x);
+        int rawDy = Math.abs(candidate.y - head.y);
+        int dx = Math.min(rawDx, x - rawDx);
+        int dy = Math.min(rawDy, y - rawDy);
+        return dx <= 2 && dy <= 2;
     }
 
     public Color getColor() {

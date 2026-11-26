@@ -1,13 +1,11 @@
 package com.comp2042.view;
 
 import com.comp2042.controller.GameController;
-import com.comp2042.controller.MainMenuController;
 import com.comp2042.model.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
@@ -28,9 +26,9 @@ public class GameView {
     public Canvas gridCanvas;
     public GraphicsContext gc;
 
-    public Label gameOverLabel;
-    public Label gameWonLabel;
-    public Label scoreLabel;
+    public Label gameOverLabel = new Label("GAME OVER");
+    public Label gameWonLabel = new Label("YOU WON!");
+    public Label scoreLabel = new Label();
     private boolean gameOverVis = false;
     private boolean gameWonVis = false;
 
@@ -55,11 +53,20 @@ public class GameView {
     private double initY;
     private double fullScale = 1;
     private boolean fullsize = false;
-    private int[][] turnArray = new int[MainMenuController.getxValue()][MainMenuController.getyValue()];
+    private int[][] turnArray;
 
     public GameView(Game game) {
         this.game = game;
+        this.turnArray = new int[game.getWidth()][game.getHeight()];
         setupPauseOverlay();
+    }
+
+    public void resetTurnArray() {
+        this.turnArray = new int[game.getWidth()][game.getHeight()];
+    }
+
+    public int getTurnAt(int x, int y) {
+        return turnArray[x][y];
     }
 
     public void makeScene(Scene scene, Snake snake, Coin coin) {
@@ -453,15 +460,25 @@ public class GameView {
     }
 
     /**
+     * Rotates and draws a sprite image centered within its target grid cell directly on the canvas
+     * without allocating offscreen ImageView snapshots.
+     */
+    private void drawRotatedImage(Image image, double angle, double x, double y, double size) {
+        gc.save();
+        gc.translate(x + size / 2.0, y + size / 2.0);
+        gc.rotate(angle);
+        gc.drawImage(image, -size / 2.0, -size / 2.0, size, size);
+        gc.restore();
+    }
+
+    /**
      * Draws the snake's head on the canvas, rotated to face its current direction.
      * @param snake the snake whose head is drawn
      */
     private void drawHead(Snake snake) {
-        snake.getImageViewHead().setRotate(snake.getSnakeDir());
-        SnapshotParameters params = new SnapshotParameters();
-        params.setFill(Color.TRANSPARENT);
-        Image rotatedImage = snake.getImageViewHead().snapshot(params, null);
-        gc.drawImage(rotatedImage, (snake.getHead().x * game.getMultiplier()) * fullScale, (snake.getHead().y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
+        double tileSize = game.getMultiplier() * fullScale;
+        drawRotatedImage(snake.getImageViewHead().getImage(), snake.getSnakeDir(),
+                snake.getHead().x * tileSize, snake.getHead().y * tileSize, tileSize);
     }
 
     /**
@@ -472,44 +489,30 @@ public class GameView {
      * @param index the segment's position in the body list, where 0 is the tail
      */
     private void drawBody(Snake snake, Point point, int index) {
-        Image rotatedImage;
-        if (snake.getBody().size() <= 1) {
-            snake.getImageViewTail().setRotate(snake.getSnakeDir());
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            rotatedImage = snake.getImageViewTail().snapshot(params, null);
-        } else if (index == 0) {
-            int rotateTail;
-            if (snake.getBody().get(1).getX() == snake.getBody().get(0).getX() && snake.getBody().get(1).getY() == snake.getBody().get(0).getY() - 1) {
-                rotateTail = 0;
-            } else if (snake.getBody().get(1).getX() == snake.getBody().get(0).getX() && snake.getBody().get(1).getY() == snake.getBody().get(0).getY() + 1) {
-                rotateTail = 180;
-            } else if (snake.getBody().get(1).getX() == snake.getBody().get(0).getX() - 1 && snake.getBody().get(1).getY() == snake.getBody().get(0).getY()) {
-                rotateTail = 270;
-            } else {
-                rotateTail = 90;
-            }
-            snake.getImageViewTail().setRotate(rotateTail);
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            rotatedImage = snake.getImageViewTail().snapshot(params, null);
-        } else if (index > 0 && (turnArray[(int) snake.getBody().get(index).getX()][(int) snake.getBody().get(index).getY()] != 0)) {
-            snake.getImageViewTurn().setRotate(90 * turnArray[(int) snake.getBody().get(index).getX()][(int) snake.getBody().get(index).getY()]);
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            rotatedImage = snake.getImageViewTurn().snapshot(params, null);
+        // Skip drawing duplicate segments that are still stacked on the same spawn/tail cell
+        if (index > 0 && point.equals(snake.getBody().get(index - 1))) {
+            return;
+        }
+
+        Image segmentImage;
+        int angle;
+        if (index == 0) {
+            segmentImage = snake.getImageViewTail().getImage();
+            angle = snake.getTailDir();
+        } else if (turnArray[(int) point.getX()][(int) point.getY()] != 0) {
+            segmentImage = snake.getImageViewTurn().getImage();
+            angle = 90 * turnArray[(int) point.getX()][(int) point.getY()];
         } else {
-            snake.getImageViewBody().setRotate(snake.getBodyDir(index));
-            SnapshotParameters params = new SnapshotParameters();
-            params.setFill(Color.TRANSPARENT);
-            rotatedImage = snake.getImageViewBody().snapshot(params, null);
+            segmentImage = snake.getImageViewBody().getImage();
+            angle = snake.getBodyDir(index);
         }
 
         if (turnArray[(int) snake.getBody().get(0).getX()][(int) snake.getBody().get(0).getY()] != 0) {
             turnArray[(int) snake.getBody().get(0).getX()][(int) snake.getBody().get(0).getY()] = 0;
         }
 
-        gc.drawImage(rotatedImage, (point.x * game.getMultiplier()) * fullScale, (point.y * game.getMultiplier()) * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
+        double tileSize = game.getMultiplier() * fullScale;
+        drawRotatedImage(segmentImage, angle, point.x * tileSize, point.y * tileSize, tileSize);
     }
 
     public void turnDir(Snake snake) {

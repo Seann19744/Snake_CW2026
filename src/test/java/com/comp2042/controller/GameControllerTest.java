@@ -155,4 +155,145 @@ class GameControllerTest extends JavaFXTestBase {
         assertFalse(gameView.isPauseHelpVisible(), "Clicking Back should close How to Play screen");
         assertTrue(gameView.getPauseHelpButton().isVisible(), "? button should be visible again on pause menu");
     }
+
+    @Test
+    @DisplayName("Verify arrow keys do not start animation after game is won")
+    void testArrowKeysIgnoredWhenGameWon() {
+        Game wonGame = new Game(20, 20, false, Difficulty.EASY);
+        // Complete all 3 levels in Quick/Easy mode (6, 8, 10 coins)
+        for (int i = 0; i < 6; i++) wonGame.incScore();
+        wonGame.advanceLevel();
+        for (int i = 0; i < 8; i++) wonGame.incScore();
+        wonGame.advanceLevel();
+        for (int i = 0; i < 10; i++) wonGame.incScore();
+        assertTrue(wonGame.gameWon(), "Game should be marked as won");
+
+        Obstacle obs = new Obstacle(20, 20);
+        Snake snk = new Snake(20, 20, true, obs);
+        Coin cn = new Coin(20, 20, snk, obs);
+        GameView gv = new GameView(wonGame);
+        GameController wonController = new GameController(snk, cn, wonGame, gv, obs, null);
+
+        wonController.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, false, false, false, false
+        ));
+        assertFalse(wonController.isAnimationRunning(), "Animation must not start or run when game is already won");
+    }
+
+    @Test
+    @DisplayName("Verify loadLevel pauses game in LEVEL_CLEARED, resets head to center spawn, and stacks body segments to uncoil")
+    void testLoadLevelPausesAndStacksSnakeOnSpawnToUncoil() {
+        Game game = new Game(20, 20, false, Difficulty.EASY);
+        Obstacle obs = new Obstacle(20, 20);
+        Snake snk = new Snake(20, 20, true, obs);
+        // Move and grow the snake so it is away from center and has 3 body segments
+        snk.move('L'); // head at (9, 10), body has (10, 10) and (11, 10) -> size 2
+        snk.move('U'); // head at (9, 9), body has (9, 10), (10, 10), (11, 10) -> size 3
+        int bodySizeBeforeNewLevel = snk.getBody().size();
+        assertEquals(3, bodySizeBeforeNewLevel);
+
+        Coin cn = new Coin(20, 20, snk, obs);
+        GameView gv = new GameView(game);
+        GameController ctrl = new GameController(snk, cn, game, gv, obs, null);
+
+        // Start the game first
+        ctrl.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false, false, false, false
+        ));
+        assertEquals(com.comp2042.model.GameState.RUNNING, ctrl.getGameState());
+
+        // Advance to Level 2
+        ctrl.loadLevel(2);
+
+        // Game must pause in LEVEL_CLEARED state and all 16 Level 2 obstacles must spawn intact
+        assertEquals(com.comp2042.model.GameState.LEVEL_CLEARED, ctrl.getGameState(), "State must be LEVEL_CLEARED");
+        assertFalse(ctrl.isAnimationRunning(), "Timeline animation must stop when entering a new level");
+        assertEquals(16, obs.getObstacles().size(), "All 16 Level 2 pillar obstacles must spawn intact");
+
+        // Snake head must be at center spawn (10, 10), with all 3 body segments stacked on spawn block (11, 10)
+        assertEquals(new java.awt.Point(10, 10), snk.getHead(), "Snake head must reset to center spawn (10, 10)");
+        assertEquals(bodySizeBeforeNewLevel, snk.getBody().size(), "Snake length must not reset on new level");
+        for (java.awt.Point segment : snk.getBody()) {
+            assertEquals(new java.awt.Point(11, 10), segment, "All body segments must initially be stacked on spawn block (11, 10)");
+        }
+
+        // Pressing a valid arrow key unpauses and resumes movement
+        ctrl.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, false, false, false, false
+        ));
+        assertEquals(com.comp2042.model.GameState.RUNNING, ctrl.getGameState(), "Arrow key should resume game to RUNNING");
+        ctrl.stopAnimation();
+    }
+
+    @Test
+    @DisplayName("Verify TAB reset preserves the full HUD format on scoreLabel instead of overwriting with 'Score: 0'")
+    void testTabResetPreservesFullHudText() {
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.TAB, false, false, false, false
+        ));
+        String hudText = gameView.scoreLabel.getText();
+        assertNotEquals("Score: 0", hudText, "TAB must not overwrite HUD with legacy 'Score: 0'");
+        assertTrue(hudText.contains("[Classic Mode] Level 1/3 | Coins: 0/8 | Score: 0"),
+                "TAB reset should display full HUD string, got: " + hudText);
+    }
+
+    @Test
+    @DisplayName("Verify turnArray is sized from game dimensions and cleared on TAB reset and loadLevel")
+    void testTurnArrayClearedOnResetAndNewLevel() {
+        // Turn UP at initial head position (10, 10)
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false, false, false, false
+        ));
+        controller.stopAnimation();
+        assertNotEquals(0, gameView.getTurnAt(10, 10), "Turn at (10, 10) should be recorded in turnArray");
+
+        // Pressing TAB reset must clear turnArray
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.TAB, false, false, false, false
+        ));
+        assertEquals(0, gameView.getTurnAt(10, 10), "turnArray must be cleared on TAB reset");
+
+        // Record another turn at (10, 10), then call loadLevel(2)
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.DOWN, false, false, false, false
+        ));
+        controller.stopAnimation();
+        assertNotEquals(0, gameView.getTurnAt(10, 10));
+
+        controller.loadLevel(2);
+        assertEquals(0, gameView.getTurnAt(10, 10), "turnArray must be cleared when advancing to a new level");
+
+        // Verify custom game dimensions (e.g. 40x30) size turnArray properly without MainMenuController coupling
+        Game customGame = new Game(40, 30, false, Difficulty.NORMAL);
+        GameView customView = new GameView(customGame);
+        assertEquals(0, customView.getTurnAt(39, 29));
+    }
+
+    @Test
+    @DisplayName("Verify two-slot input queue buffers rapid second turn within one tick for smooth U-turns")
+    void testTwoSlotInputQueueForRapidUTurn() {
+        // Initially facing LEFT; press UP then immediately RIGHT within the same tick
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false, false, false, false
+        ));
+        controller.stopAnimation();
+        assertEquals(KeyCode.UP, GameController.key, "First input (UP) should apply immediately for the current tick");
+        assertEquals(0, controller.getQueuedInputCount(), "Queue is empty after first input applies");
+
+        // Second rapid input (RIGHT) before onTick() runs must be buffered in inputQueue, not dropped
+        controller.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.RIGHT, false, false, false, false
+        ));
+        assertEquals(1, controller.getQueuedInputCount(), "Second rapid input (RIGHT) must be buffered in queue");
+
+        // Tick 1 moves UP and clears keyPressed; Tick 2 dequeues RIGHT and moves RIGHT
+        controller.onTick();
+        assertEquals(KeyCode.UP, GameController.key, "Tick 1 should move UP");
+        assertEquals(1, controller.getQueuedInputCount(), "RIGHT remains queued for Tick 2");
+
+        controller.onTick();
+        assertEquals(KeyCode.RIGHT, GameController.key, "Tick 2 must dequeue and apply RIGHT to complete the U-turn");
+        assertEquals(0, controller.getQueuedInputCount(), "Input queue should now be empty");
+        controller.stopAnimation();
+    }
 }

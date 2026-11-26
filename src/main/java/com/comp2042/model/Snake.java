@@ -13,6 +13,7 @@ public class Snake {
     private boolean dead = false;
     private final Point head = new Point();
     private final ArrayList<Point> body = new ArrayList<>();
+    private final ArrayList<Integer> bodyDirs = new ArrayList<>();
     private final int gx;
     private final int gy;
     private boolean ignoreBorders = false;
@@ -39,56 +40,73 @@ public class Snake {
         this.growthRate = growthRate;
         this.head.setLocation(x / 2, y / 2);
         this.body.add(new Point(x / 2 + 1, y / 2));
+        this.bodyDirs.add(270);
         this.gx = x;
         this.gy = y;
     }
 
     public void move(char dir) {
-        body.add(new Point(head));
+        Point prevHead = new Point(head);
         switch (dir) {
             case 'U':
                 snakeDir = 0;
                 head.translate(0, -1);
-                if (borderControl() && (!ignoreBorders && !noBorder) || obstacle.getObstacles().contains(head)) {
-                    head.translate(0, 1);
-                    dead = true;
-                } else if (borderControl() && (ignoreBorders || noBorder)) {
-                    head.setLocation(head.getX(), gy - 1);
+                if (borderControl()) {
+                    if (!ignoreBorders && !noBorder) {
+                        head.setLocation(prevHead);
+                        dead = true;
+                    } else {
+                        head.setLocation(head.getX(), gy - 1);
+                    }
                 }
                 break;
 
             case 'D':
                 snakeDir = 180;
                 head.translate(0, 1);
-                if (borderControl() && (!ignoreBorders && !noBorder) || obstacle.getObstacles().contains(head)) {
-                    head.translate(0, -1);
-                    dead = true;
-                } else if (borderControl() && (ignoreBorders || noBorder)) {
-                    head.setLocation(head.getX(), 0);
+                if (borderControl()) {
+                    if (!ignoreBorders && !noBorder) {
+                        head.setLocation(prevHead);
+                        dead = true;
+                    } else {
+                        head.setLocation(head.getX(), 0);
+                    }
                 }
                 break;
 
             case 'L':
                 snakeDir = 270;
                 head.translate(-1, 0);
-                if (borderControl() && (!ignoreBorders && !noBorder) || obstacle.getObstacles().contains(head)) {
-                    head.translate(1, 0);
-                    dead = true;
-                } else if (borderControl() && (ignoreBorders || noBorder)) {
-                    head.setLocation(gx - 1, head.getY());
+                if (borderControl()) {
+                    if (!ignoreBorders && !noBorder) {
+                        head.setLocation(prevHead);
+                        dead = true;
+                    } else {
+                        head.setLocation(gx - 1, head.getY());
+                    }
                 }
                 break;
 
             case 'R':
                 snakeDir = 90;
                 head.translate(1, 0);
-                if (borderControl() && (!ignoreBorders && !noBorder) || obstacle.getObstacles().contains(head)) {
-                    head.translate(-1, 0);
-                    dead = true;
-                } else if (borderControl() && (ignoreBorders || noBorder)) {
-                    head.setLocation(0, head.getY());
+                if (borderControl()) {
+                    if (!ignoreBorders && !noBorder) {
+                        head.setLocation(prevHead);
+                        dead = true;
+                    } else {
+                        head.setLocation(0, head.getY());
+                    }
                 }
                 break;
+        }
+
+        body.add(prevHead);
+        bodyDirs.add(snakeDir);
+
+        if (!dead && obstacle.getObstacles().contains(head)) {
+            head.setLocation(prevHead);
+            dead = true;
         }
 
         if (body.size() > 4 && hitSelf() && !body.get(0).equals(head)) {
@@ -96,40 +114,55 @@ public class Snake {
         }
     }
 
+    public int getTailDir() {
+        if (bodyDirs.isEmpty()) {
+            return snakeDir;
+        }
+        return bodyDirs.get(0);
+    }
+
     public int getBodyDir(int bodyCount) {
-        if (bodyCount == 0) {
-            return 0;
-        } else if (body.get(bodyCount).getY() == body.get(bodyCount - 1).getY()) {
-            return 270;
-        } else {
+        if (bodyCount < 0 || bodyCount >= bodyDirs.size()) {
             return 0;
         }
+        int dir = bodyDirs.get(bodyCount);
+        return (dir == 90 || dir == 270) ? 270 : 0;
     }
 
     public boolean ateCoin(Coin coin) {
         boolean ate = head.equals(coin.getPos());
         if (!ate) {
             body.remove(0);
+            if (!bodyDirs.isEmpty()) {
+                bodyDirs.remove(0);
+            }
         } else if (growthRate > 1) {
             // Adds extra segment(s) when growthRate > 1 (e.g. Hardcore mode)
+            int tailDir = getTailDir();
             for (int i = 1; i < growthRate; i++) {
                 body.add(0, new Point(body.get(0)));
+                bodyDirs.add(0, tailDir);
             }
         }
         return ate;
     }
 
     /**
-     * Resets the snake's head and body back to center coordinates.
-     * Useful when advancing to a new level to avoid immediate obstacle collision.
+     * Resets the snake's head to the center spawn block while stacking all existing
+     * body segments onto the initial tail block so they uncoil as the snake moves.
      *
      * @param x grid width
      * @param y grid height
      */
     public void resetPosition(int x, int y) {
+        int preservedSize = Math.max(1, body.size());
         head.setLocation(x / 2, y / 2);
         body.clear();
-        body.add(new Point(x / 2 + 1, y / 2));
+        bodyDirs.clear();
+        for (int i = 0; i < preservedSize; i++) {
+            body.add(new Point(x / 2 + 1, y / 2));
+            bodyDirs.add(270);
+        }
         dead = false;
         snakeDir = 270;
     }

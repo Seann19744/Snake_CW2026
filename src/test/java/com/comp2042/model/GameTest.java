@@ -13,6 +13,7 @@ class GameTest {
 
     @BeforeEach
     void setUp() {
+        GameSettings.getInstance().resetDefaults();
         game = new Game(20, 20, true, GameMode.CLASSIC);
     }
 

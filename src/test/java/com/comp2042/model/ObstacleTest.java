@@ -92,4 +92,20 @@ class ObstacleTest extends JavaFXTestBase {
         assertFalse(obstacle.getObstacles().isEmpty(), "Level 3 must have labyrinth corridor walls");
         assertFalse(obstacle.getObstacles().contains(new Point(10, 10)), "Center must be clear for snake traversal");
     }
+
+    @Test
+    @DisplayName("Verify newObstacles spawns unique cells and respects the 2-tile safety buffer around snake head")
+    void testNewObstaclesUniqueAndSafeFromHead() {
+        obstacle.newObstacles(snake, coin, 35);
+        assertEquals(35, obstacle.getObstacles().size(), "Should spawn 35 obstacles");
+
+        java.util.Set<Point> uniquePoints = new java.util.HashSet<>(obstacle.getObstacles());
+        assertEquals(35, uniquePoints.size(), "All spawned obstacles must occupy unique cells without duplicates");
+
+        Point head = snake.getHead();
+        for (Point p : obstacle.getObstacles()) {
+            assertFalse(obstacle.isTooCloseToHead(p, head),
+                    "Obstacle at " + p + " must not spawn within 2-tile safety buffer of head at " + head);
+        }
+    }
 }
