@@ -1,6 +1,8 @@
 package com.comp2042.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Snake {
     private boolean dead = false;
@@ -157,8 +159,8 @@ public class Snake {
         return body.contains(head);
     }
 
-    public ArrayList<Cell> getBody() {
-        return new ArrayList<>(body);
+    public List<Cell> getBody() {
+        return Collections.unmodifiableList(body);
     }
 
     public Cell getHead() {

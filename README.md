@@ -239,8 +239,9 @@ The following features were considered during design and development but were no
 ### 7. `com.comp2042.view.GameView`
 - Moved to package `com.comp2042.view`.
 - Fixed fullscreen distortion: removed duplicate `* fullScale` in `drawHead()` and `drawBody()`, eliminating the bug where snake body parts were scaled quadratically.
-- Renamed parameter `snek` to `snake` in methods (`turnDir`, `gameOver`, `drawGrid`, `drawHead`, `drawBody`).
-- Added in-game pause overlay (`pauseOverlay`) with a Settings sub-menu (`pauseSettingsBox`) and a top-right `?` help button (`pauseHelpButton`) opening an in-game **How to Play** overlay (`pauseHelpBox`), styled with matching 8-bit `.pixel-card` and `.pixel-slot` arcade panels and harmonized `130x40` buttons.
+- Renamed parameter `snek` to `snake` in methods (`drawGrid`, `drawHead`, `drawBody`).
+- Centralized all snake and coin sprite `Image` assets and board/obstacle `Color` constants inside `GameView`, removing JavaFX dependencies from the `model` package.
+- Extracted in-game pause overlay UI into `PauseMenuView` (Single Responsibility Principle), eliminated `ImageView.snapshot()` allocations in favor of direct `GraphicsContext` canvas rotation (`drawRotatedImage()`), removed the redundant `drawGrid` overload, and fetched `snake.getBody()` once per frame instead of copying the list per segment.
 
 ### 8. `com.comp2042.view.ViewManager`
 - Moved to package `com.comp2042.view`.
@@ -249,12 +250,13 @@ The following features were considered during design and development but were no
 
 ### 9. `com.comp2042.model.Snake`
 - Moved to package `com.comp2042.model`.
-- Standardized variable naming throughout the class (`snek` -> `snake`).
+- Standardized variable naming throughout the class (`snek` -> `snake`, `ateCoin` -> `resolveCoinConsumption`).
+- Replaced raw `'U'`/`'D'`/`'L'`/`'R'` `switch` branches with a unified `move(Direction)` method, replaced `java.awt.Point` with the immutable `Cell` record, stored per-segment movement directions (`ArrayList<Direction> bodyDirs`), removed all JavaFX `ImageView` and `Color` fields, and changed `getBody()` to return a zero-copy `Collections.unmodifiableList(body)`.
 
 ### 10. `com.comp2042.model.Coin` and Subclasses (`GoldCoin`, `SilverCoin`, `BlueCoin`, `RainbowCoin`)
 - Moved to package `com.comp2042.model`.
-- Updated constructors and method parameters from `Snake snek` to `Snake snake`.
-- Implemented polymorphic `applyEffect(Game, Snake, Obstacle, Timeline)` across all coin types, encapsulating power-up behaviors within the coin models rather than external controller conditionals.
+- Updated constructors and method parameters from `Snake snek` to `Snake snake` and coordinates to `Cell`.
+- Implemented polymorphic `applyEffect(Game, Snake, Obstacle, SpeedController)` across all coin types (Open-Closed Principle & Dependency Inversion Principle), removing JavaFX `Image` and `Timeline` dependencies from the model hierarchy.
 
 ---
 

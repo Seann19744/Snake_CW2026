@@ -14,6 +14,8 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import java.util.List;
+
 public class GameView {
 
     private static final Color ARENA_COLOR = Color.web("#feffe4");
@@ -228,10 +230,9 @@ public class GameView {
                 (coin.getPos().y() * tileSize) + coinPadding,
                 coinSize, coinSize);
 
-        int bodyIndex = 0;
-        for (Cell cell : snake.getBody()) {
-            drawBody(snake, cell, bodyIndex);
-            bodyIndex++;
+        List<Cell> body = snake.getBody();
+        for (int bodyIndex = 0; bodyIndex < body.size(); bodyIndex++) {
+            drawBody(snake, body, bodyIndex);
         }
 
         drawHead(snake);
@@ -270,12 +271,13 @@ public class GameView {
      * Draws the segment of the snake's body, choosing the right picture
      * (tail, corner or straight piece) and rotation for it.
      * @param snake the snake being drawn
-     * @param point the grid position of this segment
+     * @param body the unmodifiable list of body cells for the current frame
      * @param index the segment's position in the body list, where 0 is the tail
      */
-    private void drawBody(Snake snake, Cell point, int index) {
+    private void drawBody(Snake snake, List<Cell> body, int index) {
+        Cell point = body.get(index);
         // Skip drawing duplicate segments that are still stacked on the same spawn/tail cell
-        if (index > 0 && point.equals(snake.getBody().get(index - 1))) {
+        if (index > 0 && point.equals(body.get(index - 1))) {
             return;
         }
 
