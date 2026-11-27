@@ -8,7 +8,7 @@ https://github.com/Seann19744/Snake_CW2026
 ## Compilation and Execution Instructions
 
 ### Prerequisites
-- **Java Development Kit (JDK)**: Version 21 or higher (Project configured for Java 21 LTS in `pom.xml`).
+- **Java Development Kit (JDK)**: Version 25 (Project configured for Java 25 and JavaFX 25.0.1 in `pom.xml`).
 - **Build Tool**: Apache Maven 3.8+ (or use the included Maven wrapper `mvnw` / `mvnw.cmd`).
 - **JavaFX SDK**: Version 25.0.1 (automatically managed via Maven dependencies in `pom.xml`).
 - **IDE** (Optional): IntelliJ IDEA (recommended), Eclipse, or VS Code with Java extensions.
@@ -18,7 +18,7 @@ https://github.com/Seann19744/Snake_CW2026
 #### Option 1: Running via IntelliJ IDEA (Recommended)
 1. Open IntelliJ IDEA, select **File -> Open**, and choose the project root directory (`Snake_CW2026`).
 2. Allow IntelliJ to import and resolve dependencies from `pom.xml`.
-3. Verify that the Project SDK is set to JDK 21+ (**File -> Project Structure -> Project -> SDK**).
+3. Verify that the Project SDK is set to JDK 25 (**File -> Project Structure -> Project -> SDK**).
 4. Navigate to `src/main/java/com/comp2042/Launcher.java`.
 5. Right-click `Launcher.java` and select **Run 'Launcher.main()'**.
    > *Note*: Running via `Launcher.java` instead of `Main.java` bypasses JavaFX 11+ runtime component checks, preventing `Runtime components are missing` errors when running directly in an IDE without custom VM options.
