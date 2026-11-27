@@ -179,6 +179,7 @@ class GameControllerTest extends JavaFXTestBase {
         ctrl.handle(new javafx.scene.input.KeyEvent(
                 javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.UP, false, false, false, false
         ));
+        ctrl.stopAnimation();
         assertEquals(GameState.RUNNING, ctrl.getGameState());
 
         ctrl.loadLevel(2);
@@ -235,5 +236,75 @@ class GameControllerTest extends JavaFXTestBase {
         assertEquals(Direction.RIGHT, controller.getCurrentDirection(), "Tick 2 must dequeue and apply RIGHT to complete the U-turn");
         assertEquals(0, controller.getQueuedInputCount(), "Input queue should now be empty");
         controller.stopAnimation();
+    }
+
+    @Test
+    @DisplayName("Verify onTick transitions gameState to DEAD when snake collides with an obstacle")
+    void testOnTickSetsDeadStateAndGameOverOverlay() {
+        Game game = new Game(20, 20, false, GameMode.CLASSIC);
+        Obstacle obs = new Obstacle(20, 20);
+        Snake snk = new Snake(20, 20, false, obs);
+        Coin cn = new Coin(20, 20, snk, obs);
+        GameView gv = new GameView(game);
+        GameController ctrl = new GameController(snk, cn, game, gv, obs, null);
+
+        // Place an obstacle directly to the left of the snake's initial head (10, 10) at (9, 10)
+        // after GameController construction (which calls loadLevelLayout(1) and resets obstacles)
+        obs.getObstacles().add(new Cell(9, 10));
+
+        // Start game moving LEFT into (9, 10)
+        ctrl.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, false, false, false, false
+        ));
+        ctrl.stopAnimation();
+        assertEquals(GameState.RUNNING, ctrl.getGameState());
+
+        // Execute tick: snake moves LEFT into obstacle at (9, 10) and dies
+        ctrl.onTick();
+        assertTrue(snk.getDead(), "Snake should be dead after hitting obstacle at (9, 10)");
+        assertEquals(GameState.DEAD, ctrl.getGameState(), "onTick must transition gameState to DEAD");
+        assertTrue(gv.gameOverLabel.isVisible(), "gameOverLabel must be visible when gameState is DEAD");
+        assertFalse(gv.gameWonLabel.isVisible(), "gameWonLabel must remain hidden when DEAD");
+    }
+
+    @Test
+    @DisplayName("Verify onTick transitions gameState to WON when snake eats the final coin of Level 3")
+    void testOnTickSetsWonStateAndGameWonOverlay() {
+        Game game = new Game(20, 20, false, GameMode.QUICK);
+        // Advance to Level 3 with 9 out of 10 coins already eaten (1 coin away from winning)
+        for (int i = 0; i < 6; i++) game.recordCoinEaten();
+        game.advanceLevel();
+        for (int i = 0; i < 8; i++) game.recordCoinEaten();
+        game.advanceLevel();
+        for (int i = 0; i < 9; i++) game.recordCoinEaten();
+        assertEquals(3, game.getCurrentLevel());
+        assertFalse(game.gameWon());
+
+        Obstacle obs = new Obstacle(20, 20);
+        Snake snk = new Snake(20, 20, true, obs);
+        // Place the winning coin directly in front of the snake's head at (9, 10)
+        Coin winningCoin = new Coin(20, 20, snk, obs) {
+            @Override
+            public Cell getPos() {
+                return new Cell(9, 10);
+            }
+        };
+        GameView gv = new GameView(game);
+        GameController ctrl = new GameController(snk, winningCoin, game, gv, obs, null);
+
+        // Start game moving LEFT toward (9, 10)
+        ctrl.handle(new javafx.scene.input.KeyEvent(
+                javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.LEFT, false, false, false, false
+        ));
+        ctrl.stopAnimation();
+        assertEquals(GameState.RUNNING, ctrl.getGameState());
+
+        // Execute tick: snake moves LEFT onto (9, 10), eats final coin, and wins the game!
+        ctrl.onTick();
+        assertTrue(game.gameWon(), "Game should be won after eating final Level 3 coin");
+        assertEquals(GameState.WON, ctrl.getGameState(), "onTick must transition gameState to WON");
+        assertFalse(ctrl.isAnimationRunning(), "Animation must stop when game is WON");
+        assertTrue(gv.gameWonLabel.isVisible(), "gameWonLabel must be visible when gameState is WON");
+        assertFalse(gv.gameOverLabel.isVisible(), "gameOverLabel must remain hidden when WON");
     }
 }

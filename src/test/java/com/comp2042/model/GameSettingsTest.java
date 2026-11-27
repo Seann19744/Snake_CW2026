@@ -99,4 +99,23 @@ class GameSettingsTest {
         settings.setHighScoreFile(tempScoreFile);
         assertEquals(85, settings.getHighScore(), "High score should be restored from disk after reload");
     }
+
+    @Test
+    @DisplayName("Verify corrupt or negative highscore.txt safely falls back to 0")
+    void testCorruptHighScoreFileFallsBackToZero(@TempDir Path tempDir) throws Exception {
+        Path corruptFile = tempDir.resolve("corrupt_highscore.txt");
+        java.nio.file.Files.writeString(corruptFile, "corrupt_non_numeric_data");
+
+        settings.updateHighScore(50);
+        assertEquals(50, settings.getHighScore());
+
+        // Loading a corrupt non-numeric file must fall back to 0 without throwing
+        assertDoesNotThrow(() -> settings.setHighScoreFile(corruptFile));
+        assertEquals(0, settings.getHighScore(), "Corrupt high score file must fall back to 0");
+
+        // Loading a negative number in highscore.txt must also clamp/fall back to 0
+        java.nio.file.Files.writeString(corruptFile, "-120");
+        settings.loadHighScore();
+        assertEquals(0, settings.getHighScore(), "Negative score in high score file must clamp to 0");
+    }
 }

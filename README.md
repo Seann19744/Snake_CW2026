@@ -8,7 +8,7 @@ https://github.com/Seann19744/Snake_CW2026
 ## Compilation and Execution Instructions
 
 ### Prerequisites
-- **Java Development Kit (JDK)**: Version 21 or higher (Project configured for Java 21 LTS in `pom.xml`).
+- **Java Development Kit (JDK)**: Version 25 (Project configured for Java 25 and JavaFX 25.0.1 in `pom.xml`).
 - **Build Tool**: Apache Maven 3.8+ (or use the included Maven wrapper `mvnw` / `mvnw.cmd`).
 - **JavaFX SDK**: Version 25.0.1 (automatically managed via Maven dependencies in `pom.xml`).
 - **IDE** (Optional): IntelliJ IDEA (recommended), Eclipse, or VS Code with Java extensions.
@@ -18,7 +18,7 @@ https://github.com/Seann19744/Snake_CW2026
 #### Option 1: Running via IntelliJ IDEA (Recommended)
 1. Open IntelliJ IDEA, select **File -> Open**, and choose the project root directory (`Snake_CW2026`).
 2. Allow IntelliJ to import and resolve dependencies from `pom.xml`.
-3. Verify that the Project SDK is set to JDK 21+ (**File -> Project Structure -> Project -> SDK**).
+3. Verify that the Project SDK is set to JDK 25 (**File -> Project Structure -> Project -> SDK**).
 4. Navigate to `src/main/java/com/comp2042/Launcher.java`.
 5. Right-click `Launcher.java` and select **Run 'Launcher.main()'**.
    > *Note*: Running via `Launcher.java` instead of `Main.java` bypasses JavaFX 11+ runtime component checks, preventing `Runtime components are missing` errors when running directly in an IDE without custom VM options.
@@ -312,6 +312,33 @@ Adhering to clean code principles and Java naming conventions:
 
 ---
 
+## JUnit 5 Test Plan, Test Cases, and Execution Results
+
+To verify correctness, edge-case resilience, and regression safety across the refactored architecture, a comprehensive suite of **75 automated JUnit 5 tests** across **10 test classes** was developed. Because all JavaFX dependencies were removed from `com.comp2042.model` (via the `SpeedController` DIP interface and `GameView` sprite centralization), all 9 model test classes execute as **100% pure-Java unit tests**.
+
+### How to Execute the Test Suite
+```bash
+mvn clean test
+```
+
+### Summary of Test Classes and Results
+
+| Test Class | Layer | Tests | Status | Key Scenarios & Edge Cases Covered |
+| :--- | :---: | :---: | :---: | :--- |
+| `CellTest` | Model | 2 | **PASS (2/2)** | Immutable coordinate equality, hash codes, delta & `Direction` translations |
+| `DirectionTest` | Model | 4 | **PASS (4/4)** | Grid deltas (`dx`, `dy`), head/body rotation angles, 180° `isOpposite()`, 8 corner turn rotations |
+| `CoinTest` | Model | 10 | **PASS (10/10)** | Point values and polymorphic `applyEffect()` via `SpeedController` for `Coin`, `GoldCoin`, `RainbowCoin`, `BlueCoin`, `SilverCoin` |
+| `CoinGeneratorTest` | Model | 7 | **PASS (7/7)** | Deterministic Factory Pattern tests using injected `Random` double, obstacle condition checks for `SilverCoin` |
+| `GameModeTest` | Model | 4 | **PASS (4/4)** | Speed, border wrap-around, level coin quotas, growth rates, and English descriptions for `QUICK`, `CLASSIC`, `HARDCORE` |
+| `GameSettingsTest` | Model | 8 | **PASS (8/8)** | Singleton identity, grid toggle state, high score threshold updates, `@TempDir` disk persistence, and corrupt/negative `highscore.txt` fallback to `0` |
+| `GameTest` | Model | 4 | **PASS (4/4)** | Initialization, grid size multiplier, point scoring & high score integration, 3-level progression & victory condition |
+| `ObstacleTest` | Model | 7 | **PASS (7/7)** | Boundary bounds, snake/coin collision avoidance, 50-obstacle cap, level 1–3 static layouts, duplicate prevention & 2-tile head safety buffer |
+| `SnakeTest` | Model | 14 | **PASS (14/14)** | 4-direction movement, coin growth (`1x` and `2x`), fatal wall collisions, border wrap-around, wrap-onto-edge-obstacle death, per-segment direction tracking across wrap edges, normal & Hardcore duplicated-tail self-collision, `resetPosition()` uncoiling stack |
+| `GameControllerTest` | Controller | 15 | **PASS (15/15)** | Non-arrow key rejection, 4-direction 180° reversal blocking, pause menu & help overlay toggling, `G` grid shortcut, resize handling, post-victory input lock, `LEVEL_CLEARED` pause & uncoil spawn, `TAB` HUD preservation, 2-slot rapid U-turn input queue, `onTick()` transitions to `DEAD` and `WON` |
+| **Total** | **All** | **75** | **75 Passed, 0 Failed** | **100% Pass Rate across Model and Controller layers** |
+
+---
+
 ## Unexpected Problems Encountered and Solutions
 
 1. **IntelliJ IDEA Run Configuration Classpath Issue (`ClassNotFoundException`)**:
@@ -385,3 +412,7 @@ Adhering to clean code principles and Java naming conventions:
 18. **Package Directory Mismatch on `Launcher.java` and Misplaced Javadoc Annotation Order**:
     - **Problem**: `Launcher.java` declared `package com.comp2042;` at the top of the file but was physically located inside the `src/main/java/com/comp2042/view/` subdirectory instead of `src/main/java/com/comp2042/`. Additionally, in `MainMenuController.java`, the `/** ... */` Javadoc comment on `initialize()` was placed *below* the `@FXML` annotation rather than above it, preventing the `javadoc` documentation tool from attaching the description to the method.
     - **Solution**: Moved `Launcher.java` to its proper root package directory `src/main/java/com/comp2042/Launcher.java` with full class and method Javadoc comments, and reordered the Javadoc block above `@FXML` on `MainMenuController.initialize()`.
+
+19. **Hardcore Mode Duplicated-Tail Self-Overlap Bug in `Snake.move()`**:
+    - **Problem**: `Snake.move()` exempted the tail cell `body.get(0)` from self-collision (`!body.get(0).equals(head)`) because `body.get(0)` is normally vacated when `resolveCoinConsumption()` calls `body.remove(0)` on the same tick. However, in Hardcore Mode (`growthRate = 2`) or during level-spawn uncoiling, the tail coordinate is duplicated at both `body.get(0)` and `body.get(1)`, meaning the cell remains occupied even after `body.remove(0)` removes index `0`. The unconditional `!body.get(0).equals(head)` check allowed the snake's head to overlap its stationary duplicated tail without dying.
+    - **Solution**: Updated the self-collision check in `Snake.move()` to `if (body.size() > 1 && body.subList(1, body.size()).contains(head)) { dead = true; }`, ensuring the tail exemption applies only when `body.get(0)` appears once in `body` and is genuinely vacating the cell on that tick.
