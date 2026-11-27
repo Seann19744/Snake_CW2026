@@ -97,6 +97,7 @@ The following features, enhancements, and bug fixes have been implemented, teste
     - Removed unused variables and dead methods in `GameController.java`, including `legacyScoreMultiplier`, `calculateBonusScore()`, and `unusedObstacleCount`.
     - Removed redundant imports (`javafx.scene.media.Media`, `MediaPlayer`, `java.io.File`).
     - Removed duplicate assignment in `Game.java` (`this.powerUp = powerUp;`).
+    - Deleted unused resource assets (`SnakeLogo.png`, `green_button04.png`, `kenvector_future.ttf`) from `src/main/resources/resources/views/res/` and merged duplicate `.button` and `.startAndQuitBtn` CSS blocks in `styling.css`.
 
 12. **Code Readability & Naming Conventions**:
     - Renamed informal identifier `snek` to standard `snake` across all classes and methods.
