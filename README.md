@@ -312,6 +312,33 @@ Adhering to clean code principles and Java naming conventions:
 
 ---
 
+## JUnit 5 Test Plan, Test Cases, and Execution Results
+
+To verify correctness, edge-case resilience, and regression safety across the refactored architecture, a comprehensive suite of **75 automated JUnit 5 tests** across **10 test classes** was developed. Because all JavaFX dependencies were removed from `com.comp2042.model` (via the `SpeedController` DIP interface and `GameView` sprite centralization), all 9 model test classes execute as **100% pure-Java unit tests**.
+
+### How to Execute the Test Suite
+```bash
+mvn clean test
+```
+
+### Summary of Test Classes and Results
+
+| Test Class | Layer | Tests | Status | Key Scenarios & Edge Cases Covered |
+| :--- | :---: | :---: | :---: | :--- |
+| `CellTest` | Model | 2 | **PASS (2/2)** | Immutable coordinate equality, hash codes, delta & `Direction` translations |
+| `DirectionTest` | Model | 4 | **PASS (4/4)** | Grid deltas (`dx`, `dy`), head/body rotation angles, 180° `isOpposite()`, 8 corner turn rotations |
+| `CoinTest` | Model | 10 | **PASS (10/10)** | Point values and polymorphic `applyEffect()` via `SpeedController` for `Coin`, `GoldCoin`, `RainbowCoin`, `BlueCoin`, `SilverCoin` |
+| `CoinGeneratorTest` | Model | 7 | **PASS (7/7)** | Deterministic Factory Pattern tests using injected `Random` double, obstacle condition checks for `SilverCoin` |
+| `GameModeTest` | Model | 4 | **PASS (4/4)** | Speed, border wrap-around, level coin quotas, growth rates, and English descriptions for `QUICK`, `CLASSIC`, `HARDCORE` |
+| `GameSettingsTest` | Model | 8 | **PASS (8/8)** | Singleton identity, grid toggle state, high score threshold updates, `@TempDir` disk persistence, and corrupt/negative `highscore.txt` fallback to `0` |
+| `GameTest` | Model | 4 | **PASS (4/4)** | Initialization, grid size multiplier, point scoring & high score integration, 3-level progression & victory condition |
+| `ObstacleTest` | Model | 7 | **PASS (7/7)** | Boundary bounds, snake/coin collision avoidance, 50-obstacle cap, level 1–3 static layouts, duplicate prevention & 2-tile head safety buffer |
+| `SnakeTest` | Model | 14 | **PASS (14/14)** | 4-direction movement, coin growth (`1x` and `2x`), fatal wall collisions, border wrap-around, wrap-onto-edge-obstacle death, per-segment direction tracking across wrap edges, normal & Hardcore duplicated-tail self-collision, `resetPosition()` uncoiling stack |
+| `GameControllerTest` | Controller | 15 | **PASS (15/15)** | Non-arrow key rejection, 4-direction 180° reversal blocking, pause menu & help overlay toggling, `G` grid shortcut, resize handling, post-victory input lock, `LEVEL_CLEARED` pause & uncoil spawn, `TAB` HUD preservation, 2-slot rapid U-turn input queue, `onTick()` transitions to `DEAD` and `WON` |
+| **Total** | **All** | **75** | **75 Passed, 0 Failed** | **100% Pass Rate across Model and Controller layers** |
+
+---
+
 ## Unexpected Problems Encountered and Solutions
 
 1. **IntelliJ IDEA Run Configuration Classpath Issue (`ClassNotFoundException`)**:

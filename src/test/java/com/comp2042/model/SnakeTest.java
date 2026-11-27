@@ -168,6 +168,65 @@ class SnakeTest {
         assertEquals(0, wrapSnake.getTailDir(), "Tail straddling top wrap edge must still point UP (0°), not fall back to 90°");
     }
 
+    @Test
+    @DisplayName("Verify self-collision in normal mode and duplicated-tail self-collision in Hardcore mode")
+    void testSelfCollisionNormalAndHardcore() {
+        // 1. Normal mode: grow snake to 4 body segments and steer into its own body
+        Snake normalSnake = new Snake(20, 20, false, obstacle, 1);
+        // Move LEFT 4 times and eat a coin each step so body size reaches 5
+        for (int i = 0; i < 4; i++) {
+            normalSnake.move(Direction.LEFT);
+            assertTrue(normalSnake.resolveCoinConsumption(new CoinMock(normalSnake.getHead())));
+        }
+        assertEquals(5, normalSnake.getBody().size());
+        // Loop UP -> RIGHT -> DOWN into its own horizontal body
+        normalSnake.move(Direction.UP);
+        normalSnake.resolveCoinConsumption(new CoinMock(new Cell(0, 0)));
+        normalSnake.move(Direction.RIGHT);
+        normalSnake.resolveCoinConsumption(new CoinMock(new Cell(0, 0)));
+        normalSnake.move(Direction.DOWN);
+        assertTrue(normalSnake.getDead(), "Normal snake must die when steering into its own body segment");
+
+        // 2. Hardcore mode (growthRate = 2): duplicated tail cell must NOT be exempt from self-collision
+        Snake hardcoreSnake = new Snake(20, 20, false, obstacle, 2);
+        // Starts: head at (10, 10), body [(11, 10)]
+        // Step 1: Move UP to (10, 9), eat coin -> body becomes [(11, 10), (11, 10), (10, 10)] (size 3)
+        hardcoreSnake.move(Direction.UP);
+        assertTrue(hardcoreSnake.resolveCoinConsumption(new CoinMock(hardcoreSnake.getHead())));
+        // Step 2: Move RIGHT to (11, 9), eat coin -> body becomes [(11, 10), (11, 10), (11, 10), (10, 10), (10, 9)] (size 5)
+        // Notice tail cell (11, 10) is duplicated at indices 0, 1, 2!
+        hardcoreSnake.move(Direction.RIGHT);
+        assertTrue(hardcoreSnake.resolveCoinConsumption(new CoinMock(hardcoreSnake.getHead())));
+        assertFalse(hardcoreSnake.getDead());
+
+        // Step 3: Move DOWN from (11, 9) onto (11, 10), where the duplicated tail still sits!
+        hardcoreSnake.move(Direction.DOWN);
+        assertTrue(hardcoreSnake.getDead(), "Stepping onto a duplicated tail cell in Hardcore mode must cause self-collision death");
+    }
+
+    @Test
+    @DisplayName("Verify resetPosition resets head to center, stacks preserved body length on spawn tail, and clears dead flag")
+    void testResetPosition() {
+        // Grow snake to 3 body segments and move away from center
+        snake.move(Direction.LEFT);
+        snake.resolveCoinConsumption(new CoinMock(snake.getHead()));
+        snake.move(Direction.UP);
+        snake.resolveCoinConsumption(new CoinMock(snake.getHead()));
+        assertEquals(3, snake.getBody().size());
+        assertNotEquals(new Cell(10, 10), snake.getHead());
+
+        snake.resetPosition(20, 20);
+
+        assertEquals(new Cell(10, 10), snake.getHead(), "Head must reset to center (10, 10)");
+        assertEquals(3, snake.getBody().size(), "Accumulated body length (3) must be preserved");
+        for (Cell cell : snake.getBody()) {
+            assertEquals(new Cell(11, 10), cell, "All body segments must stack on spawn tail (11, 10)");
+        }
+        assertEquals(Direction.LEFT, snake.getDirection(), "Direction must reset to LEFT");
+        assertEquals(270, snake.getSnakeDir(), "Angle must reset to 270");
+        assertFalse(snake.getDead(), "Dead flag must be false after resetPosition");
+    }
+
     /**
      * Helper mock for Coin to test specific coordinates in ateCoin
      */

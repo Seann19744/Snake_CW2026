@@ -179,7 +179,7 @@ public class GameController {
                     if ((gameState == GameState.READY || gameState == GameState.LEVEL_CLEARED)
                             && !snake.getDead() && !game.gameWon()) {
                         gameState = GameState.RUNNING;
-                        animation.playFromStart();
+                        animation.play();
                     }
                 }
             } else if (inputQueue.size() < 2) {
