@@ -1,9 +1,6 @@
 package com.comp2042.view;
 
-import com.comp2042.controller.GameController;
 import com.comp2042.model.*;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -11,17 +8,29 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import java.awt.*;
+import java.util.List;
 
 public class GameView {
+
+    private static final Color ARENA_COLOR = Color.web("#feffe4");
+    private static final Color OBSTACLE_COLOR = Color.BLACK;
+
+    private final Image headImage = new Image("resources/views/res/snakehead.png");
+    private final Image bodyImage = new Image("resources/views/res/snakebody.png");
+    private final Image turnImage = new Image("resources/views/res/snaketurnleft.png");
+    private final Image tailImage = new Image("resources/views/res/snaketail.png");
+
+    private final Image redCoinImage = new Image("resources/views/res/redcoin.png");
+    private final Image goldCoinImage = new Image("resources/views/res/goldcoin.png");
+    private final Image rainbowCoinImage = new Image("resources/views/res/rainbowcoin.png");
+    private final Image blueCoinImage = new Image("resources/views/res/bluecoin.png");
+    private final Image silverCoinImage = new Image("resources/views/res/silvercoin.png");
 
     public Canvas gridCanvas;
     public GraphicsContext gc;
@@ -29,48 +38,23 @@ public class GameView {
     public Label gameOverLabel = new Label("GAME OVER");
     public Label gameWonLabel = new Label("YOU WON!");
     public Label scoreLabel = new Label();
-    private boolean gameOverVis = false;
-    private boolean gameWonVis = false;
 
-    public final StackPane pauseOverlay = new StackPane();
-    private final Button resumeButton = new Button("Resume");
-    private final Button returnMenuButton = new Button("Main Menu");
-    private final Button pauseSettingsButton = new Button("Settings");
-    private final Button pauseHelpButton = new Button("?");
-    private final Button gridToggleButton = new Button("Grid: ON");
-    private final Button settingsBackButton = new Button("Back");
-    private final Button helpBackButton = new Button("Back");
-    private final VBox pauseBox = new VBox(15);
-    private final VBox pauseSettingsBox = new VBox(15);
-    private final VBox pauseHelpBox = new VBox(14);
+    private final PauseMenuView pauseMenuView;
+    public final StackPane pauseOverlay;
 
     private Coin currentCoin;
     private Snake currentSnake;
     private Obstacle currentObstacle;
 
-    private Game game;
+    private final Game game;
     private double initX;
     private double initY;
     private double fullScale = 1;
-    private boolean fullsize = false;
-    private int[][] turnArray;
 
     public GameView(Game game) {
         this.game = game;
-        this.turnArray = new int[game.getWidth()][game.getHeight()];
-        setupPauseOverlay();
-    }
-
-    public void resetTurnArray() {
-        this.turnArray = new int[game.getWidth()][game.getHeight()];
-    }
-
-    public int getTurnAt(int x, int y) {
-        return turnArray[x][y];
-    }
-
-    public void makeScene(Scene scene, Snake snake, Coin coin) {
-        makeScene(scene, snake, coin, null);
+        this.pauseMenuView = new PauseMenuView(this::redrawGrid);
+        this.pauseOverlay = pauseMenuView.getOverlay();
     }
 
     public void makeScene(Scene scene, Snake snake, Coin coin, Obstacle obstacle) {
@@ -99,159 +83,9 @@ public class GameView {
 
         if (scene != null) {
             fitToWindow(scene.getWidth(), scene.getHeight(), obstacle, snake, coin);
-        } else if (obstacle != null) {
-            drawGrid(coin, snake, obstacle, gc, false, 0);
         } else {
-            drawGrid(coin, snake, gc);
+            drawGrid(coin, snake, obstacle, gc);
         }
-    }
-
-    private void setupPauseOverlay() {
-        String css = "resources/views/styling.css";
-        if (!pauseOverlay.getStylesheets().contains(css)) {
-            pauseOverlay.getStylesheets().add(css);
-        }
-        pauseOverlay.setStyle("-fx-background-color: rgba(0, 0, 0, 0.65);");
-        pauseOverlay.setVisible(false);
-        pauseOverlay.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-
-        pauseBox.setAlignment(Pos.CENTER);
-        pauseBox.setMaxSize(340, 310);
-        pauseBox.setPadding(new Insets(22, 28, 22, 28));
-        pauseBox.getStyleClass().add("pixel-card");
-
-        Label pauseTitle = new Label("GAME PAUSED");
-        pauseTitle.setId("pauseTitle");
-        pauseTitle.getStyleClass().add("pixel-header");
-
-        Label pauseHint = new Label("Press ESC or P to resume");
-        pauseHint.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px; -fx-text-fill: #6e6a50;");
-
-        resumeButton.getStyleClass().add("startAndQuitBtn");
-        resumeButton.setPrefSize(130, 40);
-
-        pauseSettingsButton.getStyleClass().add("startAndQuitBtn");
-        pauseSettingsButton.setPrefSize(130, 40);
-
-        returnMenuButton.getStyleClass().add("startAndQuitBtn");
-        returnMenuButton.setPrefSize(130, 40);
-
-        pauseBox.getChildren().setAll(pauseTitle, pauseHint, resumeButton, pauseSettingsButton, returnMenuButton);
-
-        // Top-right '?' help button in pause menu
-        pauseHelpButton.getStyleClass().add("startAndQuitBtn");
-        pauseHelpButton.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 18px; -fx-background-size: 100% 100%;");
-        pauseHelpButton.setPrefSize(40, 40);
-        pauseHelpButton.setMinSize(40, 40);
-        pauseHelpButton.setMaxSize(40, 40);
-        StackPane.setAlignment(pauseHelpButton, Pos.TOP_RIGHT);
-        StackPane.setMargin(pauseHelpButton, new Insets(16, 16, 0, 0));
-
-        // Settings sub-menu within pause overlay
-        pauseSettingsBox.setAlignment(Pos.CENTER);
-        pauseSettingsBox.setMaxSize(330, 250);
-        pauseSettingsBox.setPadding(new Insets(22, 25, 22, 25));
-        pauseSettingsBox.getStyleClass().add("pixel-card");
-        pauseSettingsBox.setVisible(false);
-
-        Label settingsTitle = new Label("SETTINGS");
-        settingsTitle.getStyleClass().add("pixel-header");
-
-        gridToggleButton.getStyleClass().add("startAndQuitBtn");
-        gridToggleButton.setPrefSize(130, 40);
-        updateGridButtonText();
-
-        settingsBackButton.getStyleClass().add("startAndQuitBtn");
-        settingsBackButton.setPrefSize(130, 40);
-
-        pauseSettingsBox.getChildren().setAll(settingsTitle, gridToggleButton, settingsBackButton);
-
-        // Help / How to Play sub-menu within pause overlay
-        pauseHelpBox.setAlignment(Pos.CENTER);
-        pauseHelpBox.setMaxSize(520, 390);
-        pauseHelpBox.setPadding(new Insets(16, 20, 16, 20));
-        pauseHelpBox.getStyleClass().add("pixel-card");
-        pauseHelpBox.setVisible(false);
-
-        Label helpTitle = new Label("HOW TO PLAY");
-        helpTitle.getStyleClass().add("pixel-header");
-
-        VBox controlsSection = new VBox(5);
-        controlsSection.setAlignment(Pos.CENTER_LEFT);
-        controlsSection.setMaxWidth(480);
-        controlsSection.getStyleClass().add("pixel-slot");
-        Label controlsHeader = new Label("CONTROLS");
-        controlsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-text-fill: #2d572c; -fx-underline: true;");
-        controlsSection.getChildren().addAll(
-                controlsHeader,
-                createHelpLabel("• Arrow Keys: Start moving and steer the snake"),
-                createHelpLabel("• ESC or P: Pause the game and open the pause menu"),
-                createHelpLabel("• G: Toggle grid on/off  |  F11: Fullscreen  |  TAB: Restart")
-        );
-
-        VBox coinsSection = new VBox(5);
-        coinsSection.setAlignment(Pos.CENTER_LEFT);
-        coinsSection.setMaxWidth(480);
-        coinsSection.getStyleClass().add("pixel-slot");
-        Label coinsHeader = new Label("COINS & GOAL");
-        coinsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-text-fill: #2d572c; -fx-underline: true;");
-        coinsSection.getChildren().addAll(
-                coinsHeader,
-                createHelpLabel("• Red Coin: +5 points  |  Gold Coin: +15 bonus points"),
-                createHelpLabel("• Rainbow Coin: +5 points & boosts movement speed"),
-                createHelpLabel("• Blue Coin: +5 points & lets you pass through walls"),
-                createHelpLabel("• Silver Coin: +5 points & spawns obstacle blocks"),
-                createHelpLabel("• Clear all 3 levels by collecting target coins without crashing!")
-        );
-
-        helpBackButton.getStyleClass().add("startAndQuitBtn");
-        helpBackButton.setPrefSize(130, 40);
-
-        pauseHelpBox.getChildren().setAll(helpTitle, controlsSection, coinsSection, helpBackButton);
-
-        pauseSettingsButton.setOnAction(e -> {
-            updateGridButtonText();
-            pauseBox.setVisible(false);
-            pauseHelpBox.setVisible(false);
-            pauseHelpButton.setVisible(false);
-            pauseSettingsBox.setVisible(true);
-        });
-
-        pauseHelpButton.setOnAction(e -> {
-            pauseBox.setVisible(false);
-            pauseSettingsBox.setVisible(false);
-            pauseHelpButton.setVisible(false);
-            pauseHelpBox.setVisible(true);
-        });
-
-        gridToggleButton.setOnAction(e -> {
-            GameSettings.getInstance().toggleGrid();
-            updateGridButtonText();
-            redrawGrid();
-        });
-
-        settingsBackButton.setOnAction(e -> {
-            pauseSettingsBox.setVisible(false);
-            pauseHelpBox.setVisible(false);
-            pauseBox.setVisible(true);
-            pauseHelpButton.setVisible(true);
-        });
-
-        helpBackButton.setOnAction(e -> {
-            pauseHelpBox.setVisible(false);
-            pauseSettingsBox.setVisible(false);
-            pauseBox.setVisible(true);
-            pauseHelpButton.setVisible(true);
-        });
-
-        pauseOverlay.getChildren().setAll(pauseBox, pauseSettingsBox, pauseHelpBox, pauseHelpButton);
-    }
-
-    private Label createHelpLabel(String text) {
-        Label lbl = new Label(text);
-        lbl.setWrapText(true);
-        lbl.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px; -fx-text-fill: #2b2b2b;");
-        return lbl;
     }
 
     public void fitToWindow(double windowWidth, double windowHeight, Obstacle obstacle, Snake snake, Coin coin) {
@@ -279,10 +113,8 @@ public class GameView {
             gameWonLabel.setFont(new Font("SF Pixelate", Math.max(26, 18 * fullScale)));
         }
 
-        if (gc != null && snake != null && coin != null && obstacle != null) {
-            drawGrid(coin, snake, obstacle, gc, false, 0);
-        } else if (gc != null && snake != null && coin != null) {
-            drawGrid(coin, snake, gc);
+        if (gc != null && snake != null && coin != null) {
+            drawGrid(coin, snake, obstacle, gc);
         }
     }
 
@@ -312,67 +144,64 @@ public class GameView {
     }
 
     public boolean isPauseMenuVisible() {
-        return pauseOverlay.isVisible();
+        return pauseMenuView.isVisible();
     }
 
     public void showPauseMenu(boolean show) {
-        pauseOverlay.setVisible(show);
-        if (show) {
-            pauseBox.setVisible(true);
-            pauseSettingsBox.setVisible(false);
-            pauseHelpBox.setVisible(false);
-            pauseHelpButton.setVisible(true);
-            updateGridButtonText();
-            pauseOverlay.toFront();
-        } else {
-            pauseBox.setVisible(false);
-            pauseSettingsBox.setVisible(false);
-            pauseHelpBox.setVisible(false);
-            pauseHelpButton.setVisible(false);
-        }
+        pauseMenuView.show(show);
     }
 
     public boolean isPauseHelpVisible() {
-        return pauseHelpBox.isVisible();
+        return pauseMenuView.isHelpVisible();
     }
 
     public Button getPauseHelpButton() {
-        return pauseHelpButton;
+        return pauseMenuView.getPauseHelpButton();
     }
 
     public Button getHelpBackButton() {
-        return helpBackButton;
+        return pauseMenuView.getHelpBackButton();
     }
 
     public void updateGridButtonText() {
-        boolean enabled = GameSettings.getInstance().isGridEnabled();
-        gridToggleButton.setText(enabled ? "Grid: ON" : "Grid: OFF");
+        pauseMenuView.updateGridButtonText();
     }
 
     public void redrawGrid() {
-        if (gc != null && currentCoin != null && currentSnake != null && currentObstacle != null) {
-            drawGrid(currentCoin, currentSnake, currentObstacle, gc, false, 0);
-        } else if (gc != null && currentCoin != null && currentSnake != null) {
-            drawGrid(currentCoin, currentSnake, gc);
+        if (gc != null && currentCoin != null && currentSnake != null) {
+            drawGrid(currentCoin, currentSnake, currentObstacle, gc);
         }
     }
 
     public Button getResumeButton() {
-        return resumeButton;
+        return pauseMenuView.getResumeButton();
     }
 
     public Button getReturnMenuButton() {
-        return returnMenuButton;
+        return pauseMenuView.getReturnMenuButton();
     }
 
-    public void drawGrid(Coin coin, Snake snake, Obstacle obstacle, GraphicsContext gc, boolean a, int b) {
-        if (gc == null || coin == null || snake == null || obstacle == null) return;
+    private Image getCoinImage(Coin coin) {
+        if (coin instanceof GoldCoin) {
+            return goldCoinImage;
+        } else if (coin instanceof RainbowCoin) {
+            return rainbowCoinImage;
+        } else if (coin instanceof BlueCoin) {
+            return blueCoinImage;
+        } else if (coin instanceof SilverCoin) {
+            return silverCoinImage;
+        }
+        return redCoinImage;
+    }
+
+    public void drawGrid(Coin coin, Snake snake, Obstacle obstacle, GraphicsContext gc) {
+        if (gc == null || coin == null || snake == null) return;
         this.currentCoin = coin;
         this.currentSnake = snake;
         this.currentObstacle = obstacle;
 
         gc.clearRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
-        gc.setFill(game.getColor());
+        gc.setFill(ARENA_COLOR);
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
         // Checkerboard pattern (alternating tiles when grid is enabled)
@@ -396,67 +225,24 @@ public class GameView {
         double tileSize = game.getMultiplier() * fullScale;
         double coinPadding = 2 * fullScale;
         double coinSize = tileSize - (2 * coinPadding);
-        gc.drawImage(coin.getImage(),
-                (coin.getPos().x * tileSize) + coinPadding,
-                (coin.getPos().y * tileSize) + coinPadding,
+        gc.drawImage(getCoinImage(coin),
+                (coin.getPos().x() * tileSize) + coinPadding,
+                (coin.getPos().y() * tileSize) + coinPadding,
                 coinSize, coinSize);
 
-        int bodyIndex = 0;
-        for (Point point : snake.getBody()) {
-            drawBody(snake, point, bodyIndex);
-            bodyIndex++;
+        List<Cell> body = snake.getBody();
+        for (int bodyIndex = 0; bodyIndex < body.size(); bodyIndex++) {
+            drawBody(snake, body, bodyIndex);
         }
 
         drawHead(snake);
 
-        gc.setFill(obstacle.getColor());
-        for (Point point : obstacle.getObstacles()) {
-            gc.fillRect(point.x * game.getMultiplier() * fullScale, point.y * game.getMultiplier() * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
-        }
-    }
-
-    private void drawGrid(Coin coin, Snake snake, GraphicsContext gc) {
-        if (gc == null || coin == null || snake == null) return;
-        this.currentCoin = coin;
-        this.currentSnake = snake;
-
-        gc.clearRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
-        gc.setFill(game.getColor());
-        gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
-
-        // Checkerboard pattern (alternating tiles when grid is enabled)
-        if (GameSettings.getInstance().isGridEnabled()) {
-            double tileSize = game.getMultiplier() * fullScale;
-            gc.setFill(Color.web("#f1efd2"));
-            for (int x = 0; x < game.getWidth(); x++) {
-                for (int y = 0; y < game.getHeight(); y++) {
-                    if ((x + y) % 2 == 1) {
-                        gc.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-                    }
-                }
+        if (obstacle != null) {
+            gc.setFill(OBSTACLE_COLOR);
+            for (Cell cell : obstacle.getObstacles()) {
+                gc.fillRect(cell.x() * tileSize, cell.y() * tileSize, tileSize, tileSize);
             }
         }
-
-        // Boundary outline separating the playable grid from the white non-playable window area
-        gc.setStroke(Color.web("#b0ab88"));
-        gc.setLineWidth(2 * fullScale);
-        gc.strokeRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
-
-        double tileSize = game.getMultiplier() * fullScale;
-        double coinPadding = 2 * fullScale;
-        double coinSize = tileSize - (2 * coinPadding);
-        gc.drawImage(coin.getImage(),
-                (coin.getPos().x * tileSize) + coinPadding,
-                (coin.getPos().y * tileSize) + coinPadding,
-                coinSize, coinSize);
-
-        int bodyIndex = 0;
-        for (Point point : snake.getBody()) {
-            drawBody(snake, point, bodyIndex);
-            bodyIndex++;
-        }
-
-        drawHead(snake);
     }
 
     /**
@@ -477,74 +263,53 @@ public class GameView {
      */
     private void drawHead(Snake snake) {
         double tileSize = game.getMultiplier() * fullScale;
-        drawRotatedImage(snake.getImageViewHead().getImage(), snake.getSnakeDir(),
-                snake.getHead().x * tileSize, snake.getHead().y * tileSize, tileSize);
+        drawRotatedImage(headImage, snake.getSnakeDir(),
+                snake.getHead().x() * tileSize, snake.getHead().y() * tileSize, tileSize);
     }
 
     /**
      * Draws the segment of the snake's body, choosing the right picture
      * (tail, corner or straight piece) and rotation for it.
      * @param snake the snake being drawn
-     * @param point the grid position of this segment
+     * @param body the unmodifiable list of body cells for the current frame
      * @param index the segment's position in the body list, where 0 is the tail
      */
-    private void drawBody(Snake snake, Point point, int index) {
+    private void drawBody(Snake snake, List<Cell> body, int index) {
+        Cell point = body.get(index);
         // Skip drawing duplicate segments that are still stacked on the same spawn/tail cell
-        if (index > 0 && point.equals(snake.getBody().get(index - 1))) {
+        if (index > 0 && point.equals(body.get(index - 1))) {
             return;
         }
 
         Image segmentImage;
         int angle;
         if (index == 0) {
-            segmentImage = snake.getImageViewTail().getImage();
+            segmentImage = tailImage;
             angle = snake.getTailDir();
-        } else if (turnArray[(int) point.getX()][(int) point.getY()] != 0) {
-            segmentImage = snake.getImageViewTurn().getImage();
-            angle = 90 * turnArray[(int) point.getX()][(int) point.getY()];
         } else {
-            segmentImage = snake.getImageViewBody().getImage();
-            angle = snake.getBodyDir(index);
-        }
-
-        if (turnArray[(int) snake.getBody().get(0).getX()][(int) snake.getBody().get(0).getY()] != 0) {
-            turnArray[(int) snake.getBody().get(0).getX()][(int) snake.getBody().get(0).getY()] = 0;
+            Direction incoming = snake.getSegmentDirection(index - 1);
+            Direction outgoing = snake.getSegmentDirection(index);
+            if (incoming != outgoing) {
+                segmentImage = turnImage;
+                angle = Direction.getCornerRotation(incoming, outgoing);
+            } else {
+                segmentImage = bodyImage;
+                angle = outgoing.getBodyAngle();
+            }
         }
 
         double tileSize = game.getMultiplier() * fullScale;
-        drawRotatedImage(segmentImage, angle, point.x * tileSize, point.y * tileSize, tileSize);
+        drawRotatedImage(segmentImage, angle, point.x() * tileSize, point.y() * tileSize, tileSize);
     }
 
-    public void turnDir(Snake snake) {
-        if ((GameController.lastKey == KeyCode.LEFT && GameController.key == KeyCode.UP) || (GameController.lastKey == KeyCode.DOWN && GameController.key == KeyCode.RIGHT)) {
-            turnArray[(int) snake.getHead().getX()][(int) snake.getHead().getY()] = 2;
-        } else if ((GameController.lastKey == KeyCode.LEFT && GameController.key == KeyCode.DOWN) || (GameController.lastKey == KeyCode.UP && GameController.key == KeyCode.RIGHT)) {
-            turnArray[(int) snake.getHead().getX()][(int) snake.getHead().getY()] = 3;
-        } else if ((GameController.lastKey == KeyCode.RIGHT && GameController.key == KeyCode.UP) || (GameController.lastKey == KeyCode.DOWN && GameController.key == KeyCode.LEFT)) {
-            turnArray[(int) snake.getHead().getX()][(int) snake.getHead().getY()] = 1;
-        } else if ((GameController.lastKey == KeyCode.UP && GameController.key == KeyCode.LEFT) || (GameController.lastKey == KeyCode.RIGHT && GameController.key == KeyCode.DOWN)) {
-            turnArray[(int) snake.getHead().getX()][(int) snake.getHead().getY()] = 4;
-        } else turnArray[(int) snake.getHead().getX()][(int) snake.getHead().getY()] = 0;
-    }
-
-    public void gameOver(Snake snake) {
-        if (snake.getDead() && !gameOverVis) {
-            gameOverVis = true;
-            gameOverLabel.setVisible(true);
-        } else if (!snake.getDead() && gameOverVis) {
-            gameOverLabel.setVisible(false);
-            gameOverVis = false;
-        }
-    }
-
-    public void gameWon() {
-        if (game.gameWon() && !gameWonVis) {
-            gameWonVis = true;
-            gameWonLabel.setVisible(true);
-        } else if (!game.gameWon() && gameWonVis) {
-            gameWonVis = false;
-            gameWonLabel.setVisible(false);
-        }
+    /**
+     * Updates the visibility of the victory and game-over overlays from the authoritative {@link GameState}.
+     *
+     * @param state the current lifecycle phase of the game
+     */
+    public void updateStateOverlays(GameState state) {
+        gameOverLabel.setVisible(state == GameState.DEAD);
+        gameWonLabel.setVisible(state == GameState.WON);
     }
 
     public void updateScoreLabel() {
@@ -556,5 +321,4 @@ public class GameView {
                 game.getCoinsRequiredForCurrentLevel(),
                 game.getScorePoints()));
     }
-
 }

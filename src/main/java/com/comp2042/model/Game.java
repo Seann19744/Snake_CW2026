@@ -1,52 +1,37 @@
 package com.comp2042.model;
 
-import javafx.scene.paint.Color;
-
 public class Game {
     public static final int MAX_LEVEL = 3;
 
-    private Color color = Color.web("feffe4");
-    private int width;
-    private int height;
-    private int score;
-    private int maxScore;
-    private double multiplier;
+    private final int width;
+    private final int height;
+    private final double multiplier;
     private int scorePoints;
-    private double speed;
-    private boolean powerUp;
-    private boolean noBorder;
+    private final double speed;
+    private final boolean powerUp;
+    private final boolean noBorder;
 
-    private GameMode gameMode;
+    private final GameMode gameMode;
     private int currentLevel = 1;
     private int levelCoinsEaten = 0;
     private int totalCoinsEaten = 0;
 
     public Game(int x, int y, boolean powerUp, GameMode gameMode) {
         this.gameMode = gameMode;
-        speed = gameMode.getSpeed();
-        noBorder = gameMode.isNoBorder();
+        this.speed = gameMode.getSpeed();
+        this.noBorder = gameMode.isNoBorder();
         this.powerUp = powerUp;
-        width = x;
-        height = y;
-        maxScore = x * y - 2;
+        this.width = x;
+        this.height = y;
         if (height > 50) {
-            multiplier = 10;
+            this.multiplier = 10;
         } else {
-            multiplier = 20;
+            this.multiplier = 20;
         }
     }
 
     /**
-     * Backward-compatible constructor mapping legacy Difficulty to GameMode.
-     */
-    public Game(int x, int y, boolean powerUp, Difficulty difficulty) {
-        this(x, y, powerUp, difficulty == Difficulty.EASY ? GameMode.QUICK
-                : (difficulty == Difficulty.HARD ? GameMode.HARDCORE : GameMode.CLASSIC));
-    }
-
-    /**
-     * Returns whether the player has won the entire game (completed the final
-     * level).
+     * Returns whether the player has won the entire game (completed the final level).
      */
     public boolean gameWon() {
         return currentLevel == MAX_LEVEL && isLevelCompleted();
@@ -62,8 +47,7 @@ public class Game {
     /**
      * Advances to the next level if not already at MAX_LEVEL.
      *
-     * @return true if successfully advanced to a new level, false if already at
-     *         MAX_LEVEL
+     * @return true if successfully advanced to a new level, false if already at MAX_LEVEL
      */
     public boolean advanceLevel() {
         if (currentLevel < MAX_LEVEL) {
@@ -74,14 +58,12 @@ public class Game {
         return false;
     }
 
-    public void incScore() {
-        score++;
+    /**
+     * Increments the current level and total coin counters when a coin is collected.
+     */
+    public void recordCoinEaten() {
         levelCoinsEaten++;
         totalCoinsEaten++;
-    }
-
-    public void decMaxScore(int num) {
-        this.maxScore -= (num - 1);
     }
 
     public int getWidth() {
@@ -93,15 +75,10 @@ public class Game {
     }
 
     public void resetScore() {
-        score = 0;
         scorePoints = 0;
         currentLevel = 1;
         levelCoinsEaten = 0;
         totalCoinsEaten = 0;
-    }
-
-    public Color getColor() {
-        return color;
     }
 
     public double getMultiplier() {

@@ -81,7 +81,7 @@ The following features, enhancements, and bug fixes have been implemented, teste
 
 9. **In-Game Controls & Gameplay Mechanics**:
    - **Movement**: Arrow keys (`UP`, `DOWN`, `LEFT`, `RIGHT`) start the game and steer the snake.
-   - **Pause Game**: Press `P` to pause the animation loop.
+   - **Pause Menu**: Press `ESCAPE` to pause the animation loop and open the in-game pause menu.
    - **Reset Game**: Press `TAB` to reset the snake, coin, obstacles, score, and canvas without quitting.
    - **Power-Up Coins**:
      - Regular Coin (Red): +5 points, extends snake body.
@@ -89,7 +89,6 @@ The following features, enhancements, and bug fixes have been implemented, teste
      - Rainbow Coin: +5 points, temporary speed increase.
      - Blue Coin: +5 points, temporarily enables passing through borders without dying.
      - Silver Coin: +5 points, spawns random obstacle blocks.
-   - **Return to Menu**: Press `ESCAPE` to halt the game and return to the main menu.
 
 10. **Architectural MVC Refactoring**:
     - Reorganized all classes from the flat default package `com.comp2042` into distinct architectural layers: `model`, `view`, and `controller`, improving code cohesion and modularity.
@@ -148,33 +147,45 @@ The following features were considered during design and development but were no
 - **Purpose**: Application launcher entry point.
 - **Justification**: JavaFX 11+ enforces strict runtime checks when the entry point class directly inherits from `javafx.application.Application`. If launched from an IDE or a shaded fat JAR without explicit VM options pointing to the JavaFX module path, the JVM throws `Error: JavaFX runtime components are missing, and are required to run this application`. `Launcher` contains a standard `main(String[] args)` method that does not extend `Application` and delegates directly to `Main.main(args)`. This enables IntelliJ IDEA, Eclipse, and packaged fat JARs to execute seamlessly across all environments.
 
-### 2. `com.comp2042.model.Difficulty`
-- **Location**: `src/main/java/com/comp2042/model/Difficulty.java`
-- **Purpose**: Type-safe enumeration defining game difficulty levels (`EASY`, `NORMAL`, `HARD`).
-- **Justification**: The original codebase utilized loose `char` values (`'E'`, `'N'`, `'H'`) passed into constructors without input validation, creating risk of undefined states or a frozen snake if an unexpected character was passed. `Difficulty` encapsulates gameplay parameters:
-  - `speed` (double): Animation rate (8.5 for `EASY` and `NORMAL`, 13.0 for `HARD`).
-  - `noBorder` (boolean): `true` for `EASY` (enabling wall wrap-around), `false` for `NORMAL` and `HARD`.
-  - Provides a clean data model that integrates directly with JavaFX UI controls such as `ComboBox<Difficulty>`.
-
-### 3. `com.comp2042.model.CoinGenerator`
+### 2. `com.comp2042.model.CoinGenerator`
 - **Location**: `src/main/java/com/comp2042/model/CoinGenerator.java`
 - **Purpose**: Implements the GoF Factory Pattern for generating `Coin` instances and subclasses.
 - **Justification**: Decouples coin generation from controller classes. Encapsulates probability-based power-up selection and board condition validation. Supports constructor dependency injection with `java.util.Random`, enabling deterministic unit testing.
 
-### 4. `com.comp2042.model.GameMode`
+### 3. `com.comp2042.model.GameMode`
 - **Location**: `src/main/java/com/comp2042/model/GameMode.java`
 - **Purpose**: Type-safe enumeration defining game modes (`QUICK`, `CLASSIC`, `HARDCORE`).
 - **Justification**: Encapsulates speed, wall wrap-around behavior, coin quotas required to clear each level, snake body growth rate per coin eaten, and human-readable mode descriptions (`getDescription()`) displayed on the difficulty selection screen.
 
-### 5. `com.comp2042.model.GameSettings`
+### 4. `com.comp2042.model.GameSettings`
 - **Location**: `src/main/java/com/comp2042/model/GameSettings.java`
 - **Purpose**: Singleton configuration manager (GoF Singleton Pattern) managing user preferences such as grid display options and persistent high score storage (`highscore.txt`).
 - **Justification**: Centralizes application-wide user configuration and persistent record tracking without polluting controller state. Accessible from both the Main Menu and active gameplay sessions. Automatically loads the saved high score on startup (`loadHighScore()`) and writes new records to `highscore.txt` when beaten (`updateHighScore(int)`).
 
-### 6. `com.comp2042.model.GameState`
+### 5. `com.comp2042.model.GameState`
 - **Location**: `src/main/java/com/comp2042/model/GameState.java`
 - **Purpose**: Type-safe enumeration defining the lifecycle phases of a game session (`READY`, `RUNNING`, `PAUSED`, `LEVEL_CLEARED`, `WON`, `DEAD`).
-- **Justification**: Replaces fragmented boolean flags (`gameStarted`, overlay visibility checks) with an explicit finite state machine in `GameController`, ensuring deterministic transitions when starting a match, clearing levels, pausing/resuming, winning, or dying.
+- **Justification**: Replaces fragmented boolean flags (`gameStarted`, `gameOverVis`, `gameWonVis`, overlay visibility checks) with an explicit finite state machine across `GameController` and `GameView`, ensuring deterministic transitions when starting a match, clearing levels, pausing/resuming, winning, or dying.
+
+### 6. `com.comp2042.model.Direction`
+- **Location**: `src/main/java/com/comp2042/model/Direction.java`
+- **Purpose**: Type-safe enumeration defining cardinal movement directions (`UP`, `DOWN`, `LEFT`, `RIGHT`) with encapsulated grid deltas (`dx`, `dy`), rotation angles, opposite-direction validation (`isOpposite()`), and corner turn sprite angle computation (`getCornerRotation()`).
+- **Justification**: Eliminates primitive `'U'`/`'D'`/`'L'`/`'R'` characters and the 4 copy-pasted `switch` cases in `Snake.move()`, removes global mutable `public static KeyCode key` and `lastKey` fields from `GameController`, and replaces the `turnArray` grid in `GameView` with direct per-segment `Direction` comparisons.
+
+### 7. `com.comp2042.model.SpeedController`
+- **Location**: `src/main/java/com/comp2042/model/SpeedController.java`
+- **Purpose**: Pure-Java `@FunctionalInterface` (`void setSpeedRate(double rate)`) abstracting game loop speed adjustments in `Coin.applyEffect(...)`.
+- **Justification**: Applies the **Dependency Inversion Principle (DIP)** to decouple the `Coin` model hierarchy from JavaFX's `Timeline`. Together with moving sprite `Image`s and `Color`s from `Snake`, `Coin`, `Game`, and `Obstacle` into `GameView`, this makes the entire `com.comp2042.model` package 100% pure Java with zero `javafx.*` dependencies and enables pure-Java model unit tests without `JavaFXTestBase`.
+
+### 8. `com.comp2042.model.Cell`
+- **Location**: `src/main/java/com/comp2042/model/Cell.java`
+- **Purpose**: Immutable 2D grid coordinate record (`public record Cell(int x, int y)`) with translation helpers (`translate(int, int)` and `translate(Direction)`).
+- **Justification**: Replaces mutable legacy `java.awt.Point` across `Snake`, `Coin`, `Obstacle`, and `GameView`, eliminating all `java.awt.*` dependencies, removing `(int)` double-to-int casts, and enforcing coordinate immutability without defensive object cloning.
+
+### 9. `com.comp2042.view.PauseMenuView`
+- **Location**: `src/main/java/com/comp2042/view/PauseMenuView.java`
+- **Purpose**: Dedicated view component encapsulating the in-game pause overlay (`pauseBox`), settings sub-menu (`pauseSettingsBox`), and How to Play help overlay (`pauseHelpBox`).
+- **Justification**: Applies the **Single Responsibility Principle (SRP)** by extracting ~140 lines of pause overlay UI construction and sub-menu navigation out of `GameView`, allowing `GameView` to focus exclusively on board rendering, HUD labels, and window scaling.
 
 ---
 
@@ -198,7 +209,7 @@ The following features were considered during design and development but were no
 ### 3. `src/main/resources/resources/views/MainMenu.fxml` & `styling.css`
 - Updated `fx:controller` attribute to match the new package path: `com.comp2042.controller.MainMenuController`.
 - Replaced the `<ComboBox>` dropdown with a structured `<StackPane fx:id="difficultyOverlay">` screen containing left-aligned `startAndQuitBtn` mode buttons (`Quick`, `Classic`, `Hardcore`) paired with right-aligned wrapped English description labels in `HBox` rows, plus a `Back` navigation button.
-- Added a top-right `?` button (`btn_help`) and `<StackPane fx:id="helpOverlay">` explaining all keyboard controls (`Arrow Keys`, `ESC/P`, `G`, `F11`, `TAB`) and coin power-up effects with embedded `16x16` pixel coin sprite icons.
+- Added a top-right `?` button (`btn_help`) and `<StackPane fx:id="helpOverlay">` explaining all keyboard controls (`Arrow Keys`, `ESC`, `G`, `F11`, `TAB`) and coin power-up effects with embedded `16x16` pixel coin sprite icons.
 - Added a harmonized **Quit** button (`btn_quit`) styled with `startAndQuitBtn` and aligned below **Start** and **Settings**.
 - Redesigned the menu theme in `MainMenu.fxml` and `styling.css` with a background `<Canvas fx:id="menuBgCanvas">`, retro 8-bit bordered dialog cards (`.pixel-card`), cartridge-style slot containers (`.pixel-slot`), top-centered high score badge (`.pixel-badge` with `lbl_highScore`), shaded pixel headers (`.pixel-header`), harmonized `130x40` buttons, golden hover highlights (`#ffe66d`), and tactile 8-bit button press offsets.
 
@@ -228,8 +239,9 @@ The following features were considered during design and development but were no
 ### 7. `com.comp2042.view.GameView`
 - Moved to package `com.comp2042.view`.
 - Fixed fullscreen distortion: removed duplicate `* fullScale` in `drawHead()` and `drawBody()`, eliminating the bug where snake body parts were scaled quadratically.
-- Renamed parameter `snek` to `snake` in methods (`turnDir`, `gameOver`, `drawGrid`, `drawHead`, `drawBody`).
-- Added in-game pause overlay (`pauseOverlay`) with a Settings sub-menu (`pauseSettingsBox`) and a top-right `?` help button (`pauseHelpButton`) opening an in-game **How to Play** overlay (`pauseHelpBox`), styled with matching 8-bit `.pixel-card` and `.pixel-slot` arcade panels and harmonized `130x40` buttons.
+- Renamed parameter `snek` to `snake` in methods (`drawGrid`, `drawHead`, `drawBody`).
+- Centralized all snake and coin sprite `Image` assets and board/obstacle `Color` constants inside `GameView`, removing JavaFX dependencies from the `model` package.
+- Extracted in-game pause overlay UI into `PauseMenuView` (Single Responsibility Principle), eliminated `ImageView.snapshot()` allocations in favor of direct `GraphicsContext` canvas rotation (`drawRotatedImage()`), removed the redundant `drawGrid` overload, and fetched `snake.getBody()` once per frame instead of copying the list per segment.
 
 ### 8. `com.comp2042.view.ViewManager`
 - Moved to package `com.comp2042.view`.
@@ -238,12 +250,13 @@ The following features were considered during design and development but were no
 
 ### 9. `com.comp2042.model.Snake`
 - Moved to package `com.comp2042.model`.
-- Standardized variable naming throughout the class (`snek` -> `snake`).
+- Standardized variable naming throughout the class (`snek` -> `snake`, `ateCoin` -> `resolveCoinConsumption`).
+- Replaced raw `'U'`/`'D'`/`'L'`/`'R'` `switch` branches with a unified `move(Direction)` method, replaced `java.awt.Point` with the immutable `Cell` record, stored per-segment movement directions (`ArrayList<Direction> bodyDirs`), removed all JavaFX `ImageView` and `Color` fields, and changed `getBody()` to return a zero-copy `Collections.unmodifiableList(body)`.
 
 ### 10. `com.comp2042.model.Coin` and Subclasses (`GoldCoin`, `SilverCoin`, `BlueCoin`, `RainbowCoin`)
 - Moved to package `com.comp2042.model`.
-- Updated constructors and method parameters from `Snake snek` to `Snake snake`.
-- Implemented polymorphic `applyEffect(Game, Snake, Obstacle, Timeline)` across all coin types, encapsulating power-up behaviors within the coin models rather than external controller conditionals.
+- Updated constructors and method parameters from `Snake snek` to `Snake snake` and coordinates to `Cell`.
+- Implemented polymorphic `applyEffect(Game, Snake, Obstacle, SpeedController)` across all coin types (Open-Closed Principle & Dependency Inversion Principle), removing JavaFX `Image` and `Timeline` dependencies from the model hierarchy.
 
 ---
 
@@ -260,9 +273,10 @@ src/main/java/com/comp2042/
 │   └── MainMenuController.java         (Main menu UI interactions, difficulty binding)
 ├── model/                              [Model Layer]
 │   ├── BlueCoin.java                   (Border pass power-up coin)
+│   ├── Cell.java                       (Immutable 2D grid coordinate record)
 │   ├── Coin.java                       (Base coin entity)
 │   ├── CoinGenerator.java              (GoF Factory Pattern for coin instantiation)
-│   ├── Difficulty.java                 (Legacy difficulty enumeration)
+│   ├── Direction.java                  (Cardinal direction enum with deltas & angles)
 │   ├── Game.java                       (Game state, score, speed, grid boundaries)
 │   ├── GameMode.java                   (Game modes: Quick, Classic, Hardcore)
 │   ├── GameSettings.java               (GoF Singleton for grid preference & high score)
@@ -271,9 +285,11 @@ src/main/java/com/comp2042/
 │   ├── Obstacle.java                   (Obstacle entity and placement algorithms)
 │   ├── RainbowCoin.java                (Speed boost coin)
 │   ├── SilverCoin.java                 (Obstacle-spawning coin)
-│   └── Snake.java                      (Snake segments, movement, collision detection)
+│   ├── Snake.java                      (Snake segments, movement, collision detection)
+│   └── SpeedController.java            (DIP functional interface for speed control)
 └── view/                               [View Layer]
     ├── GameView.java                   (Canvas rendering, head/tail rotations, UI labels)
+    ├── PauseMenuView.java              (In-game pause, settings, and help overlay UI)
     └── ViewManager.java                (JavaFX stage management and scene transitions)
 ```
 
@@ -289,6 +305,8 @@ src/main/java/com/comp2042/
 Adhering to clean code principles and Java naming conventions:
 - **`snek` -> `snake`**: Replaced all colloquialisms with descriptive, professional terminology across variable names, parameter lists, and method signatures in all classes.
 - **`valKey()` -> `isValidTurn()`**: Renamed this method in `GameController.java` to clearly express its purpose as a boolean predicate checking whether a direction change is legally permitted.
+- **`incScore()` -> `recordCoinEaten()`**: Renamed in `Game.java` to clarify that it increments level and total coin counters rather than point score (`addPoints(int)`).
+- **`ateCoin(Coin)` -> `resolveCoinConsumption(Coin)`**: Renamed in `Snake.java` to reflect that the method both checks coin collection and advances/grows the snake's tail segments.
 - **`initalizeMainMenu()` -> `initializeMainMenu()`**: Corrected spelling error in `ViewManager.java` and updated all callers (`Main.java`).
 - **Standardized Constants**: Maintained UPPER_SNAKE_CASE for class constants (`X_VALUE`, `Y_VALUE`, `POWER_UP`).
 

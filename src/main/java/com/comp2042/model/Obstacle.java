@@ -1,43 +1,38 @@
 package com.comp2042.model;
 
-import javafx.scene.paint.Color;
-
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class Obstacle {
-    private Color color = Color.BLACK;
-    private ArrayList<Point> obstacles = new ArrayList<>();
-    private int x;
-    private int y;
+    private final ArrayList<Cell> obstacles = new ArrayList<>();
+    private final int x;
+    private final int y;
 
     public Obstacle(int x, int y) {
-       this.x = x;
-       this.y = y;
+        this.x = x;
+        this.y = y;
     }
 
     /**
-     * Adds randomly placed obstacles to the grid, avoiding the coin and snake.
-     * Does nothing if more than 50 obstacles already exist, so the total can still pass 50 by the end of one call
+     * Adds randomly placed obstacles to the grid, avoiding the coin, the snake,
+     * existing obstacles, and a 2-tile safety radius around the snake's head.
+     * Does nothing if more than 50 obstacles already exist.
      *
      * @param snake the snake, used to avoid its head and body
      * @param coin the current coin, used to avoid its square
-     * @param amount how many obstacles is added.
+     * @param amount how many obstacles are added
      */
     public void newObstacles(Snake snake, Coin coin, int amount) {
-        // Exit the method if there are already more than 50 obstacles
         if (obstacles.size() > 50) {
             return;
         }
         Random rnd = new Random();
         int maxAttempts = x * y * 4;
-        // Store each obstacle's coordinates
-        Point p;
+        Cell p;
         for (int i = 0; i < amount; i++) {
             int attempts = 0;
             do {
-                p = new Point(rnd.nextInt(x), rnd.nextInt(y));
+                p = new Cell(rnd.nextInt(x), rnd.nextInt(y));
                 attempts++;
             } while (attempts < maxAttempts && (coin.getPos().equals(p)
                     || snake.getBody().contains(p)
@@ -64,19 +59,15 @@ public class Obstacle {
      * @param head the snake's current head position
      * @return true if the candidate is too close to the snake's head
      */
-    public boolean isTooCloseToHead(Point candidate, Point head) {
-        int rawDx = Math.abs(candidate.x - head.x);
-        int rawDy = Math.abs(candidate.y - head.y);
+    public boolean isTooCloseToHead(Cell candidate, Cell head) {
+        int rawDx = Math.abs(candidate.x() - head.x());
+        int rawDy = Math.abs(candidate.y() - head.y());
         int dx = Math.min(rawDx, x - rawDx);
         int dy = Math.min(rawDy, y - rawDy);
         return dx <= 2 && dy <= 2;
     }
 
-    public Color getColor() {
-        return color;
-    }
-
-    public ArrayList<Point> getObstacles() {
+    public ArrayList<Cell> getObstacles() {
         return obstacles;
     }
 
@@ -95,7 +86,6 @@ public class Obstacle {
     public void loadLevelLayout(int level) {
         reset();
         if (level == 2) {
-            // Level 2: Four Pillars (2x2 blocks in each quadrant)
             int[][] offsets = {{4, 4}, {14, 4}, {4, 14}, {14, 14}};
             for (int[] base : offsets) {
                 for (int dx = 0; dx < 2; dx++) {
@@ -103,26 +93,25 @@ public class Obstacle {
                         int px = (base[0] * x) / 20 + dx;
                         int py = (base[1] * y) / 20 + dy;
                         if (px >= 0 && px < x && py >= 0 && py < y) {
-                            obstacles.add(new Point(px, py));
+                            obstacles.add(new Cell(px, py));
                         }
                     }
                 }
             }
         } else if (level == 3) {
-            // Level 3: The Labyrinth (interior corridor walls leaving center and outer ring open)
             int midX = x / 2;
             int midY = y / 2;
             for (int py = 2; py <= 6; py++) {
-                obstacles.add(new Point(midX, py));
+                obstacles.add(new Cell(midX, py));
             }
             for (int py = y - 7; py <= y - 3; py++) {
-                obstacles.add(new Point(midX, py));
+                obstacles.add(new Cell(midX, py));
             }
             for (int px = 2; px <= 6; px++) {
-                obstacles.add(new Point(px, midY));
+                obstacles.add(new Cell(px, midY));
             }
             for (int px = x - 7; px <= x - 3; px++) {
-                obstacles.add(new Point(px, midY));
+                obstacles.add(new Cell(px, midY));
             }
         }
     }

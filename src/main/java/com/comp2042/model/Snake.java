@@ -1,33 +1,20 @@
 package com.comp2042.model;
 
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.paint.Color;
-
-import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Snake {
-    private Color headColor = Color.web("2eb872");
-    private Color bodyColor = Color.web("a3de83");
     private boolean dead = false;
-    private final Point head = new Point();
-    private final ArrayList<Point> body = new ArrayList<>();
-    private final ArrayList<Integer> bodyDirs = new ArrayList<>();
+    private Cell head;
+    private final ArrayList<Cell> body = new ArrayList<>();
+    private final ArrayList<Direction> bodyDirs = new ArrayList<>();
     private final int gx;
     private final int gy;
     private boolean ignoreBorders = false;
-    private boolean noBorder;
-    private Obstacle obstacle;
-    private Image imgInputHead = new Image("resources/views/res/snakehead.png");
-    private ImageView imageHead = new ImageView(imgInputHead);
-    private Image imgInputBody = new Image("resources/views/res/snakebody.png");
-    private ImageView imageBody = new ImageView(imgInputBody);
-    private Image imgInputTurn = new Image("resources/views/res/snaketurnleft.png");
-    private ImageView imageTurn = new ImageView(imgInputTurn);
-    private Image imgInputTail = new Image("resources/views/res/snaketail.png");
-    private ImageView imageTail = new ImageView(imgInputTail);
-    private int snakeDir = 270;
+    private final boolean noBorder;
+    private final Obstacle obstacle;
+    private Direction direction = Direction.LEFT;
     private int growthRate = 1;
 
     public Snake(int x, int y, boolean noBorder, Obstacle obstacle) {
@@ -38,74 +25,41 @@ public class Snake {
         this.obstacle = obstacle;
         this.noBorder = noBorder;
         this.growthRate = growthRate;
-        this.head.setLocation(x / 2, y / 2);
-        this.body.add(new Point(x / 2 + 1, y / 2));
-        this.bodyDirs.add(270);
+        this.head = new Cell(x / 2, y / 2);
+        this.body.add(new Cell(x / 2 + 1, y / 2));
+        this.bodyDirs.add(Direction.LEFT);
         this.gx = x;
         this.gy = y;
     }
 
     public void move(char dir) {
-        Point prevHead = new Point(head);
-        switch (dir) {
-            case 'U':
-                snakeDir = 0;
-                head.translate(0, -1);
-                if (borderControl()) {
-                    if (!ignoreBorders && !noBorder) {
-                        head.setLocation(prevHead);
-                        dead = true;
-                    } else {
-                        head.setLocation(head.getX(), gy - 1);
-                    }
-                }
-                break;
+        move(Direction.fromChar(dir));
+    }
 
-            case 'D':
-                snakeDir = 180;
-                head.translate(0, 1);
-                if (borderControl()) {
-                    if (!ignoreBorders && !noBorder) {
-                        head.setLocation(prevHead);
-                        dead = true;
-                    } else {
-                        head.setLocation(head.getX(), 0);
-                    }
-                }
-                break;
+    public void move(Direction dir) {
+        if (dir == null) {
+            return;
+        }
+        Cell prevHead = head;
+        this.direction = dir;
+        head = head.translate(dir);
 
-            case 'L':
-                snakeDir = 270;
-                head.translate(-1, 0);
-                if (borderControl()) {
-                    if (!ignoreBorders && !noBorder) {
-                        head.setLocation(prevHead);
-                        dead = true;
-                    } else {
-                        head.setLocation(gx - 1, head.getY());
-                    }
-                }
-                break;
-
-            case 'R':
-                snakeDir = 90;
-                head.translate(1, 0);
-                if (borderControl()) {
-                    if (!ignoreBorders && !noBorder) {
-                        head.setLocation(prevHead);
-                        dead = true;
-                    } else {
-                        head.setLocation(0, head.getY());
-                    }
-                }
-                break;
+        if (borderControl()) {
+            if (!ignoreBorders && !noBorder) {
+                head = prevHead;
+                dead = true;
+            } else {
+                int wrappedX = (head.x() + gx) % gx;
+                int wrappedY = (head.y() + gy) % gy;
+                head = new Cell(wrappedX, wrappedY);
+            }
         }
 
         body.add(prevHead);
-        bodyDirs.add(snakeDir);
+        bodyDirs.add(direction);
 
         if (!dead && obstacle.getObstacles().contains(head)) {
-            head.setLocation(prevHead);
+            head = prevHead;
             dead = true;
         }
 
@@ -114,22 +68,43 @@ public class Snake {
         }
     }
 
-    public int getTailDir() {
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public Direction getSegmentDirection(int index) {
         if (bodyDirs.isEmpty()) {
-            return snakeDir;
+            return direction;
         }
-        return bodyDirs.get(0);
+        if (index < 0) {
+            return bodyDirs.get(0);
+        }
+        if (index >= bodyDirs.size()) {
+            return bodyDirs.get(bodyDirs.size() - 1);
+        }
+        return bodyDirs.get(index);
+    }
+
+    public int getTailDir() {
+        return getSegmentDirection(0).getAngle();
     }
 
     public int getBodyDir(int bodyCount) {
         if (bodyCount < 0 || bodyCount >= bodyDirs.size()) {
             return 0;
         }
-        int dir = bodyDirs.get(bodyCount);
-        return (dir == 90 || dir == 270) ? 270 : 0;
+        return bodyDirs.get(bodyCount).getBodyAngle();
     }
 
-    public boolean ateCoin(Coin coin) {
+    /**
+     * Checks whether the snake's head has reached the coin's cell, advancing the tail
+     * (removing the trailing segment) if no coin was eaten or growing extra segments
+     * when {@code growthRate > 1}.
+     *
+     * @param coin the active coin on the board
+     * @return true if the coin was consumed, false otherwise
+     */
+    public boolean resolveCoinConsumption(Coin coin) {
         boolean ate = head.equals(coin.getPos());
         if (!ate) {
             body.remove(0);
@@ -137,11 +112,11 @@ public class Snake {
                 bodyDirs.remove(0);
             }
         } else if (growthRate > 1) {
-            // Adds extra segment(s) when growthRate > 1 (e.g. Hardcore mode)
-            int tailDir = getTailDir();
+            Direction tailDirection = getSegmentDirection(0);
+            Cell tailCell = body.get(0);
             for (int i = 1; i < growthRate; i++) {
-                body.add(0, new Point(body.get(0)));
-                bodyDirs.add(0, tailDir);
+                body.add(0, tailCell);
+                bodyDirs.add(0, tailDirection);
             }
         }
         return ate;
@@ -156,15 +131,16 @@ public class Snake {
      */
     public void resetPosition(int x, int y) {
         int preservedSize = Math.max(1, body.size());
-        head.setLocation(x / 2, y / 2);
+        head = new Cell(x / 2, y / 2);
         body.clear();
         bodyDirs.clear();
+        Cell spawnTail = new Cell(x / 2 + 1, y / 2);
         for (int i = 0; i < preservedSize; i++) {
-            body.add(new Point(x / 2 + 1, y / 2));
-            bodyDirs.add(270);
+            body.add(spawnTail);
+            bodyDirs.add(Direction.LEFT);
         }
         dead = false;
-        snakeDir = 270;
+        direction = Direction.LEFT;
     }
 
     public int getGrowthRate() {
@@ -176,27 +152,19 @@ public class Snake {
     }
 
     private boolean borderControl() {
-        return head.getX() < 0 || head.getY() < 0 || head.getX() >= gx || head.getY() >= gy;
+        return head.x() < 0 || head.y() < 0 || head.x() >= gx || head.y() >= gy;
     }
 
     public boolean hitSelf() {
         return body.contains(head);
     }
 
-    public ArrayList<Point> getBody() {
-        return new ArrayList<>(body);
+    public List<Cell> getBody() {
+        return Collections.unmodifiableList(body);
     }
 
-    public Point getHead() {
-        return new Point(head);
-    }
-
-    public Color getHeadColor() {
-        return headColor;
-    }
-
-    public Color getBodyColor() {
-        return bodyColor;
+    public Cell getHead() {
+        return head;
     }
 
     public boolean getDead() {
@@ -207,23 +175,7 @@ public class Snake {
         ignoreBorders = ign;
     }
 
-    public ImageView getImageViewHead() {
-        return imageHead;
-    }
-
-    public ImageView getImageViewBody() {
-        return imageBody;
-    }
-
-    public ImageView getImageViewTurn() {
-        return imageTurn;
-    }
-
     public int getSnakeDir() {
-        return snakeDir;
-    }
-
-    public ImageView getImageViewTail() {
-        return imageTail;
+        return direction.getAngle();
     }
 }

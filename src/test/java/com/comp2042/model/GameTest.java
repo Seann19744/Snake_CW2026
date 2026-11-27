@@ -48,8 +48,8 @@ class GameTest {
     @DisplayName("Verify score incrementation and point addition")
     void testScoreAndPoints() {
         GameSettings.getInstance().resetDefaults();
-        game.incScore();
-        game.incScore();
+        game.recordCoinEaten();
+        game.recordCoinEaten();
         game.addPoints(15);
 
         assertEquals(15, game.getScorePoints(), "Score points should be 15 after adding 15");
@@ -70,10 +70,10 @@ class GameTest {
         // Level 1: requires 8 coins in Classic mode
         assertEquals(8, game.getCoinsRequiredForCurrentLevel());
         for (int i = 0; i < 7; i++) {
-            game.incScore();
+            game.recordCoinEaten();
             assertFalse(game.isLevelCompleted(), "Level 1 should not be complete before 8 coins");
         }
-        game.incScore(); // 8th coin
+        game.recordCoinEaten(); // 8th coin
         assertTrue(game.isLevelCompleted(), "Level 1 should be complete after 8 coins");
         assertFalse(game.gameWon(), "Game should not be won after Level 1");
 
@@ -85,7 +85,7 @@ class GameTest {
 
         // Level 2: requires 10 coins
         for (int i = 0; i < 10; i++) {
-            game.incScore();
+            game.recordCoinEaten();
         }
         assertTrue(game.isLevelCompleted());
         assertFalse(game.gameWon(), "Game should not be won after Level 2");
@@ -97,10 +97,10 @@ class GameTest {
 
         // Level 3: requires 12 coins
         for (int i = 0; i < 11; i++) {
-            game.incScore();
+            game.recordCoinEaten();
             assertFalse(game.gameWon());
         }
-        game.incScore(); // 12th coin
+        game.recordCoinEaten(); // 12th coin
         assertTrue(game.isLevelCompleted());
         assertTrue(game.gameWon(), "Game should be won after completing Level 3!");
 
