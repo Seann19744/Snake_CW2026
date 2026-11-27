@@ -128,7 +128,7 @@
                             <children>
                                 <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 13px; -fx-text-fill: #2d572c; -fx-underline: true;" text="CONTROLS" />
                                 <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="• Arrow Keys: Start moving and steer the snake" wrapText="true" />
-                                <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="• ESC or P: Pause the game and open the pause menu" wrapText="true" />
+                                <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="• ESC: Pause the game and open the pause menu" wrapText="true" />
                                 <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="• G: Toggle grid on/off  |  F11: Fullscreen  |  TAB: Restart" wrapText="true" />
                             </children>
                         </VBox>

@@ -81,7 +81,7 @@ The following features, enhancements, and bug fixes have been implemented, teste
 
 9. **In-Game Controls & Gameplay Mechanics**:
    - **Movement**: Arrow keys (`UP`, `DOWN`, `LEFT`, `RIGHT`) start the game and steer the snake.
-   - **Pause Game**: Press `P` to pause the animation loop.
+   - **Pause Menu**: Press `ESCAPE` to pause the animation loop and open the in-game pause menu.
    - **Reset Game**: Press `TAB` to reset the snake, coin, obstacles, score, and canvas without quitting.
    - **Power-Up Coins**:
      - Regular Coin (Red): +5 points, extends snake body.
@@ -89,7 +89,6 @@ The following features, enhancements, and bug fixes have been implemented, teste
      - Rainbow Coin: +5 points, temporary speed increase.
      - Blue Coin: +5 points, temporarily enables passing through borders without dying.
      - Silver Coin: +5 points, spawns random obstacle blocks.
-   - **Return to Menu**: Press `ESCAPE` to halt the game and return to the main menu.
 
 10. **Architectural MVC Refactoring**:
     - Reorganized all classes from the flat default package `com.comp2042` into distinct architectural layers: `model`, `view`, and `controller`, improving code cohesion and modularity.
@@ -210,7 +209,7 @@ The following features were considered during design and development but were no
 ### 3. `src/main/resources/resources/views/MainMenu.fxml` & `styling.css`
 - Updated `fx:controller` attribute to match the new package path: `com.comp2042.controller.MainMenuController`.
 - Replaced the `<ComboBox>` dropdown with a structured `<StackPane fx:id="difficultyOverlay">` screen containing left-aligned `startAndQuitBtn` mode buttons (`Quick`, `Classic`, `Hardcore`) paired with right-aligned wrapped English description labels in `HBox` rows, plus a `Back` navigation button.
-- Added a top-right `?` button (`btn_help`) and `<StackPane fx:id="helpOverlay">` explaining all keyboard controls (`Arrow Keys`, `ESC/P`, `G`, `F11`, `TAB`) and coin power-up effects with embedded `16x16` pixel coin sprite icons.
+- Added a top-right `?` button (`btn_help`) and `<StackPane fx:id="helpOverlay">` explaining all keyboard controls (`Arrow Keys`, `ESC`, `G`, `F11`, `TAB`) and coin power-up effects with embedded `16x16` pixel coin sprite icons.
 - Added a harmonized **Quit** button (`btn_quit`) styled with `startAndQuitBtn` and aligned below **Start** and **Settings**.
 - Redesigned the menu theme in `MainMenu.fxml` and `styling.css` with a background `<Canvas fx:id="menuBgCanvas">`, retro 8-bit bordered dialog cards (`.pixel-card`), cartridge-style slot containers (`.pixel-slot`), top-centered high score badge (`.pixel-badge` with `lbl_highScore`), shaded pixel headers (`.pixel-header`), harmonized `130x40` buttons, golden hover highlights (`#ffe66d`), and tactile 8-bit button press offsets.
 

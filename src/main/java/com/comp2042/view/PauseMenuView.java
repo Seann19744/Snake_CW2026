@@ -53,7 +53,7 @@ public class PauseMenuView {
         pauseTitle.setId("pauseTitle");
         pauseTitle.getStyleClass().add("pixel-header");
 
-        Label pauseHint = new Label("Press ESC or P to resume");
+        Label pauseHint = new Label("Press ESC to resume");
         pauseHint.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px; -fx-text-fill: #6e6a50;");
 
         resumeButton.getStyleClass().add("startAndQuitBtn");
@@ -114,7 +114,7 @@ public class PauseMenuView {
         controlsSection.getChildren().addAll(
                 controlsHeader,
                 createHelpLabel("• Arrow Keys: Start moving and steer the snake"),
-                createHelpLabel("• ESC or P: Pause the game and open the pause menu"),
+                createHelpLabel("• ESC: Pause the game and open the pause menu"),
                 createHelpLabel("• G: Toggle grid on/off  |  F11: Fullscreen  |  TAB: Restart")
         );
 

@@ -139,8 +139,8 @@ public class GameController {
     public void handle(KeyEvent event) {
         KeyCode code = event.getCode();
 
-        // Pause Menu toggle with ESC or P
-        if (code.equals(KeyCode.ESCAPE) || code.equals(KeyCode.P)) {
+        // Pause Menu toggle with ESC
+        if (code.equals(KeyCode.ESCAPE)) {
             togglePauseMenu();
             event.consume();
             return;
