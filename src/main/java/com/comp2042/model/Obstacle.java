@@ -1,13 +1,10 @@
 package com.comp2042.model;
 
-import javafx.scene.paint.Color;
-
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class Obstacle {
-    private Color color = Color.BLACK;
     private ArrayList<Point> obstacles = new ArrayList<>();
     private int x;
     private int y;
@@ -70,10 +67,6 @@ public class Obstacle {
         int dx = Math.min(rawDx, x - rawDx);
         int dy = Math.min(rawDy, y - rawDy);
         return dx <= 2 && dy <= 2;
-    }
-
-    public Color getColor() {
-        return color;
     }
 
     public ArrayList<Point> getObstacles() {

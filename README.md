@@ -181,6 +181,11 @@ The following features were considered during design and development but were no
 - **Purpose**: Type-safe enumeration defining cardinal movement directions (`UP`, `DOWN`, `LEFT`, `RIGHT`) with encapsulated grid deltas (`dx`, `dy`), rotation angles, opposite-direction validation (`isOpposite()`), and corner turn sprite angle computation (`getCornerRotation()`).
 - **Justification**: Eliminates primitive `'U'`/`'D'`/`'L'`/`'R'` characters and the 4 copy-pasted `switch` cases in `Snake.move()`, removes global mutable `public static KeyCode key` and `lastKey` fields from `GameController`, and replaces the `turnArray` grid in `GameView` with direct per-segment `Direction` comparisons.
 
+### 8. `com.comp2042.model.SpeedController`
+- **Location**: `src/main/java/com/comp2042/model/SpeedController.java`
+- **Purpose**: Pure-Java `@FunctionalInterface` (`void setSpeedRate(double rate)`) abstracting game loop speed adjustments in `Coin.applyEffect(...)`.
+- **Justification**: Applies the **Dependency Inversion Principle (DIP)** to decouple the `Coin` model hierarchy from JavaFX's `Timeline`. Together with moving sprite `Image`s and `Color`s from `Snake`, `Coin`, `Game`, and `Obstacle` into `GameView`, this makes the entire `com.comp2042.model` package 100% pure Java with zero `javafx.*` dependencies and enables pure-Java model unit tests without `JavaFXTestBase`.
+
 ---
 
 ## Modified Java Classes
@@ -277,7 +282,8 @@ src/main/java/com/comp2042/
 │   ├── Obstacle.java                   (Obstacle entity and placement algorithms)
 │   ├── RainbowCoin.java                (Speed boost coin)
 │   ├── SilverCoin.java                 (Obstacle-spawning coin)
-│   └── Snake.java                      (Snake segments, movement, collision detection)
+│   ├── Snake.java                      (Snake segments, movement, collision detection)
+│   └── SpeedController.java            (DIP functional interface for speed control)
 └── view/                               [View Layer]
     ├── GameView.java                   (Canvas rendering, head/tail rotations, UI labels)
     └── ViewManager.java                (JavaFX stage management and scene transitions)

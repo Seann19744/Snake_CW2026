@@ -1,10 +1,10 @@
 package com.comp2042.model;
 
-import javafx.scene.input.KeyCode;
-
 /**
- * Type-safe enumeration representing the four cardinal movement directions of the snake.
- * Encapsulates grid translation deltas, sprite rotation angles, opposite-direction checks,
+ * Type-safe enumeration representing the four cardinal movement directions of
+ * the snake.
+ * Encapsulates grid translation deltas, sprite rotation angles,
+ * opposite-direction checks,
  * and corner turn sprite angles.
  */
 public enum Direction {
@@ -36,14 +36,16 @@ public enum Direction {
     }
 
     /**
-     * Returns the straight body sprite rotation angle (270 for horizontal, 0 for vertical).
+     * Returns the straight body sprite rotation angle (270 for horizontal, 0 for
+     * vertical).
      */
     public int getBodyAngle() {
         return (this == LEFT || this == RIGHT) ? 270 : 0;
     }
 
     /**
-     * Checks whether the specified direction is the 180-degree opposite of this direction.
+     * Checks whether the specified direction is the 180-degree opposite of this
+     * direction.
      *
      * @param other the direction to compare against
      * @return true if {@code other} is directly opposite to this direction
@@ -56,7 +58,8 @@ public enum Direction {
     }
 
     /**
-     * Computes the rotation angle (in degrees) for the corner turn sprite when transitioning
+     * Computes the rotation angle (in degrees) for the corner turn sprite when
+     * transitioning
      * from {@code incoming} direction into {@code outgoing} direction.
      *
      * @param incoming the direction entering the corner tile
@@ -77,24 +80,8 @@ public enum Direction {
     }
 
     /**
-     * Maps a JavaFX arrow {@link KeyCode} to its corresponding {@link Direction},
-     * or returns {@code null} if the key is not an arrow key.
-     */
-    public static Direction fromKeyCode(KeyCode code) {
-        if (code == null) {
-            return null;
-        }
-        return switch (code) {
-            case UP -> UP;
-            case DOWN -> DOWN;
-            case LEFT -> LEFT;
-            case RIGHT -> RIGHT;
-            default -> null;
-        };
-    }
-
-    /**
-     * Maps a legacy character ('U', 'D', 'L', 'R') to its corresponding {@link Direction}.
+     * Maps a legacy character ('U', 'D', 'L', 'R') to its corresponding
+     * {@link Direction}.
      */
     public static Direction fromChar(char dir) {
         return switch (dir) {

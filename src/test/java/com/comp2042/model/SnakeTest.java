@@ -1,6 +1,5 @@
 package com.comp2042.model;
 
-import com.comp2042.JavaFXTestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,13 +9,14 @@ import java.awt.Point;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Snake Model Unit Tests")
-class SnakeTest extends JavaFXTestBase {
+class SnakeTest {
 
     private Obstacle obstacle;
     private Snake snake;
 
     @BeforeEach
     void setUp() {
+        GameSettings.getInstance().resetDefaults();
         obstacle = new Obstacle(20, 20);
         snake = new Snake(20, 20, false, obstacle);
     }

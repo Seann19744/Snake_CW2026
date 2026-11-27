@@ -22,6 +22,20 @@ import java.awt.*;
 
 public class GameView {
 
+    private static final Color ARENA_COLOR = Color.web("#feffe4");
+    private static final Color OBSTACLE_COLOR = Color.BLACK;
+
+    private final Image headImage = new Image("resources/views/res/snakehead.png");
+    private final Image bodyImage = new Image("resources/views/res/snakebody.png");
+    private final Image turnImage = new Image("resources/views/res/snaketurnleft.png");
+    private final Image tailImage = new Image("resources/views/res/snaketail.png");
+
+    private final Image redCoinImage = new Image("resources/views/res/redcoin.png");
+    private final Image goldCoinImage = new Image("resources/views/res/goldcoin.png");
+    private final Image rainbowCoinImage = new Image("resources/views/res/rainbowcoin.png");
+    private final Image blueCoinImage = new Image("resources/views/res/bluecoin.png");
+    private final Image silverCoinImage = new Image("resources/views/res/silvercoin.png");
+
     public Canvas gridCanvas;
     public GraphicsContext gc;
 
@@ -352,6 +366,19 @@ public class GameView {
         return returnMenuButton;
     }
 
+    private Image getCoinImage(Coin coin) {
+        if (coin instanceof GoldCoin) {
+            return goldCoinImage;
+        } else if (coin instanceof RainbowCoin) {
+            return rainbowCoinImage;
+        } else if (coin instanceof BlueCoin) {
+            return blueCoinImage;
+        } else if (coin instanceof SilverCoin) {
+            return silverCoinImage;
+        }
+        return redCoinImage;
+    }
+
     public void drawGrid(Coin coin, Snake snake, Obstacle obstacle, GraphicsContext gc, boolean a, int b) {
         if (gc == null || coin == null || snake == null || obstacle == null) return;
         this.currentCoin = coin;
@@ -359,7 +386,7 @@ public class GameView {
         this.currentObstacle = obstacle;
 
         gc.clearRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
-        gc.setFill(game.getColor());
+        gc.setFill(ARENA_COLOR);
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
         // Checkerboard pattern (alternating tiles when grid is enabled)
@@ -383,7 +410,7 @@ public class GameView {
         double tileSize = game.getMultiplier() * fullScale;
         double coinPadding = 2 * fullScale;
         double coinSize = tileSize - (2 * coinPadding);
-        gc.drawImage(coin.getImage(),
+        gc.drawImage(getCoinImage(coin),
                 (coin.getPos().x * tileSize) + coinPadding,
                 (coin.getPos().y * tileSize) + coinPadding,
                 coinSize, coinSize);
@@ -396,7 +423,7 @@ public class GameView {
 
         drawHead(snake);
 
-        gc.setFill(obstacle.getColor());
+        gc.setFill(OBSTACLE_COLOR);
         for (Point point : obstacle.getObstacles()) {
             gc.fillRect(point.x * game.getMultiplier() * fullScale, point.y * game.getMultiplier() * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
         }
@@ -408,7 +435,7 @@ public class GameView {
         this.currentSnake = snake;
 
         gc.clearRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
-        gc.setFill(game.getColor());
+        gc.setFill(ARENA_COLOR);
         gc.fillRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
         // Checkerboard pattern (alternating tiles when grid is enabled)
@@ -432,7 +459,7 @@ public class GameView {
         double tileSize = game.getMultiplier() * fullScale;
         double coinPadding = 2 * fullScale;
         double coinSize = tileSize - (2 * coinPadding);
-        gc.drawImage(coin.getImage(),
+        gc.drawImage(getCoinImage(coin),
                 (coin.getPos().x * tileSize) + coinPadding,
                 (coin.getPos().y * tileSize) + coinPadding,
                 coinSize, coinSize);
@@ -464,7 +491,7 @@ public class GameView {
      */
     private void drawHead(Snake snake) {
         double tileSize = game.getMultiplier() * fullScale;
-        drawRotatedImage(snake.getImageViewHead().getImage(), snake.getSnakeDir(),
+        drawRotatedImage(headImage, snake.getSnakeDir(),
                 snake.getHead().x * tileSize, snake.getHead().y * tileSize, tileSize);
     }
 
@@ -484,16 +511,16 @@ public class GameView {
         Image segmentImage;
         int angle;
         if (index == 0) {
-            segmentImage = snake.getImageViewTail().getImage();
+            segmentImage = tailImage;
             angle = snake.getTailDir();
         } else {
             Direction incoming = snake.getSegmentDirection(index - 1);
             Direction outgoing = snake.getSegmentDirection(index);
             if (incoming != outgoing) {
-                segmentImage = snake.getImageViewTurn().getImage();
+                segmentImage = turnImage;
                 angle = Direction.getCornerRotation(incoming, outgoing);
             } else {
-                segmentImage = snake.getImageViewBody().getImage();
+                segmentImage = bodyImage;
                 angle = outgoing.getBodyAngle();
             }
         }

@@ -167,7 +167,7 @@ public class GameController {
         }
 
         // Arrow keys to start/resume movement from READY or LEVEL_CLEARED and steer the snake
-        Direction dir = Direction.fromKeyCode(code);
+        Direction dir = toDirection(code);
         if (dir != null) {
             if (!keyPressed && inputQueue.isEmpty()) {
                 if (isValidTurnFrom(currentDirection, dir)) {
@@ -272,7 +272,20 @@ public class GameController {
      * @return true if the snake may turn in the direction, false otherwise.
      */
     boolean isValidTurn(KeyCode key) {
-        return isValidTurnFrom(currentDirection, Direction.fromKeyCode(key));
+        return isValidTurnFrom(currentDirection, toDirection(key));
+    }
+
+    static Direction toDirection(KeyCode code) {
+        if (code == null) {
+            return null;
+        }
+        return switch (code) {
+            case UP -> Direction.UP;
+            case DOWN -> Direction.DOWN;
+            case LEFT -> Direction.LEFT;
+            case RIGHT -> Direction.RIGHT;
+            default -> null;
+        };
     }
 
     /**
@@ -330,7 +343,7 @@ public class GameController {
     }
 
     private void powerCoin() {
-        coin.applyEffect(game, snake, obstacle, animation);
+        coin.applyEffect(game, snake, obstacle, animation::setRate);
     }
 
     private void newCoin() {

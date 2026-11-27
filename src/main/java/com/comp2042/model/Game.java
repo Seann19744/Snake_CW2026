@@ -1,11 +1,8 @@
 package com.comp2042.model;
 
-import javafx.scene.paint.Color;
-
 public class Game {
     public static final int MAX_LEVEL = 3;
 
-    private Color color = Color.web("feffe4");
     private int width;
     private int height;
     private int score;
@@ -98,10 +95,6 @@ public class Game {
         currentLevel = 1;
         levelCoinsEaten = 0;
         totalCoinsEaten = 0;
-    }
-
-    public Color getColor() {
-        return color;
     }
 
     public double getMultiplier() {

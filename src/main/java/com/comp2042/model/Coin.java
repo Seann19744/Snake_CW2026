@@ -1,21 +1,16 @@
 package com.comp2042.model;
 
-import javafx.animation.Timeline;
-import javafx.scene.image.Image;
-
 import java.awt.*;
 import java.util.Random;
 
 public class Coin {
     private Point pos;
-    private Image image = new Image("resources/views/res/redcoin.png");
 
     public Coin(int x, int y, Snake snake, Obstacle obstacle) {
         int tx;
         int ty;
+        Random rnd = new Random();
         do {
-            Random rnd = new Random();
-
             tx = rnd.nextInt(x);
             ty = rnd.nextInt(y);
             pos = new Point(tx, ty);
@@ -27,26 +22,24 @@ public class Coin {
     }
 
     public int getPoints() {
-        int points = 5;
-        return points;
-    }
-
-    public Image getImage() {
-        return image;
+        return 5;
     }
 
     /**
      * Applies the effect of this coin when eaten by the snake.
      * By default, resets speed, resets border-passing, and awards points.
-     * Subclasses override this method to provide polymorphic power-up behavior (Open-Closed Principle).
+     * Subclasses override this method to provide polymorphic power-up behavior (Open-Closed Principle)
+     * while depending on the {@link SpeedController} abstraction (Dependency Inversion Principle).
      *
      * @param game the current Game instance
      * @param snake the Snake instance
      * @param obstacle the Obstacle instance
-     * @param animation the game loop Timeline
+     * @param speedController callback interface to update the game loop rate
      */
-    public void applyEffect(Game game, Snake snake, Obstacle obstacle, Timeline animation) {
-        animation.setRate(game.getSpeed());
+    public void applyEffect(Game game, Snake snake, Obstacle obstacle, SpeedController speedController) {
+        if (speedController != null) {
+            speedController.setSpeedRate(game.getSpeed());
+        }
         snake.ignoreBorders(false);
         game.addPoints(getPoints());
     }

@@ -1,6 +1,5 @@
 package com.comp2042.model;
 
-import javafx.scene.input.KeyCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -61,18 +60,12 @@ class DirectionTest {
     }
 
     @Test
-    @DisplayName("Verify KeyCode and char conversions")
+    @DisplayName("Verify char conversions")
     void testConversions() {
-        assertEquals(Direction.UP, Direction.fromKeyCode(KeyCode.UP));
-        assertEquals(Direction.DOWN, Direction.fromKeyCode(KeyCode.DOWN));
-        assertEquals(Direction.LEFT, Direction.fromKeyCode(KeyCode.LEFT));
-        assertEquals(Direction.RIGHT, Direction.fromKeyCode(KeyCode.RIGHT));
-        assertNull(Direction.fromKeyCode(KeyCode.SPACE));
-        assertNull(Direction.fromKeyCode(null));
-
         assertEquals(Direction.UP, Direction.fromChar('U'));
         assertEquals(Direction.DOWN, Direction.fromChar('D'));
         assertEquals(Direction.LEFT, Direction.fromChar('L'));
         assertEquals(Direction.RIGHT, Direction.fromChar('R'));
+        assertThrows(IllegalArgumentException.class, () -> Direction.fromChar('X'));
     }
 }
