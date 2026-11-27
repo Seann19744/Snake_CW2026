@@ -1,18 +1,17 @@
 package com.comp2042.model;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 public class Snake {
     private boolean dead = false;
-    private final Point head = new Point();
-    private final ArrayList<Point> body = new ArrayList<>();
+    private Cell head;
+    private final ArrayList<Cell> body = new ArrayList<>();
     private final ArrayList<Direction> bodyDirs = new ArrayList<>();
     private final int gx;
     private final int gy;
     private boolean ignoreBorders = false;
-    private boolean noBorder;
-    private Obstacle obstacle;
+    private final boolean noBorder;
+    private final Obstacle obstacle;
     private Direction direction = Direction.LEFT;
     private int growthRate = 1;
 
@@ -24,8 +23,8 @@ public class Snake {
         this.obstacle = obstacle;
         this.noBorder = noBorder;
         this.growthRate = growthRate;
-        this.head.setLocation(x / 2, y / 2);
-        this.body.add(new Point(x / 2 + 1, y / 2));
+        this.head = new Cell(x / 2, y / 2);
+        this.body.add(new Cell(x / 2 + 1, y / 2));
         this.bodyDirs.add(Direction.LEFT);
         this.gx = x;
         this.gy = y;
@@ -39,18 +38,18 @@ public class Snake {
         if (dir == null) {
             return;
         }
-        Point prevHead = new Point(head);
+        Cell prevHead = head;
         this.direction = dir;
-        head.translate(dir.getDx(), dir.getDy());
+        head = head.translate(dir);
 
         if (borderControl()) {
             if (!ignoreBorders && !noBorder) {
-                head.setLocation(prevHead);
+                head = prevHead;
                 dead = true;
             } else {
-                int wrappedX = ((int) head.getX() + gx) % gx;
-                int wrappedY = ((int) head.getY() + gy) % gy;
-                head.setLocation(wrappedX, wrappedY);
+                int wrappedX = (head.x() + gx) % gx;
+                int wrappedY = (head.y() + gy) % gy;
+                head = new Cell(wrappedX, wrappedY);
             }
         }
 
@@ -58,7 +57,7 @@ public class Snake {
         bodyDirs.add(direction);
 
         if (!dead && obstacle.getObstacles().contains(head)) {
-            head.setLocation(prevHead);
+            head = prevHead;
             dead = true;
         }
 
@@ -103,10 +102,10 @@ public class Snake {
                 bodyDirs.remove(0);
             }
         } else if (growthRate > 1) {
-            // Adds extra segment(s) when growthRate > 1 (e.g. Hardcore mode)
             Direction tailDirection = getSegmentDirection(0);
+            Cell tailCell = body.get(0);
             for (int i = 1; i < growthRate; i++) {
-                body.add(0, new Point(body.get(0)));
+                body.add(0, tailCell);
                 bodyDirs.add(0, tailDirection);
             }
         }
@@ -122,11 +121,12 @@ public class Snake {
      */
     public void resetPosition(int x, int y) {
         int preservedSize = Math.max(1, body.size());
-        head.setLocation(x / 2, y / 2);
+        head = new Cell(x / 2, y / 2);
         body.clear();
         bodyDirs.clear();
+        Cell spawnTail = new Cell(x / 2 + 1, y / 2);
         for (int i = 0; i < preservedSize; i++) {
-            body.add(new Point(x / 2 + 1, y / 2));
+            body.add(spawnTail);
             bodyDirs.add(Direction.LEFT);
         }
         dead = false;
@@ -142,19 +142,19 @@ public class Snake {
     }
 
     private boolean borderControl() {
-        return head.getX() < 0 || head.getY() < 0 || head.getX() >= gx || head.getY() >= gy;
+        return head.x() < 0 || head.y() < 0 || head.x() >= gx || head.y() >= gy;
     }
 
     public boolean hitSelf() {
         return body.contains(head);
     }
 
-    public ArrayList<Point> getBody() {
+    public ArrayList<Cell> getBody() {
         return new ArrayList<>(body);
     }
 
-    public Point getHead() {
-        return new Point(head);
+    public Cell getHead() {
+        return head;
     }
 
     public boolean getDead() {

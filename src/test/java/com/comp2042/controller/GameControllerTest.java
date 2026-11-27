@@ -187,10 +187,10 @@ class GameControllerTest extends JavaFXTestBase {
         assertFalse(ctrl.isAnimationRunning(), "Timeline animation must stop when entering a new level");
         assertEquals(16, obs.getObstacles().size(), "All 16 Level 2 pillar obstacles must spawn intact");
 
-        assertEquals(new java.awt.Point(10, 10), snk.getHead(), "Snake head must reset to center spawn (10, 10)");
+        assertEquals(new Cell(10, 10), snk.getHead(), "Snake head must reset to center spawn (10, 10)");
         assertEquals(bodySizeBeforeNewLevel, snk.getBody().size(), "Snake length must not reset on new level");
-        for (java.awt.Point segment : snk.getBody()) {
-            assertEquals(new java.awt.Point(11, 10), segment, "All body segments must initially be stacked on spawn block (11, 10)");
+        for (Cell segment : snk.getBody()) {
+            assertEquals(new Cell(11, 10), segment, "All body segments must initially be stacked on spawn block (11, 10)");
         }
 
         ctrl.handle(new javafx.scene.input.KeyEvent(

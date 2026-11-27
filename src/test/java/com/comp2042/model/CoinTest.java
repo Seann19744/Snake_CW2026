@@ -4,8 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.awt.Point;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Coin Hierarchy Unit Tests")
@@ -31,11 +29,11 @@ class CoinTest {
     @DisplayName("Verify base Coin point value is 5 and coordinates are valid")
     void testBaseCoin() {
         Coin coin = new Coin(20, 20, snake, obstacle);
-        Point pos = coin.getPos();
+        Cell pos = coin.getPos();
 
         assertNotNull(pos, "Coin position should not be null");
-        assertTrue(pos.x >= 0 && pos.x < 20, "Coin X coordinate should be within [0, 20)");
-        assertTrue(pos.y >= 0 && pos.y < 20, "Coin Y coordinate should be within [0, 20)");
+        assertTrue(pos.x() >= 0 && pos.x() < 20, "Coin X coordinate should be within [0, 20)");
+        assertTrue(pos.y() >= 0 && pos.y() < 20, "Coin Y coordinate should be within [0, 20)");
         assertNotEquals(snake.getHead(), pos, "Coin must not spawn on snake head");
         assertFalse(snake.getBody().contains(pos), "Coin must not spawn on snake body");
         assertEquals(5, coin.getPoints(), "Base coin points should be 5");

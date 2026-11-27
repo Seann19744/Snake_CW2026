@@ -1,24 +1,23 @@
 package com.comp2042.model;
 
-import java.awt.*;
 import java.util.Random;
 
 public class Coin {
-    private Point pos;
+    private final Cell pos;
 
     public Coin(int x, int y, Snake snake, Obstacle obstacle) {
-        int tx;
-        int ty;
         Random rnd = new Random();
+        Cell candidate;
         do {
-            tx = rnd.nextInt(x);
-            ty = rnd.nextInt(y);
-            pos = new Point(tx, ty);
-        } while (snake.getHead().equals(pos) || snake.getBody().contains(pos) || obstacle.getObstacles().contains(pos));
+            candidate = new Cell(rnd.nextInt(x), rnd.nextInt(y));
+        } while (snake.getHead().equals(candidate)
+                || snake.getBody().contains(candidate)
+                || obstacle.getObstacles().contains(candidate));
+        this.pos = candidate;
     }
 
-    public Point getPos() {
-        return new Point(pos);
+    public Cell getPos() {
+        return pos;
     }
 
     public int getPoints() {

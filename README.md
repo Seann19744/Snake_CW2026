@@ -186,6 +186,11 @@ The following features were considered during design and development but were no
 - **Purpose**: Pure-Java `@FunctionalInterface` (`void setSpeedRate(double rate)`) abstracting game loop speed adjustments in `Coin.applyEffect(...)`.
 - **Justification**: Applies the **Dependency Inversion Principle (DIP)** to decouple the `Coin` model hierarchy from JavaFX's `Timeline`. Together with moving sprite `Image`s and `Color`s from `Snake`, `Coin`, `Game`, and `Obstacle` into `GameView`, this makes the entire `com.comp2042.model` package 100% pure Java with zero `javafx.*` dependencies and enables pure-Java model unit tests without `JavaFXTestBase`.
 
+### 9. `com.comp2042.model.Cell`
+- **Location**: `src/main/java/com/comp2042/model/Cell.java`
+- **Purpose**: Immutable 2D grid coordinate record (`public record Cell(int x, int y)`) with translation helpers (`translate(int, int)` and `translate(Direction)`).
+- **Justification**: Replaces mutable legacy `java.awt.Point` across `Snake`, `Coin`, `Obstacle`, and `GameView`, eliminating all `java.awt.*` dependencies, removing `(int)` double-to-int casts, and enforcing coordinate immutability without defensive object cloning.
+
 ---
 
 ## Modified Java Classes
@@ -270,6 +275,7 @@ src/main/java/com/comp2042/
 │   └── MainMenuController.java         (Main menu UI interactions, difficulty binding)
 ├── model/                              [Model Layer]
 │   ├── BlueCoin.java                   (Border pass power-up coin)
+│   ├── Cell.java                       (Immutable 2D grid coordinate record)
 │   ├── Coin.java                       (Base coin entity)
 │   ├── CoinGenerator.java              (GoF Factory Pattern for coin instantiation)
 │   ├── Difficulty.java                 (Legacy difficulty enumeration)

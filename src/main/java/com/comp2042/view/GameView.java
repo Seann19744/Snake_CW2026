@@ -18,8 +18,6 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
-import java.awt.*;
-
 public class GameView {
 
     private static final Color ARENA_COLOR = Color.web("#feffe4");
@@ -411,21 +409,21 @@ public class GameView {
         double coinPadding = 2 * fullScale;
         double coinSize = tileSize - (2 * coinPadding);
         gc.drawImage(getCoinImage(coin),
-                (coin.getPos().x * tileSize) + coinPadding,
-                (coin.getPos().y * tileSize) + coinPadding,
+                (coin.getPos().x() * tileSize) + coinPadding,
+                (coin.getPos().y() * tileSize) + coinPadding,
                 coinSize, coinSize);
 
         int bodyIndex = 0;
-        for (Point point : snake.getBody()) {
-            drawBody(snake, point, bodyIndex);
+        for (Cell cell : snake.getBody()) {
+            drawBody(snake, cell, bodyIndex);
             bodyIndex++;
         }
 
         drawHead(snake);
 
         gc.setFill(OBSTACLE_COLOR);
-        for (Point point : obstacle.getObstacles()) {
-            gc.fillRect(point.x * game.getMultiplier() * fullScale, point.y * game.getMultiplier() * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
+        for (Cell cell : obstacle.getObstacles()) {
+            gc.fillRect(cell.x() * game.getMultiplier() * fullScale, cell.y() * game.getMultiplier() * fullScale, game.getMultiplier() * fullScale, game.getMultiplier() * fullScale);
         }
     }
 
@@ -460,13 +458,13 @@ public class GameView {
         double coinPadding = 2 * fullScale;
         double coinSize = tileSize - (2 * coinPadding);
         gc.drawImage(getCoinImage(coin),
-                (coin.getPos().x * tileSize) + coinPadding,
-                (coin.getPos().y * tileSize) + coinPadding,
+                (coin.getPos().x() * tileSize) + coinPadding,
+                (coin.getPos().y() * tileSize) + coinPadding,
                 coinSize, coinSize);
 
         int bodyIndex = 0;
-        for (Point point : snake.getBody()) {
-            drawBody(snake, point, bodyIndex);
+        for (Cell cell : snake.getBody()) {
+            drawBody(snake, cell, bodyIndex);
             bodyIndex++;
         }
 
@@ -492,7 +490,7 @@ public class GameView {
     private void drawHead(Snake snake) {
         double tileSize = game.getMultiplier() * fullScale;
         drawRotatedImage(headImage, snake.getSnakeDir(),
-                snake.getHead().x * tileSize, snake.getHead().y * tileSize, tileSize);
+                snake.getHead().x() * tileSize, snake.getHead().y() * tileSize, tileSize);
     }
 
     /**
@@ -502,7 +500,7 @@ public class GameView {
      * @param point the grid position of this segment
      * @param index the segment's position in the body list, where 0 is the tail
      */
-    private void drawBody(Snake snake, Point point, int index) {
+    private void drawBody(Snake snake, Cell point, int index) {
         // Skip drawing duplicate segments that are still stacked on the same spawn/tail cell
         if (index > 0 && point.equals(snake.getBody().get(index - 1))) {
             return;
@@ -526,7 +524,7 @@ public class GameView {
         }
 
         double tileSize = game.getMultiplier() * fullScale;
-        drawRotatedImage(segmentImage, angle, point.x * tileSize, point.y * tileSize, tileSize);
+        drawRotatedImage(segmentImage, angle, point.x() * tileSize, point.y() * tileSize, tileSize);
     }
 
     /**
