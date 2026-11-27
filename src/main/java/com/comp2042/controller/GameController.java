@@ -1,5 +1,6 @@
 package com.comp2042.controller;
 
+import com.comp2042.Main;
 import com.comp2042.model.*;
 import com.comp2042.view.GameView;
 import javafx.animation.Animation;
@@ -257,8 +258,9 @@ public class GameController {
         if (stage != null) {
             stage.close();
         }
-        MainMenuController mainMenuController = new MainMenuController();
-        mainMenuController.getViewManager().getPrimaryStage().show();
+        if (Main.getViewManager() != null && Main.getViewManager().getPrimaryStage() != null) {
+            Main.getViewManager().getPrimaryStage().show();
+        }
     }
 
     public void handleResize(double width, double height) {

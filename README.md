@@ -183,6 +183,11 @@ The following features were considered during design and development but were no
 - **Purpose**: Immutable 2D grid coordinate record (`public record Cell(int x, int y)`) with translation helpers (`translate(int, int)` and `translate(Direction)`).
 - **Justification**: Replaces mutable legacy `java.awt.Point` across `Snake`, `Coin`, `Obstacle`, and `GameView`, eliminating all `java.awt.*` dependencies, removing `(int)` double-to-int casts, and enforcing coordinate immutability without defensive object cloning.
 
+### 9. `com.comp2042.view.PauseMenuView`
+- **Location**: `src/main/java/com/comp2042/view/PauseMenuView.java`
+- **Purpose**: Dedicated view component encapsulating the in-game pause overlay (`pauseBox`), settings sub-menu (`pauseSettingsBox`), and How to Play help overlay (`pauseHelpBox`).
+- **Justification**: Applies the **Single Responsibility Principle (SRP)** by extracting ~140 lines of pause overlay UI construction and sub-menu navigation out of `GameView`, allowing `GameView` to focus exclusively on board rendering, HUD labels, and window scaling.
+
 ---
 
 ## Modified Java Classes
@@ -283,6 +288,7 @@ src/main/java/com/comp2042/
 │   └── SpeedController.java            (DIP functional interface for speed control)
 └── view/                               [View Layer]
     ├── GameView.java                   (Canvas rendering, head/tail rotations, UI labels)
+    ├── PauseMenuView.java              (In-game pause, settings, and help overlay UI)
     └── ViewManager.java                (JavaFX stage management and scene transitions)
 ```
 
