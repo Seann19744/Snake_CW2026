@@ -13,7 +13,7 @@ public class Snake {
     private boolean dead = false;
     private final Point head = new Point();
     private final ArrayList<Point> body = new ArrayList<>();
-    private final ArrayList<Integer> bodyDirs = new ArrayList<>();
+    private final ArrayList<Direction> bodyDirs = new ArrayList<>();
     private final int gx;
     private final int gy;
     private boolean ignoreBorders = false;
@@ -27,7 +27,7 @@ public class Snake {
     private ImageView imageTurn = new ImageView(imgInputTurn);
     private Image imgInputTail = new Image("resources/views/res/snaketail.png");
     private ImageView imageTail = new ImageView(imgInputTail);
-    private int snakeDir = 270;
+    private Direction direction = Direction.LEFT;
     private int growthRate = 1;
 
     public Snake(int x, int y, boolean noBorder, Obstacle obstacle) {
@@ -40,69 +40,36 @@ public class Snake {
         this.growthRate = growthRate;
         this.head.setLocation(x / 2, y / 2);
         this.body.add(new Point(x / 2 + 1, y / 2));
-        this.bodyDirs.add(270);
+        this.bodyDirs.add(Direction.LEFT);
         this.gx = x;
         this.gy = y;
     }
 
     public void move(char dir) {
+        move(Direction.fromChar(dir));
+    }
+
+    public void move(Direction dir) {
+        if (dir == null) {
+            return;
+        }
         Point prevHead = new Point(head);
-        switch (dir) {
-            case 'U':
-                snakeDir = 0;
-                head.translate(0, -1);
-                if (borderControl()) {
-                    if (!ignoreBorders && !noBorder) {
-                        head.setLocation(prevHead);
-                        dead = true;
-                    } else {
-                        head.setLocation(head.getX(), gy - 1);
-                    }
-                }
-                break;
+        this.direction = dir;
+        head.translate(dir.getDx(), dir.getDy());
 
-            case 'D':
-                snakeDir = 180;
-                head.translate(0, 1);
-                if (borderControl()) {
-                    if (!ignoreBorders && !noBorder) {
-                        head.setLocation(prevHead);
-                        dead = true;
-                    } else {
-                        head.setLocation(head.getX(), 0);
-                    }
-                }
-                break;
-
-            case 'L':
-                snakeDir = 270;
-                head.translate(-1, 0);
-                if (borderControl()) {
-                    if (!ignoreBorders && !noBorder) {
-                        head.setLocation(prevHead);
-                        dead = true;
-                    } else {
-                        head.setLocation(gx - 1, head.getY());
-                    }
-                }
-                break;
-
-            case 'R':
-                snakeDir = 90;
-                head.translate(1, 0);
-                if (borderControl()) {
-                    if (!ignoreBorders && !noBorder) {
-                        head.setLocation(prevHead);
-                        dead = true;
-                    } else {
-                        head.setLocation(0, head.getY());
-                    }
-                }
-                break;
+        if (borderControl()) {
+            if (!ignoreBorders && !noBorder) {
+                head.setLocation(prevHead);
+                dead = true;
+            } else {
+                int wrappedX = ((int) head.getX() + gx) % gx;
+                int wrappedY = ((int) head.getY() + gy) % gy;
+                head.setLocation(wrappedX, wrappedY);
+            }
         }
 
         body.add(prevHead);
-        bodyDirs.add(snakeDir);
+        bodyDirs.add(direction);
 
         if (!dead && obstacle.getObstacles().contains(head)) {
             head.setLocation(prevHead);
@@ -114,19 +81,32 @@ public class Snake {
         }
     }
 
-    public int getTailDir() {
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public Direction getSegmentDirection(int index) {
         if (bodyDirs.isEmpty()) {
-            return snakeDir;
+            return direction;
         }
-        return bodyDirs.get(0);
+        if (index < 0) {
+            return bodyDirs.get(0);
+        }
+        if (index >= bodyDirs.size()) {
+            return bodyDirs.get(bodyDirs.size() - 1);
+        }
+        return bodyDirs.get(index);
+    }
+
+    public int getTailDir() {
+        return getSegmentDirection(0).getAngle();
     }
 
     public int getBodyDir(int bodyCount) {
         if (bodyCount < 0 || bodyCount >= bodyDirs.size()) {
             return 0;
         }
-        int dir = bodyDirs.get(bodyCount);
-        return (dir == 90 || dir == 270) ? 270 : 0;
+        return bodyDirs.get(bodyCount).getBodyAngle();
     }
 
     public boolean ateCoin(Coin coin) {
@@ -138,10 +118,10 @@ public class Snake {
             }
         } else if (growthRate > 1) {
             // Adds extra segment(s) when growthRate > 1 (e.g. Hardcore mode)
-            int tailDir = getTailDir();
+            Direction tailDirection = getSegmentDirection(0);
             for (int i = 1; i < growthRate; i++) {
                 body.add(0, new Point(body.get(0)));
-                bodyDirs.add(0, tailDir);
+                bodyDirs.add(0, tailDirection);
             }
         }
         return ate;
@@ -161,10 +141,10 @@ public class Snake {
         bodyDirs.clear();
         for (int i = 0; i < preservedSize; i++) {
             body.add(new Point(x / 2 + 1, y / 2));
-            bodyDirs.add(270);
+            bodyDirs.add(Direction.LEFT);
         }
         dead = false;
-        snakeDir = 270;
+        direction = Direction.LEFT;
     }
 
     public int getGrowthRate() {
@@ -220,7 +200,7 @@ public class Snake {
     }
 
     public int getSnakeDir() {
-        return snakeDir;
+        return direction.getAngle();
     }
 
     public ImageView getImageViewTail() {

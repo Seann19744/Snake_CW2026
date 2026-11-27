@@ -1,6 +1,5 @@
 package com.comp2042.view;
 
-import com.comp2042.controller.GameController;
 import com.comp2042.model.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -29,8 +28,6 @@ public class GameView {
     public Label gameOverLabel = new Label("GAME OVER");
     public Label gameWonLabel = new Label("YOU WON!");
     public Label scoreLabel = new Label();
-    private boolean gameOverVis = false;
-    private boolean gameWonVis = false;
 
     public final StackPane pauseOverlay = new StackPane();
     private final Button resumeButton = new Button("Resume");
@@ -53,20 +50,10 @@ public class GameView {
     private double initY;
     private double fullScale = 1;
     private boolean fullsize = false;
-    private int[][] turnArray;
 
     public GameView(Game game) {
         this.game = game;
-        this.turnArray = new int[game.getWidth()][game.getHeight()];
         setupPauseOverlay();
-    }
-
-    public void resetTurnArray() {
-        this.turnArray = new int[game.getWidth()][game.getHeight()];
-    }
-
-    public int getTurnAt(int x, int y) {
-        return turnArray[x][y];
     }
 
     public void makeScene(Scene scene, Snake snake, Coin coin) {
@@ -499,52 +486,30 @@ public class GameView {
         if (index == 0) {
             segmentImage = snake.getImageViewTail().getImage();
             angle = snake.getTailDir();
-        } else if (turnArray[(int) point.getX()][(int) point.getY()] != 0) {
-            segmentImage = snake.getImageViewTurn().getImage();
-            angle = 90 * turnArray[(int) point.getX()][(int) point.getY()];
         } else {
-            segmentImage = snake.getImageViewBody().getImage();
-            angle = snake.getBodyDir(index);
-        }
-
-        if (turnArray[(int) snake.getBody().get(0).getX()][(int) snake.getBody().get(0).getY()] != 0) {
-            turnArray[(int) snake.getBody().get(0).getX()][(int) snake.getBody().get(0).getY()] = 0;
+            Direction incoming = snake.getSegmentDirection(index - 1);
+            Direction outgoing = snake.getSegmentDirection(index);
+            if (incoming != outgoing) {
+                segmentImage = snake.getImageViewTurn().getImage();
+                angle = Direction.getCornerRotation(incoming, outgoing);
+            } else {
+                segmentImage = snake.getImageViewBody().getImage();
+                angle = outgoing.getBodyAngle();
+            }
         }
 
         double tileSize = game.getMultiplier() * fullScale;
         drawRotatedImage(segmentImage, angle, point.x * tileSize, point.y * tileSize, tileSize);
     }
 
-    public void turnDir(Snake snake) {
-        if ((GameController.lastKey == KeyCode.LEFT && GameController.key == KeyCode.UP) || (GameController.lastKey == KeyCode.DOWN && GameController.key == KeyCode.RIGHT)) {
-            turnArray[(int) snake.getHead().getX()][(int) snake.getHead().getY()] = 2;
-        } else if ((GameController.lastKey == KeyCode.LEFT && GameController.key == KeyCode.DOWN) || (GameController.lastKey == KeyCode.UP && GameController.key == KeyCode.RIGHT)) {
-            turnArray[(int) snake.getHead().getX()][(int) snake.getHead().getY()] = 3;
-        } else if ((GameController.lastKey == KeyCode.RIGHT && GameController.key == KeyCode.UP) || (GameController.lastKey == KeyCode.DOWN && GameController.key == KeyCode.LEFT)) {
-            turnArray[(int) snake.getHead().getX()][(int) snake.getHead().getY()] = 1;
-        } else if ((GameController.lastKey == KeyCode.UP && GameController.key == KeyCode.LEFT) || (GameController.lastKey == KeyCode.RIGHT && GameController.key == KeyCode.DOWN)) {
-            turnArray[(int) snake.getHead().getX()][(int) snake.getHead().getY()] = 4;
-        } else turnArray[(int) snake.getHead().getX()][(int) snake.getHead().getY()] = 0;
-    }
-
-    public void gameOver(Snake snake) {
-        if (snake.getDead() && !gameOverVis) {
-            gameOverVis = true;
-            gameOverLabel.setVisible(true);
-        } else if (!snake.getDead() && gameOverVis) {
-            gameOverLabel.setVisible(false);
-            gameOverVis = false;
-        }
-    }
-
-    public void gameWon() {
-        if (game.gameWon() && !gameWonVis) {
-            gameWonVis = true;
-            gameWonLabel.setVisible(true);
-        } else if (!game.gameWon() && gameWonVis) {
-            gameWonVis = false;
-            gameWonLabel.setVisible(false);
-        }
+    /**
+     * Updates the visibility of the victory and game-over overlays from the authoritative {@link GameState}.
+     *
+     * @param state the current lifecycle phase of the game
+     */
+    public void updateStateOverlays(GameState state) {
+        gameOverLabel.setVisible(state == GameState.DEAD);
+        gameWonLabel.setVisible(state == GameState.WON);
     }
 
     public void updateScoreLabel() {

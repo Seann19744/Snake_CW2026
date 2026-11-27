@@ -174,7 +174,12 @@ The following features were considered during design and development but were no
 ### 6. `com.comp2042.model.GameState`
 - **Location**: `src/main/java/com/comp2042/model/GameState.java`
 - **Purpose**: Type-safe enumeration defining the lifecycle phases of a game session (`READY`, `RUNNING`, `PAUSED`, `LEVEL_CLEARED`, `WON`, `DEAD`).
-- **Justification**: Replaces fragmented boolean flags (`gameStarted`, overlay visibility checks) with an explicit finite state machine in `GameController`, ensuring deterministic transitions when starting a match, clearing levels, pausing/resuming, winning, or dying.
+- **Justification**: Replaces fragmented boolean flags (`gameStarted`, `gameOverVis`, `gameWonVis`, overlay visibility checks) with an explicit finite state machine across `GameController` and `GameView`, ensuring deterministic transitions when starting a match, clearing levels, pausing/resuming, winning, or dying.
+
+### 7. `com.comp2042.model.Direction`
+- **Location**: `src/main/java/com/comp2042/model/Direction.java`
+- **Purpose**: Type-safe enumeration defining cardinal movement directions (`UP`, `DOWN`, `LEFT`, `RIGHT`) with encapsulated grid deltas (`dx`, `dy`), rotation angles, opposite-direction validation (`isOpposite()`), and corner turn sprite angle computation (`getCornerRotation()`).
+- **Justification**: Eliminates primitive `'U'`/`'D'`/`'L'`/`'R'` characters and the 4 copy-pasted `switch` cases in `Snake.move()`, removes global mutable `public static KeyCode key` and `lastKey` fields from `GameController`, and replaces the `turnArray` grid in `GameView` with direct per-segment `Direction` comparisons.
 
 ---
 
@@ -263,6 +268,7 @@ src/main/java/com/comp2042/
 │   ├── Coin.java                       (Base coin entity)
 │   ├── CoinGenerator.java              (GoF Factory Pattern for coin instantiation)
 │   ├── Difficulty.java                 (Legacy difficulty enumeration)
+│   ├── Direction.java                  (Cardinal direction enum with deltas & angles)
 │   ├── Game.java                       (Game state, score, speed, grid boundaries)
 │   ├── GameMode.java                   (Game modes: Quick, Classic, Hardcore)
 │   ├── GameSettings.java               (GoF Singleton for grid preference & high score)
