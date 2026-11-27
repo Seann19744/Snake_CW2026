@@ -20,7 +20,7 @@ class CoinTest {
         GameSettings.getInstance().resetDefaults();
         obstacle = new Obstacle(20, 20);
         snake = new Snake(20, 20, false, obstacle);
-        game = new Game(20, 20, true, Difficulty.NORMAL);
+        game = new Game(20, 20, true, GameMode.CLASSIC);
         appliedSpeedRate = 0.0;
         speedController = rate -> appliedSpeedRate = rate;
     }

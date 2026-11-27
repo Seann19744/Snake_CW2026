@@ -18,7 +18,7 @@ class GameControllerTest extends JavaFXTestBase {
 
     @BeforeEach
     void setUp() {
-        Game game = new Game(20, 20, false, Difficulty.NORMAL);
+        Game game = new Game(20, 20, false, GameMode.CLASSIC);
         Obstacle obstacle = new Obstacle(20, 20);
         Snake snake = new Snake(20, 20, false, obstacle);
         Coin coin = new Coin(20, 20, snake, obstacle);
@@ -141,12 +141,12 @@ class GameControllerTest extends JavaFXTestBase {
     @Test
     @DisplayName("Verify arrow keys do not start animation after game is won")
     void testArrowKeysIgnoredWhenGameWon() {
-        Game wonGame = new Game(20, 20, false, Difficulty.EASY);
-        for (int i = 0; i < 6; i++) wonGame.incScore();
+        Game wonGame = new Game(20, 20, false, GameMode.QUICK);
+        for (int i = 0; i < 6; i++) wonGame.recordCoinEaten();
         wonGame.advanceLevel();
-        for (int i = 0; i < 8; i++) wonGame.incScore();
+        for (int i = 0; i < 8; i++) wonGame.recordCoinEaten();
         wonGame.advanceLevel();
-        for (int i = 0; i < 10; i++) wonGame.incScore();
+        for (int i = 0; i < 10; i++) wonGame.recordCoinEaten();
         assertTrue(wonGame.gameWon(), "Game should be marked as won");
 
         Obstacle obs = new Obstacle(20, 20);
@@ -164,7 +164,7 @@ class GameControllerTest extends JavaFXTestBase {
     @Test
     @DisplayName("Verify loadLevel pauses game in LEVEL_CLEARED, resets head to center spawn, and stacks body segments to uncoil")
     void testLoadLevelPausesAndStacksSnakeOnSpawnToUncoil() {
-        Game game = new Game(20, 20, false, Difficulty.EASY);
+        Game game = new Game(20, 20, false, GameMode.QUICK);
         Obstacle obs = new Obstacle(20, 20);
         Snake snk = new Snake(20, 20, true, obs);
         snk.move(Direction.LEFT);

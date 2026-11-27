@@ -57,11 +57,4 @@ public class CoinGenerator {
             return new Coin(width, height, snake, obstacle);
         }
     }
-
-    /**
-     * Alias for generateCoin to maintain compatibility with factory conventions.
-     */
-    public Coin createCoin(int width, int height, Snake snake, Obstacle obstacle, boolean powerUpEnabled) {
-        return generateCoin(width, height, snake, obstacle, powerUpEnabled);
-    }
 }

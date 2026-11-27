@@ -94,7 +94,15 @@ public class Snake {
         return bodyDirs.get(bodyCount).getBodyAngle();
     }
 
-    public boolean ateCoin(Coin coin) {
+    /**
+     * Checks whether the snake's head has reached the coin's cell, advancing the tail
+     * (removing the trailing segment) if no coin was eaten or growing extra segments
+     * when {@code growthRate > 1}.
+     *
+     * @param coin the active coin on the board
+     * @return true if the coin was consumed, false otherwise
+     */
+    public boolean resolveCoinConsumption(Coin coin) {
         boolean ate = head.equals(coin.getPos());
         if (!ate) {
             body.remove(0);

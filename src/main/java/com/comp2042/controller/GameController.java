@@ -94,10 +94,10 @@ public class GameController {
 
         snake.move(currentDirection);
 
-        if (!snake.getDead() && snake.ateCoin(coin)) {
+        if (!snake.getDead() && snake.resolveCoinConsumption(coin)) {
             coinSound.play();
             powerCoin();
-            game.incScore();
+            game.recordCoinEaten();
             if (game.isLevelCompleted()) {
                 if (game.advanceLevel()) {
                     loadLevel(game.getCurrentLevel());
@@ -105,7 +105,7 @@ public class GameController {
                 } else {
                     gameState = GameState.WON;
                     animation.stop();
-                    gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
+                    gameView.drawGrid(coin, snake, obstacle, gameView.gc);
                     gameView.updateStateOverlays(gameState);
                     gameView.updateScoreLabel();
                     return;
@@ -118,7 +118,7 @@ public class GameController {
         keyPressed = false;
 
         if (!snake.getDead() || snake.hitSelf()) {
-            gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
+            gameView.drawGrid(coin, snake, obstacle, gameView.gc);
         }
 
         if (snake.getDead()) {
@@ -324,7 +324,7 @@ public class GameController {
         gameView.updateStateOverlays(gameState);
         gameView.updateScoreLabel();
 
-        gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
+        gameView.drawGrid(coin, snake, obstacle, gameView.gc);
     }
 
     void loadLevel(int level) {
@@ -339,7 +339,7 @@ public class GameController {
         newCoin();
         gameView.updateStateOverlays(gameState);
         gameView.updateScoreLabel();
-        gameView.drawGrid(coin, snake, obstacle, gameView.gc, false, 0);
+        gameView.drawGrid(coin, snake, obstacle, gameView.gc);
     }
 
     private void powerCoin() {

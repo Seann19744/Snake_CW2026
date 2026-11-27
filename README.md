@@ -148,45 +148,37 @@ The following features were considered during design and development but were no
 - **Purpose**: Application launcher entry point.
 - **Justification**: JavaFX 11+ enforces strict runtime checks when the entry point class directly inherits from `javafx.application.Application`. If launched from an IDE or a shaded fat JAR without explicit VM options pointing to the JavaFX module path, the JVM throws `Error: JavaFX runtime components are missing, and are required to run this application`. `Launcher` contains a standard `main(String[] args)` method that does not extend `Application` and delegates directly to `Main.main(args)`. This enables IntelliJ IDEA, Eclipse, and packaged fat JARs to execute seamlessly across all environments.
 
-### 2. `com.comp2042.model.Difficulty`
-- **Location**: `src/main/java/com/comp2042/model/Difficulty.java`
-- **Purpose**: Type-safe enumeration defining game difficulty levels (`EASY`, `NORMAL`, `HARD`).
-- **Justification**: The original codebase utilized loose `char` values (`'E'`, `'N'`, `'H'`) passed into constructors without input validation, creating risk of undefined states or a frozen snake if an unexpected character was passed. `Difficulty` encapsulates gameplay parameters:
-  - `speed` (double): Animation rate (8.5 for `EASY` and `NORMAL`, 13.0 for `HARD`).
-  - `noBorder` (boolean): `true` for `EASY` (enabling wall wrap-around), `false` for `NORMAL` and `HARD`.
-  - Provides a clean data model that integrates directly with JavaFX UI controls such as `ComboBox<Difficulty>`.
-
-### 3. `com.comp2042.model.CoinGenerator`
+### 2. `com.comp2042.model.CoinGenerator`
 - **Location**: `src/main/java/com/comp2042/model/CoinGenerator.java`
 - **Purpose**: Implements the GoF Factory Pattern for generating `Coin` instances and subclasses.
 - **Justification**: Decouples coin generation from controller classes. Encapsulates probability-based power-up selection and board condition validation. Supports constructor dependency injection with `java.util.Random`, enabling deterministic unit testing.
 
-### 4. `com.comp2042.model.GameMode`
+### 3. `com.comp2042.model.GameMode`
 - **Location**: `src/main/java/com/comp2042/model/GameMode.java`
 - **Purpose**: Type-safe enumeration defining game modes (`QUICK`, `CLASSIC`, `HARDCORE`).
 - **Justification**: Encapsulates speed, wall wrap-around behavior, coin quotas required to clear each level, snake body growth rate per coin eaten, and human-readable mode descriptions (`getDescription()`) displayed on the difficulty selection screen.
 
-### 5. `com.comp2042.model.GameSettings`
+### 4. `com.comp2042.model.GameSettings`
 - **Location**: `src/main/java/com/comp2042/model/GameSettings.java`
 - **Purpose**: Singleton configuration manager (GoF Singleton Pattern) managing user preferences such as grid display options and persistent high score storage (`highscore.txt`).
 - **Justification**: Centralizes application-wide user configuration and persistent record tracking without polluting controller state. Accessible from both the Main Menu and active gameplay sessions. Automatically loads the saved high score on startup (`loadHighScore()`) and writes new records to `highscore.txt` when beaten (`updateHighScore(int)`).
 
-### 6. `com.comp2042.model.GameState`
+### 5. `com.comp2042.model.GameState`
 - **Location**: `src/main/java/com/comp2042/model/GameState.java`
 - **Purpose**: Type-safe enumeration defining the lifecycle phases of a game session (`READY`, `RUNNING`, `PAUSED`, `LEVEL_CLEARED`, `WON`, `DEAD`).
 - **Justification**: Replaces fragmented boolean flags (`gameStarted`, `gameOverVis`, `gameWonVis`, overlay visibility checks) with an explicit finite state machine across `GameController` and `GameView`, ensuring deterministic transitions when starting a match, clearing levels, pausing/resuming, winning, or dying.
 
-### 7. `com.comp2042.model.Direction`
+### 6. `com.comp2042.model.Direction`
 - **Location**: `src/main/java/com/comp2042/model/Direction.java`
 - **Purpose**: Type-safe enumeration defining cardinal movement directions (`UP`, `DOWN`, `LEFT`, `RIGHT`) with encapsulated grid deltas (`dx`, `dy`), rotation angles, opposite-direction validation (`isOpposite()`), and corner turn sprite angle computation (`getCornerRotation()`).
 - **Justification**: Eliminates primitive `'U'`/`'D'`/`'L'`/`'R'` characters and the 4 copy-pasted `switch` cases in `Snake.move()`, removes global mutable `public static KeyCode key` and `lastKey` fields from `GameController`, and replaces the `turnArray` grid in `GameView` with direct per-segment `Direction` comparisons.
 
-### 8. `com.comp2042.model.SpeedController`
+### 7. `com.comp2042.model.SpeedController`
 - **Location**: `src/main/java/com/comp2042/model/SpeedController.java`
 - **Purpose**: Pure-Java `@FunctionalInterface` (`void setSpeedRate(double rate)`) abstracting game loop speed adjustments in `Coin.applyEffect(...)`.
 - **Justification**: Applies the **Dependency Inversion Principle (DIP)** to decouple the `Coin` model hierarchy from JavaFX's `Timeline`. Together with moving sprite `Image`s and `Color`s from `Snake`, `Coin`, `Game`, and `Obstacle` into `GameView`, this makes the entire `com.comp2042.model` package 100% pure Java with zero `javafx.*` dependencies and enables pure-Java model unit tests without `JavaFXTestBase`.
 
-### 9. `com.comp2042.model.Cell`
+### 8. `com.comp2042.model.Cell`
 - **Location**: `src/main/java/com/comp2042/model/Cell.java`
 - **Purpose**: Immutable 2D grid coordinate record (`public record Cell(int x, int y)`) with translation helpers (`translate(int, int)` and `translate(Direction)`).
 - **Justification**: Replaces mutable legacy `java.awt.Point` across `Snake`, `Coin`, `Obstacle`, and `GameView`, eliminating all `java.awt.*` dependencies, removing `(int)` double-to-int casts, and enforcing coordinate immutability without defensive object cloning.
@@ -278,7 +270,6 @@ src/main/java/com/comp2042/
 │   ├── Cell.java                       (Immutable 2D grid coordinate record)
 │   ├── Coin.java                       (Base coin entity)
 │   ├── CoinGenerator.java              (GoF Factory Pattern for coin instantiation)
-│   ├── Difficulty.java                 (Legacy difficulty enumeration)
 │   ├── Direction.java                  (Cardinal direction enum with deltas & angles)
 │   ├── Game.java                       (Game state, score, speed, grid boundaries)
 │   ├── GameMode.java                   (Game modes: Quick, Classic, Hardcore)
@@ -307,6 +298,8 @@ src/main/java/com/comp2042/
 Adhering to clean code principles and Java naming conventions:
 - **`snek` -> `snake`**: Replaced all colloquialisms with descriptive, professional terminology across variable names, parameter lists, and method signatures in all classes.
 - **`valKey()` -> `isValidTurn()`**: Renamed this method in `GameController.java` to clearly express its purpose as a boolean predicate checking whether a direction change is legally permitted.
+- **`incScore()` -> `recordCoinEaten()`**: Renamed in `Game.java` to clarify that it increments level and total coin counters rather than point score (`addPoints(int)`).
+- **`ateCoin(Coin)` -> `resolveCoinConsumption(Coin)`**: Renamed in `Snake.java` to reflect that the method both checks coin collection and advances/grows the snake's tail segments.
 - **`initalizeMainMenu()` -> `initializeMainMenu()`**: Corrected spelling error in `ViewManager.java` and updated all callers (`Main.java`).
 - **Standardized Constants**: Maintained UPPER_SNAKE_CASE for class constants (`X_VALUE`, `Y_VALUE`, `POWER_UP`).
 

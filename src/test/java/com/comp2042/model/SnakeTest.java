@@ -69,11 +69,11 @@ class SnakeTest {
     void testAteCoinGrowth() {
         Coin coin = new Coin(20, 20, snake, obstacle);
         snake.move(Direction.LEFT);
-        assertFalse(snake.ateCoin(coin), "Should not have eaten coin at different position");
+        assertFalse(snake.resolveCoinConsumption(coin), "Should not have eaten coin at different position");
         assertEquals(1, snake.getBody().size(), "Body size remains 1 when no coin is eaten");
 
         Snake targetSnake = new Snake(20, 20, false, obstacle);
-        assertTrue(targetSnake.ateCoin(new CoinMock(targetSnake.getHead())), "ateCoin should return true when head equals coin position");
+        assertTrue(targetSnake.resolveCoinConsumption(new CoinMock(targetSnake.getHead())), "resolveCoinConsumption should return true when head equals coin position");
         assertEquals(1, targetSnake.getBody().size(), "Body segment count preserved for growth");
     }
 
@@ -117,7 +117,7 @@ class SnakeTest {
         assertEquals(1, hardcoreSnake.getBody().size(), "Initial body size is 1");
 
         CoinMock coin = new CoinMock(hardcoreSnake.getHead());
-        assertTrue(hardcoreSnake.ateCoin(coin));
+        assertTrue(hardcoreSnake.resolveCoinConsumption(coin));
 
         assertEquals(2, hardcoreSnake.getBody().size(), "Body size must increase by 2 segments for 2x growth rate");
     }
@@ -144,9 +144,9 @@ class SnakeTest {
     void testPerSegmentDirectionAcrossWrapAndHardcoreGrowth() {
         Snake hardcoreSnake = new Snake(10, 10, true, obstacle, 2);
         hardcoreSnake.move(Direction.UP);
-        hardcoreSnake.ateCoin(new CoinMock(new Cell(0, 0)));
+        hardcoreSnake.resolveCoinConsumption(new CoinMock(new Cell(0, 0)));
         hardcoreSnake.move(Direction.UP);
-        assertTrue(hardcoreSnake.ateCoin(new CoinMock(hardcoreSnake.getHead())));
+        assertTrue(hardcoreSnake.resolveCoinConsumption(new CoinMock(hardcoreSnake.getHead())));
         assertEquals(0, hardcoreSnake.getTailDir(), "Tail direction must remain 0 (UP) when tail cell is duplicated in Hardcore mode");
         assertEquals(0, hardcoreSnake.getBodyDir(1), "Body segment above duplicated tail must remain 0 (vertical), not 270 (horizontal)");
 
@@ -154,15 +154,15 @@ class SnakeTest {
         for (int i = 0; i < 5; i++) {
             wrapSnake.move(Direction.UP);
             if (i < 4) {
-                wrapSnake.ateCoin(new CoinMock(new Cell(9, 9)));
+                wrapSnake.resolveCoinConsumption(new CoinMock(new Cell(9, 9)));
             } else {
-                wrapSnake.ateCoin(new CoinMock(new Cell(5, 0)));
+                wrapSnake.resolveCoinConsumption(new CoinMock(new Cell(5, 0)));
             }
         }
         wrapSnake.move(Direction.UP);
-        wrapSnake.ateCoin(new CoinMock(new Cell(9, 9)));
+        wrapSnake.resolveCoinConsumption(new CoinMock(new Cell(9, 9)));
         wrapSnake.move(Direction.UP);
-        wrapSnake.ateCoin(new CoinMock(new Cell(9, 9)));
+        wrapSnake.resolveCoinConsumption(new CoinMock(new Cell(9, 9)));
         assertEquals(new Cell(5, 0), wrapSnake.getBody().get(0), "Tail should be at top edge (5, 0)");
         assertEquals(new Cell(5, 9), wrapSnake.getBody().get(1), "Segment ahead of tail wrapped to (5, 9)");
         assertEquals(0, wrapSnake.getTailDir(), "Tail straddling top wrap edge must still point UP (0°), not fall back to 90°");

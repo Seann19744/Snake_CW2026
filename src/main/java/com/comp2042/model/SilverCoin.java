@@ -18,6 +18,5 @@ public class SilverCoin extends Coin {
         super.applyEffect(game, snake, obstacle, speedController);
         Random rnd = new Random();
         obstacle.newObstacles(snake, this, rnd.nextInt(game.getWidth() * game.getHeight() / 20) + 3);
-        game.decMaxScore(obstacle.getObstacles().size());
     }
 }
