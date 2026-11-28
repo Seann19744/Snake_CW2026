@@ -313,7 +313,7 @@ Adhering to clean code principles and Java naming conventions:
 - **`ateCoin(Coin)` -> `resolveCoinConsumption(Coin)`**: Renamed in `Snake.java` to reflect that the method both checks coin collection and advances/grows the snake's tail segments.
 - **`getDead()` -> `isDead()`**: Renamed in `Snake.java` to follow standard Java boolean getter conventions.
 - **`initalizeMainMenu()` -> `initializeMainMenu()`**: Corrected spelling error in `ViewManager.java` and updated all callers (`Main.java`).
-- **Standardized Constants**: Maintained UPPER_SNAKE_CASE for class constants (`X_VALUE`, `Y_VALUE`, `POWER_UP`).
+- **Standardized Constants**: Maintained UPPER_SNAKE_CASE for class constants (`X_VALUE`, `Y_VALUE`, `POWER_UP`, `MAX_OBSTACLES`, `HEAD_SAFETY_BUFFER`, `POWER_UP_ROLL_BOUND`, and `GameView` font/margin/rendering constants).
 
 ---
 

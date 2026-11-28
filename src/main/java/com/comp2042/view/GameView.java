@@ -19,7 +19,23 @@ import java.util.List;
 public class GameView {
 
     private static final Color ARENA_COLOR = Color.web("#feffe4");
+    private static final Color CHECKERBOARD_ALT_COLOR = Color.web("#f1efd2");
+    private static final Color BORDER_COLOR = Color.web("#b0ab88");
     private static final Color OBSTACLE_COLOR = Color.BLACK;
+
+    private static final String FONT_FAMILY = "SF Pixelate";
+    private static final double MIN_SCORE_FONT_SIZE = 16.0;
+    private static final double SCORE_FONT_SCALE_FACTOR = 11.0;
+    private static final double MIN_OVERLAY_FONT_SIZE = 26.0;
+    private static final double OVERLAY_FONT_SCALE_FACTOR = 18.0;
+
+    private static final double WINDOW_MARGIN_WIDTH = 100.0;
+    private static final double WINDOW_MARGIN_HEIGHT = 120.0;
+    private static final double DEFAULT_WINDOW_WIDTH = 800.0;
+    private static final double DEFAULT_WINDOW_HEIGHT = 600.0;
+
+    private static final double BORDER_LINE_WIDTH = 2.0;
+    private static final double COIN_PADDING = 2.0;
 
     private final Image headImage = new Image("resources/views/res/snakehead.png");
     private final Image bodyImage = new Image("resources/views/res/snakebody.png");
@@ -77,7 +93,7 @@ public class GameView {
         scoreLabel = new Label();
         scoreLabel.setId("scoreLabel");
         scoreLabel.getStylesheets().add(css);
-        scoreLabel.setFont(new Font("SF Pixelate", 16));
+        scoreLabel.setFont(new Font(FONT_FAMILY, MIN_SCORE_FONT_SIZE));
         updateScoreLabel();
         scoreLabel.setVisible(true);
 
@@ -91,10 +107,8 @@ public class GameView {
     public void fitToWindow(double windowWidth, double windowHeight, Obstacle obstacle, Snake snake, Coin coin) {
         if (windowWidth <= 0 || windowHeight <= 0) return;
 
-        double marginW = 100;
-        double marginH = 120;
-        double availableW = Math.max(initX, windowWidth - marginW);
-        double availableH = Math.max(initY, windowHeight - marginH);
+        double availableW = Math.max(initX, windowWidth - WINDOW_MARGIN_WIDTH);
+        double availableH = Math.max(initY, windowHeight - WINDOW_MARGIN_HEIGHT);
 
         fullScale = Math.max(1.0, Math.min(availableW / initX, availableH / initY));
 
@@ -104,13 +118,13 @@ public class GameView {
         }
 
         if (scoreLabel != null) {
-            scoreLabel.setFont(new Font("SF Pixelate", Math.max(16, 11 * fullScale)));
+            scoreLabel.setFont(new Font(FONT_FAMILY, Math.max(MIN_SCORE_FONT_SIZE, SCORE_FONT_SCALE_FACTOR * fullScale)));
         }
         if (gameOverLabel != null) {
-            gameOverLabel.setFont(new Font("SF Pixelate", Math.max(26, 18 * fullScale)));
+            gameOverLabel.setFont(new Font(FONT_FAMILY, Math.max(MIN_OVERLAY_FONT_SIZE, OVERLAY_FONT_SCALE_FACTOR * fullScale)));
         }
         if (gameWonLabel != null) {
-            gameWonLabel.setFont(new Font("SF Pixelate", Math.max(26, 18 * fullScale)));
+            gameWonLabel.setFont(new Font(FONT_FAMILY, Math.max(MIN_OVERLAY_FONT_SIZE, OVERLAY_FONT_SCALE_FACTOR * fullScale)));
         }
 
         if (gc != null && snake != null && coin != null) {
@@ -122,8 +136,8 @@ public class GameView {
         if (primaryStage != null) {
             primaryStage.setFullScreen(fullScreen);
         }
-        double width = 800;
-        double height = 600;
+        double width = DEFAULT_WINDOW_WIDTH;
+        double height = DEFAULT_WINDOW_HEIGHT;
         try {
             Screen screen = Screen.getPrimary();
             if (screen != null) {
@@ -231,7 +245,7 @@ public class GameView {
         // Checkerboard pattern (alternating tiles when grid is enabled)
         if (GameSettings.getInstance().isGridEnabled()) {
             double tileSize = game.getMultiplier() * fullScale;
-            gc.setFill(Color.web("#f1efd2"));
+            gc.setFill(CHECKERBOARD_ALT_COLOR);
             for (int x = 0; x < game.getWidth(); x++) {
                 for (int y = 0; y < game.getHeight(); y++) {
                     if ((x + y) % 2 == 1) {
@@ -242,12 +256,12 @@ public class GameView {
         }
 
         // Boundary outline separating the playable grid from the white non-playable window area
-        gc.setStroke(Color.web("#b0ab88"));
-        gc.setLineWidth(2 * fullScale);
+        gc.setStroke(BORDER_COLOR);
+        gc.setLineWidth(BORDER_LINE_WIDTH * fullScale);
         gc.strokeRect(0, 0, gridCanvas.getWidth(), gridCanvas.getHeight());
 
         double tileSize = game.getMultiplier() * fullScale;
-        double coinPadding = 2 * fullScale;
+        double coinPadding = COIN_PADDING * fullScale;
         double coinSize = tileSize - (2 * coinPadding);
         gc.drawImage(getCoinImage(coin),
                 (coin.getPos().x() * tileSize) + coinPadding,
