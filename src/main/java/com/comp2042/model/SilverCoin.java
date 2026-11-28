@@ -9,6 +9,11 @@ public class SilverCoin extends Coin {
     }
 
     @Override
+    public String getSpritePath() {
+        return "resources/views/res/silvercoin.png";
+    }
+
+    @Override
     public void applyEffect(Game game, Snake snake, Obstacle obstacle, SpeedController speedController) {
         super.applyEffect(game, snake, obstacle, speedController);
         Random rnd = new Random();

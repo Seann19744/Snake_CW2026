@@ -14,7 +14,9 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class GameView {
 
@@ -42,11 +44,7 @@ public class GameView {
     private final Image turnImage = new Image("resources/views/res/snaketurnleft.png");
     private final Image tailImage = new Image("resources/views/res/snaketail.png");
 
-    private final Image redCoinImage = new Image("resources/views/res/redcoin.png");
-    private final Image goldCoinImage = new Image("resources/views/res/goldcoin.png");
-    private final Image rainbowCoinImage = new Image("resources/views/res/rainbowcoin.png");
-    private final Image blueCoinImage = new Image("resources/views/res/bluecoin.png");
-    private final Image silverCoinImage = new Image("resources/views/res/silvercoin.png");
+    private final Map<String, Image> coinImages = new HashMap<>();
 
     private Canvas gridCanvas;
     private GraphicsContext gc;
@@ -220,16 +218,7 @@ public class GameView {
     }
 
     private Image getCoinImage(Coin coin) {
-        if (coin instanceof GoldCoin) {
-            return goldCoinImage;
-        } else if (coin instanceof RainbowCoin) {
-            return rainbowCoinImage;
-        } else if (coin instanceof BlueCoin) {
-            return blueCoinImage;
-        } else if (coin instanceof SilverCoin) {
-            return silverCoinImage;
-        }
-        return redCoinImage;
+        return coinImages.computeIfAbsent(coin.getSpritePath(), Image::new);
     }
 
     public void drawGrid(Coin coin, Snake snake, Obstacle obstacle) {

@@ -37,6 +37,7 @@ class CoinTest {
         assertNotEquals(snake.getHead(), pos, "Coin must not spawn on snake head");
         assertFalse(snake.getBody().contains(pos), "Coin must not spawn on snake body");
         assertEquals(5, coin.getPoints(), "Base coin points should be 5");
+        assertEquals("resources/views/res/redcoin.png", coin.getSpritePath(), "Base coin sprite path should point to redcoin.png");
     }
 
     @Test
@@ -44,6 +45,7 @@ class CoinTest {
     void testGoldCoin() {
         GoldCoin goldCoin = new GoldCoin(20, 20, snake, obstacle);
         assertEquals(15, goldCoin.getPoints(), "Gold coin should yield 15 points");
+        assertEquals("resources/views/res/goldcoin.png", goldCoin.getSpritePath());
         assertInstanceOf(Coin.class, goldCoin, "GoldCoin must inherit from Coin");
     }
 
@@ -53,6 +55,7 @@ class CoinTest {
         RainbowCoin rainbowCoin = new RainbowCoin(20, 20, snake, obstacle);
         assertEquals(5, rainbowCoin.getPoints(), "Rainbow coin should yield 5 points");
         assertEquals(5.0, rainbowCoin.getSpeedBonus(), 0.001, "Rainbow coin speed bonus should be 5.0");
+        assertEquals("resources/views/res/rainbowcoin.png", rainbowCoin.getSpritePath());
         assertInstanceOf(Coin.class, rainbowCoin, "RainbowCoin must inherit from Coin");
     }
 
@@ -61,6 +64,7 @@ class CoinTest {
     void testSilverCoin() {
         SilverCoin silverCoin = new SilverCoin(20, 20, snake, obstacle);
         assertEquals(5, silverCoin.getPoints(), "Silver coin should yield 5 points");
+        assertEquals("resources/views/res/silvercoin.png", silverCoin.getSpritePath());
         assertInstanceOf(Coin.class, silverCoin, "SilverCoin must inherit from Coin");
     }
 
@@ -69,6 +73,7 @@ class CoinTest {
     void testBlueCoin() {
         BlueCoin blueCoin = new BlueCoin(20, 20, snake, obstacle);
         assertEquals(5, blueCoin.getPoints(), "Blue coin should yield 5 points");
+        assertEquals("resources/views/res/bluecoin.png", blueCoin.getSpritePath());
         assertInstanceOf(Coin.class, blueCoin, "BlueCoin must inherit from Coin");
     }
 

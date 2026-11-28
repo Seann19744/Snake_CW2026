@@ -7,6 +7,11 @@ public class BlueCoin extends Coin {
     }
 
     @Override
+    public String getSpritePath() {
+        return "resources/views/res/bluecoin.png";
+    }
+
+    @Override
     public void applyEffect(Game game, Snake snake, Obstacle obstacle, SpeedController speedController) {
         super.applyEffect(game, snake, obstacle, speedController);
         snake.ignoreBorders(true);

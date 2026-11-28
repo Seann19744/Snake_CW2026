@@ -11,6 +11,11 @@ public class RainbowCoin extends Coin {
     }
 
     @Override
+    public String getSpritePath() {
+        return "resources/views/res/rainbowcoin.png";
+    }
+
+    @Override
     public void applyEffect(Game game, Snake snake, Obstacle obstacle, SpeedController speedController) {
         super.applyEffect(game, snake, obstacle, speedController);
         if (speedController != null) {

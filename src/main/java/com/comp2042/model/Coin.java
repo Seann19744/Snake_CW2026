@@ -25,6 +25,18 @@ public class Coin {
     }
 
     /**
+     * Returns the resource path of the sprite image representing this coin.
+     * Subclasses override this method to provide their own sprite resource path,
+     * allowing the view layer to resolve and cache coin images polymorphically
+     * without {@code instanceof} type checks (Open-Closed Principle).
+     *
+     * @return classpath resource path to the coin's sprite image
+     */
+    public String getSpritePath() {
+        return "resources/views/res/redcoin.png";
+    }
+
+    /**
      * Applies the effect of this coin when eaten by the snake.
      * By default, resets speed, resets border-passing, and awards points.
      * Subclasses override this method to provide polymorphic power-up behavior (Open-Closed Principle)

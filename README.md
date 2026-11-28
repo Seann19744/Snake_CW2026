@@ -110,10 +110,11 @@ The following features, enhancements, and bug fixes have been implemented, teste
     - Encapsulates probability distributions and board condition checks (e.g., ensuring `SilverCoin` only spawns when the board has no obstacles).
     - Enables dependency injection of `Random` for deterministic unit testing.
 
-14. **SOLID Refactoring: Polymorphic Power-Up Effects (Open-Closed Principle)**:
-    - Replaced the hardcoded class-type checking ladder (`if (coin.getClass().equals(RainbowCoin.class)) ...`) in `GameController.powerCoin()` with a polymorphic `applyEffect(Game, Snake, Obstacle, Timeline)` method across the `Coin` hierarchy.
-    - Each coin subclass encapsulates its own effect (`RainbowCoin` adds speed bonus, `BlueCoin` enables border-crossing, `SilverCoin` spawns obstacles, `GoldCoin` adds 15 points).
-    - New coin types can now be introduced without modifying existing controller logic, fully conforming to the Open-Closed Principle (OCP) and Single Responsibility Principle (SRP).
+14. **SOLID Refactoring: Polymorphic Power-Up Effects & Sprite Resolution (Open-Closed Principle)**:
+    - Replaced the hardcoded class-type checking ladder (`if (coin.getClass().equals(RainbowCoin.class)) ...`) in `GameController.powerCoin()` with a polymorphic `applyEffect(Game, Snake, Obstacle, SpeedController)` method across the `Coin` hierarchy.
+    - Replaced the `instanceof` chain in `GameView.getCoinImage(Coin)` with a polymorphic `getSpritePath()` method on `Coin` and its subclasses, paired with an image cache (`Map<String, Image>`) in `GameView`.
+    - Each coin subclass encapsulates its own effect and sprite path (`RainbowCoin` adds speed bonus, `BlueCoin` enables border-crossing, `SilverCoin` spawns obstacles, `GoldCoin` adds 15 points).
+    - New coin types can now be introduced without modifying existing controller or view logic, fully conforming to the Open-Closed Principle (OCP) and Single Responsibility Principle (SRP).
 
 15. **Persistent Best Score Tracking & Pixel Art Main Menu Display**:
     - Added persistent high score tracking in `GameSettings` (`highscore.txt` in the project root directory), automatically saving new high score records whenever points are earned (`Game.addPoints(int)`) and reloading them on application startup.
@@ -260,7 +261,7 @@ The following features were considered during design and development but were no
 ### 10. `com.comp2042.model.Coin` and Subclasses (`GoldCoin`, `SilverCoin`, `BlueCoin`, `RainbowCoin`)
 - Moved to package `com.comp2042.model`.
 - Updated constructors and method parameters from `Snake snek` to `Snake snake` and coordinates to `Cell`.
-- Implemented polymorphic `applyEffect(Game, Snake, Obstacle, SpeedController)` across all coin types (Open-Closed Principle & Dependency Inversion Principle), removing JavaFX `Image` and `Timeline` dependencies from the model hierarchy.
+- Implemented polymorphic `applyEffect(Game, Snake, Obstacle, SpeedController)` and `getSpritePath()` across all coin types (Open-Closed Principle & Dependency Inversion Principle), removing JavaFX `Image` and `Timeline` dependencies from the model hierarchy and eliminating the `instanceof` chain in `GameView.getCoinImage(Coin)`.
 
 ---
 
