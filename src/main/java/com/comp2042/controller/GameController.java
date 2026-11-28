@@ -8,7 +8,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.media.AudioClip;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -16,6 +15,8 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 public class GameController {
+    private static final int MAX_INPUT_QUEUE_SIZE = 2;
+
     private Snake snake;
     private Coin coin;
     private GameView gameView;
@@ -23,22 +24,24 @@ public class GameController {
     private Stage stage;
     private Obstacle obstacle;
     private final CoinGenerator coinGenerator;
+    private final SoundManager soundManager;
 
     private Direction currentDirection = Direction.LEFT;
     private boolean keyPressed = false;
-    private final Deque<Direction> inputQueue = new ArrayDeque<>(2);
+    private final Deque<Direction> inputQueue = new ArrayDeque<>(MAX_INPUT_QUEUE_SIZE);
     private GameState gameState = GameState.READY;
     private GameState prePauseState = GameState.READY;
 
-    private final AudioClip coinSound = new AudioClip(
-            getClass().getResource("/resources/views/res/coinSound.wav").toExternalForm()
-    );
-
     public GameController(Snake snake, Coin coin, Game game, GameView gameView, Obstacle obstacle, Stage stage) {
-        this(snake, coin, game, gameView, obstacle, stage, new CoinGenerator());
+        this(snake, coin, game, gameView, obstacle, stage, new CoinGenerator(), new SoundManager());
     }
 
     public GameController(Snake snake, Coin coin, Game game, GameView gameView, Obstacle obstacle, Stage stage, CoinGenerator coinGenerator) {
+        this(snake, coin, game, gameView, obstacle, stage, coinGenerator, new SoundManager());
+    }
+
+    public GameController(Snake snake, Coin coin, Game game, GameView gameView, Obstacle obstacle, Stage stage,
+                          CoinGenerator coinGenerator, SoundManager soundManager) {
         this.snake = snake;
         this.coin = coin;
         this.gameView = gameView;
@@ -46,6 +49,7 @@ public class GameController {
         this.stage = stage;
         this.obstacle = obstacle;
         this.coinGenerator = coinGenerator;
+        this.soundManager = soundManager != null ? soundManager : new SoundManager(() -> {});
 
         this.snake.setGrowthRate(game.getGameMode().getGrowthRate());
         this.obstacle.loadLevelLayout(game.getCurrentLevel());
@@ -96,7 +100,7 @@ public class GameController {
         snake.move(currentDirection);
 
         if (!snake.isDead() && snake.resolveCoinConsumption(coin)) {
-            coinSound.play();
+            soundManager.playCoinSound();
             powerCoin();
             game.recordCoinEaten();
             if (game.isLevelCompleted()) {
@@ -182,7 +186,7 @@ public class GameController {
                         animation.play();
                     }
                 }
-            } else if (inputQueue.size() < 2) {
+            } else if (inputQueue.size() < MAX_INPUT_QUEUE_SIZE) {
                 Direction referenceDirection = inputQueue.isEmpty() ? currentDirection : inputQueue.peekLast();
                 if (isValidTurnFrom(referenceDirection, dir) && dir != referenceDirection) {
                     inputQueue.addLast(dir);
