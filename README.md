@@ -187,8 +187,8 @@ The following features were considered during design and development but were no
 
 ### 9. `com.comp2042.view.PauseMenuView`
 - **Location**: `src/main/java/com/comp2042/view/PauseMenuView.java`
-- **Purpose**: Dedicated view component encapsulating the in-game pause overlay (`pauseBox`), settings sub-menu (`pauseSettingsBox`), and How to Play help overlay (`pauseHelpBox`).
-- **Justification**: Applies the **Single Responsibility Principle (SRP)** by extracting ~140 lines of pause overlay UI construction and sub-menu navigation out of `GameView`, allowing `GameView` to focus exclusively on board rendering, HUD labels, and window scaling.
+- **Purpose**: Dedicated view component encapsulating the in-game pause overlay (`pauseBox`), settings sub-menu (`pauseSettingsBox`), and shared How to Play help overlay builder (`populateHelpContent(VBox)`).
+- **Justification**: Applies the **Single Responsibility Principle (SRP)** and **Don't Repeat Yourself (DRY)** principle by extracting pause overlay UI construction out of `GameView` and providing a single shared help-section factory (`populateHelpContent(VBox)`) reused by both `PauseMenuView` and `MainMenuController` (`helpContentBox` in `MainMenu.fxml`), eliminating duplicated help text across FXML and Java view code.
 
 ---
 
@@ -201,8 +201,8 @@ The following features were considered during design and development but were no
 ### 2. `com.comp2042.controller.MainMenuController`
 - Moved to package `com.comp2042.controller`.
 - Replaced the main menu `ComboBox` dropdown with a dedicated **Select Difficulty** overlay (`difficultyOverlay`) opened via `handleStart()`.
-- Added handlers (`handleQuickMode()`, `handleClassicMode()`, `handleHardcoreMode()`, `handleCloseDifficulty()`) and dynamic description labels (`lbl_quickDesc`, `lbl_classicDesc`, `lbl_hardcoreDesc`) populated from `GameMode.getDescription()`.
-- Added top-right `?` help button handlers (`handleOpenHelp()`, `handleCloseHelp()`) controlling the **How to Play** overlay (`helpOverlay`).
+- Added handlers (`handleQuickMode()`, `handleClassicMode()`, `handleHardcoreMode()`, `handleCloseDifficulty()`) and dynamic description labels (`lbl_quickDesc`, `lbl_classicDesc`, `lbl_hardcoreDesc`) populated exclusively from `GameMode.getDescription()` (removing duplicate hardcoded description attributes from `MainMenu.fxml`).
+- Added top-right `?` help button handlers (`handleOpenHelp()`, `handleCloseHelp()`) controlling the **How to Play** overlay (`helpOverlay`), with `helpContentBox` populated dynamically via `PauseMenuView.populateHelpContent(helpContentBox)`.
 - Added `handleQuit()` handler for the main menu **Quit** button to cleanly close the stage and exit the JavaFX application via `Platform.exit()`.
 - Added `drawPixelArtBackground()` on `menuBgCanvas` to render a retro 25x25 checkerboard tile grid (`#feffe4` / `#f1efd2`), double-layered pixel arcade border with corner rivets, and decorative pixel-art snake and coin sprites.
 - Added `lbl_highScore` binding and `updateHighScoreLabel()` (with a `showingProperty()` stage listener) to display the persistent best score at the top of the Main Menu.
