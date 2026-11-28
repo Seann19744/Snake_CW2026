@@ -270,17 +270,17 @@ public class MainMenuController {
 
         gameView.makeScene(gameScene, snake, coin, obstacle);
         gamePane.getChildren().addAll(
-                gameView.gridCanvas,
-                gameView.gameOverLabel,
-                gameView.gameWonLabel,
-                gameView.scoreLabel,
-                gameView.pauseOverlay
+                gameView.getGridCanvas(),
+                gameView.getGameOverLabel(),
+                gameView.getGameWonLabel(),
+                gameView.getScoreLabel(),
+                gameView.getPauseOverlay()
         );
         gamePane.setPadding(new Insets(20));
-        gamePane.setAlignment(gameView.gameOverLabel, Pos.TOP_CENTER);
-        gamePane.setAlignment(gameView.gameWonLabel, Pos.TOP_CENTER);
-        gamePane.setAlignment(gameView.scoreLabel, Pos.BOTTOM_CENTER);
-        gamePane.setAlignment(gameView.pauseOverlay, Pos.CENTER);
+        gamePane.setAlignment(gameView.getGameOverLabel(), Pos.TOP_CENTER);
+        gamePane.setAlignment(gameView.getGameWonLabel(), Pos.TOP_CENTER);
+        gamePane.setAlignment(gameView.getScoreLabel(), Pos.BOTTOM_CENTER);
+        gamePane.setAlignment(gameView.getPauseOverlay(), Pos.CENTER);
 
         // Dynamically scale on window resize or fullscreen toggle using live controller state
         gameScene.widthProperty().addListener((obs, oldV, newV) ->

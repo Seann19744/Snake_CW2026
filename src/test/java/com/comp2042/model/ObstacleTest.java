@@ -22,10 +22,13 @@ class ObstacleTest {
     }
 
     @Test
-    @DisplayName("Verify obstacle list is initially empty")
+    @DisplayName("Verify obstacle list is initially empty and unmodifiable")
     void testInitialObstaclesEmpty() {
         assertNotNull(obstacle.getObstacles(), "Obstacles list should not be null");
         assertTrue(obstacle.getObstacles().isEmpty(), "Obstacles list should initially be empty");
+        assertThrows(UnsupportedOperationException.class,
+                () -> obstacle.getObstacles().add(new Cell(0, 0)),
+                "getObstacles() must return an unmodifiable list");
     }
 
     @Test

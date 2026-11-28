@@ -32,15 +32,15 @@ public class GameView {
     private final Image blueCoinImage = new Image("resources/views/res/bluecoin.png");
     private final Image silverCoinImage = new Image("resources/views/res/silvercoin.png");
 
-    public Canvas gridCanvas;
-    public GraphicsContext gc;
+    private Canvas gridCanvas;
+    private GraphicsContext gc;
 
-    public Label gameOverLabel = new Label("GAME OVER");
-    public Label gameWonLabel = new Label("YOU WON!");
-    public Label scoreLabel = new Label();
+    private Label gameOverLabel = new Label("GAME OVER");
+    private Label gameWonLabel = new Label("YOU WON!");
+    private Label scoreLabel = new Label();
 
     private final PauseMenuView pauseMenuView;
-    public final StackPane pauseOverlay;
+    private final StackPane pauseOverlay;
 
     private Coin currentCoin;
     private Snake currentSnake;
@@ -84,7 +84,7 @@ public class GameView {
         if (scene != null) {
             fitToWindow(scene.getWidth(), scene.getHeight(), obstacle, snake, coin);
         } else {
-            drawGrid(coin, snake, obstacle, gc);
+            drawGrid(coin, snake, obstacle);
         }
     }
 
@@ -114,7 +114,7 @@ public class GameView {
         }
 
         if (gc != null && snake != null && coin != null) {
-            drawGrid(coin, snake, obstacle, gc);
+            drawGrid(coin, snake, obstacle);
         }
     }
 
@@ -169,8 +169,32 @@ public class GameView {
 
     public void redrawGrid() {
         if (gc != null && currentCoin != null && currentSnake != null) {
-            drawGrid(currentCoin, currentSnake, currentObstacle, gc);
+            drawGrid(currentCoin, currentSnake, currentObstacle);
         }
+    }
+
+    public Canvas getGridCanvas() {
+        return gridCanvas;
+    }
+
+    public GraphicsContext getGc() {
+        return gc;
+    }
+
+    public Label getGameOverLabel() {
+        return gameOverLabel;
+    }
+
+    public Label getGameWonLabel() {
+        return gameWonLabel;
+    }
+
+    public Label getScoreLabel() {
+        return scoreLabel;
+    }
+
+    public StackPane getPauseOverlay() {
+        return pauseOverlay;
     }
 
     public Button getResumeButton() {
@@ -194,7 +218,7 @@ public class GameView {
         return redCoinImage;
     }
 
-    public void drawGrid(Coin coin, Snake snake, Obstacle obstacle, GraphicsContext gc) {
+    public void drawGrid(Coin coin, Snake snake, Obstacle obstacle) {
         if (gc == null || coin == null || snake == null) return;
         this.currentCoin = coin;
         this.currentSnake = snake;

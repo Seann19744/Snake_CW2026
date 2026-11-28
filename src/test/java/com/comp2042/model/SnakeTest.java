@@ -25,7 +25,7 @@ class SnakeTest {
         assertEquals(new Cell(10, 10), snake.getHead(), "Initial head position should be at (10, 10)");
         assertEquals(1, snake.getBody().size(), "Snake should start with 1 body segment");
         assertEquals(new Cell(11, 10), snake.getBody().get(0), "Initial body segment should be at (11, 10)");
-        assertFalse(snake.getDead(), "Snake should be alive initially");
+        assertFalse(snake.isDead(), "Snake should be alive initially");
         assertEquals(270, snake.getSnakeDir(), "Initial direction should be 270 (facing LEFT)");
     }
 
@@ -35,7 +35,7 @@ class SnakeTest {
         snake.move(Direction.LEFT);
         assertEquals(new Cell(9, 10), snake.getHead(), "Head should move left to (9, 10)");
         assertEquals(270, snake.getSnakeDir(), "Direction should be 270 for LEFT");
-        assertFalse(snake.getDead(), "Snake should be alive after moving within bounds");
+        assertFalse(snake.isDead(), "Snake should be alive after moving within bounds");
     }
 
     @Test
@@ -44,7 +44,7 @@ class SnakeTest {
         snake.move(Direction.UP);
         assertEquals(new Cell(10, 9), snake.getHead(), "Head should move up to (10, 9)");
         assertEquals(0, snake.getSnakeDir(), "Direction should be 0 for UP");
-        assertFalse(snake.getDead(), "Snake should be alive after moving within bounds");
+        assertFalse(snake.isDead(), "Snake should be alive after moving within bounds");
     }
 
     @Test
@@ -53,7 +53,7 @@ class SnakeTest {
         snake.move(Direction.DOWN);
         assertEquals(new Cell(10, 11), snake.getHead(), "Head should move down to (10, 11)");
         assertEquals(180, snake.getSnakeDir(), "Direction should be 180 for DOWN");
-        assertFalse(snake.getDead(), "Snake should be alive after moving within bounds");
+        assertFalse(snake.isDead(), "Snake should be alive after moving within bounds");
     }
 
     @Test
@@ -84,7 +84,7 @@ class SnakeTest {
         normalSnake.move(Direction.LEFT); // (1, 2)
         normalSnake.move(Direction.LEFT); // (0, 2)
         normalSnake.move(Direction.LEFT); // moves to (-1, 2), triggers borderControl -> fatal
-        assertTrue(normalSnake.getDead(), "Snake must die when colliding with boundary in normal mode");
+        assertTrue(normalSnake.isDead(), "Snake must die when colliding with boundary in normal mode");
     }
 
     @Test
@@ -94,7 +94,7 @@ class SnakeTest {
         easySnake.move(Direction.LEFT); // (1, 2)
         easySnake.move(Direction.LEFT); // (0, 2)
         easySnake.move(Direction.LEFT); // Crosses left boundary (x < 0) -> wraps to (3, 2)
-        assertFalse(easySnake.getDead(), "Snake should NOT die on border in Easy mode");
+        assertFalse(easySnake.isDead(), "Snake should NOT die on border in Easy mode");
         assertEquals(3, easySnake.getHead().x(), "Head X should wrap around to gx - 1 (3)");
         assertEquals(2, easySnake.getHead().y(), "Head Y should remain 2");
     }
@@ -103,10 +103,10 @@ class SnakeTest {
     @DisplayName("Verify collision with obstacle causes death")
     void testObstacleCollision() {
         Cell obstaclePoint = new Cell(9, 10);
-        obstacle.getObstacles().add(obstaclePoint);
+        obstacle.addObstacle(obstaclePoint);
 
         snake.move(Direction.LEFT);
-        assertTrue(snake.getDead(), "Snake must die upon hitting an obstacle");
+        assertTrue(snake.isDead(), "Snake must die upon hitting an obstacle");
     }
 
     @Test
@@ -126,16 +126,16 @@ class SnakeTest {
     @DisplayName("Verify wrap-around onto an edge obstacle causes death")
     void testWrapAroundOntoEdgeObstacleCausesDeath() {
         Obstacle edgeObstacle = new Obstacle(4, 4);
-        edgeObstacle.getObstacles().add(new Cell(3, 2));
+        edgeObstacle.addObstacle(new Cell(3, 2));
 
         Snake wrappingSnake = new Snake(4, 4, true, edgeObstacle);
         wrappingSnake.move(Direction.LEFT);
         wrappingSnake.move(Direction.LEFT);
-        assertFalse(wrappingSnake.getDead());
+        assertFalse(wrappingSnake.isDead());
         assertEquals(new Cell(0, 2), wrappingSnake.getHead());
 
         wrappingSnake.move(Direction.LEFT);
-        assertTrue(wrappingSnake.getDead(), "Wrapping onto an edge obstacle must kill the snake");
+        assertTrue(wrappingSnake.isDead(), "Wrapping onto an edge obstacle must kill the snake");
         assertEquals(new Cell(0, 2), wrappingSnake.getHead(), "Head should revert to pre-collision position (0, 2)");
     }
 
@@ -185,7 +185,7 @@ class SnakeTest {
         normalSnake.move(Direction.RIGHT);
         normalSnake.resolveCoinConsumption(new CoinMock(new Cell(0, 0)));
         normalSnake.move(Direction.DOWN);
-        assertTrue(normalSnake.getDead(), "Normal snake must die when steering into its own body segment");
+        assertTrue(normalSnake.isDead(), "Normal snake must die when steering into its own body segment");
 
         // 2. Hardcore mode (growthRate = 2): duplicated tail cell must NOT be exempt from self-collision
         Snake hardcoreSnake = new Snake(20, 20, false, obstacle, 2);
@@ -197,11 +197,11 @@ class SnakeTest {
         // Notice tail cell (11, 10) is duplicated at indices 0, 1, 2!
         hardcoreSnake.move(Direction.RIGHT);
         assertTrue(hardcoreSnake.resolveCoinConsumption(new CoinMock(hardcoreSnake.getHead())));
-        assertFalse(hardcoreSnake.getDead());
+        assertFalse(hardcoreSnake.isDead());
 
         // Step 3: Move DOWN from (11, 9) onto (11, 10), where the duplicated tail still sits!
         hardcoreSnake.move(Direction.DOWN);
-        assertTrue(hardcoreSnake.getDead(), "Stepping onto a duplicated tail cell in Hardcore mode must cause self-collision death");
+        assertTrue(hardcoreSnake.isDead(), "Stepping onto a duplicated tail cell in Hardcore mode must cause self-collision death");
     }
 
     @Test
@@ -223,7 +223,7 @@ class SnakeTest {
             assertEquals(new Cell(11, 10), cell, "All body segments must stack on spawn tail (11, 10)");
         }
         assertEquals(270, snake.getSnakeDir(), "Angle must reset to 270");
-        assertFalse(snake.getDead(), "Dead flag must be false after resetPosition");
+        assertFalse(snake.isDead(), "Dead flag must be false after resetPosition");
     }
 
     /**

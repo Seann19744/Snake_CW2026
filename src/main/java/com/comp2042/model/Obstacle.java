@@ -1,6 +1,8 @@
 package com.comp2042.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class Obstacle {
@@ -67,8 +69,14 @@ public class Obstacle {
         return dx <= 2 && dy <= 2;
     }
 
-    public ArrayList<Cell> getObstacles() {
-        return obstacles;
+    public List<Cell> getObstacles() {
+        return Collections.unmodifiableList(obstacles);
+    }
+
+    public void addObstacle(Cell cell) {
+        if (cell != null && !obstacles.contains(cell)) {
+            obstacles.add(cell);
+        }
     }
 
     public void reset() {

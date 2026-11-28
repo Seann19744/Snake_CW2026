@@ -113,7 +113,7 @@ class CoinTest {
         testSnake.move(Direction.LEFT);
         testSnake.move(Direction.LEFT);
         testSnake.move(Direction.LEFT); // Crosses border
-        assertFalse(testSnake.getDead(), "Snake should pass through border when BlueCoin effect is active");
+        assertFalse(testSnake.isDead(), "Snake should pass through border when BlueCoin effect is active");
     }
 
     @Test

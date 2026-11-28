@@ -236,6 +236,7 @@ The following features were considered during design and development but were no
 ### 6. `com.comp2042.model.Obstacle`
 - Moved to package `com.comp2042.model`.
 - Fixed coordinate generation in `newObstacles()`: changed `rnd.nextInt(x - 1) + 1` to `rnd.nextInt(x)`, allowing obstacles to spawn across all columns including column 0.
+- Encapsulated `getObstacles()` to return an unmodifiable view `Collections.unmodifiableList(obstacles)` (`List<Cell>`).
 - Added comprehensive Javadoc documentation explaining obstacle placement logic and collision prevention with the snake and coin.
 
 ### 7. `com.comp2042.view.GameView`
@@ -244,6 +245,7 @@ The following features were considered during design and development but were no
 - Renamed parameter `snek` to `snake` in methods (`drawGrid`, `drawHead`, `drawBody`).
 - Centralized all snake and coin sprite `Image` assets and board/obstacle `Color` constants inside `GameView`, removing JavaFX dependencies from the `model` package.
 - Extracted in-game pause overlay UI into `PauseMenuView` (Single Responsibility Principle), eliminated `ImageView.snapshot()` allocations in favor of direct `GraphicsContext` canvas rotation (`drawRotatedImage()`), removed the redundant `drawGrid` overload, and fetched `snake.getBody()` once per frame instead of copying the list per segment.
+- Encapsulated `gridCanvas`, `gc`, `gameOverLabel`, `gameWonLabel`, `scoreLabel`, and `pauseOverlay` as `private` fields with dedicated getters, and removed the redundant `GraphicsContext gc` parameter from `drawGrid(Coin, Snake, Obstacle)`.
 
 ### 8. `com.comp2042.view.ViewManager`
 - Moved to package `com.comp2042.view`.
@@ -309,6 +311,7 @@ Adhering to clean code principles and Java naming conventions:
 - **`valKey()` -> `isValidTurn()`**: Renamed this method in `GameController.java` to clearly express its purpose as a boolean predicate checking whether a direction change is legally permitted.
 - **`incScore()` -> `recordCoinEaten()`**: Renamed in `Game.java` to clarify that it increments the current level coin counter rather than point score (`addPoints(int)`).
 - **`ateCoin(Coin)` -> `resolveCoinConsumption(Coin)`**: Renamed in `Snake.java` to reflect that the method both checks coin collection and advances/grows the snake's tail segments.
+- **`getDead()` -> `isDead()`**: Renamed in `Snake.java` to follow standard Java boolean getter conventions.
 - **`initalizeMainMenu()` -> `initializeMainMenu()`**: Corrected spelling error in `ViewManager.java` and updated all callers (`Main.java`).
 - **Standardized Constants**: Maintained UPPER_SNAKE_CASE for class constants (`X_VALUE`, `Y_VALUE`, `POWER_UP`).
 

@@ -159,7 +159,7 @@ public class Snake {
         return head;
     }
 
-    public boolean getDead() {
+    public boolean isDead() {
         return dead;
     }
 

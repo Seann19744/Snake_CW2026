@@ -207,7 +207,7 @@ class GameControllerTest extends JavaFXTestBase {
         controller.handle(new javafx.scene.input.KeyEvent(
                 javafx.scene.input.KeyEvent.KEY_PRESSED, "", "", KeyCode.TAB, false, false, false, false
         ));
-        String hudText = gameView.scoreLabel.getText();
+        String hudText = gameView.getScoreLabel().getText();
         assertNotEquals("Score: 0", hudText, "TAB must not overwrite HUD with legacy 'Score: 0'");
         assertTrue(hudText.contains("[Classic Mode] Level 1/3 | Coins: 0/8 | Score: 0"),
                 "TAB reset should display full HUD string, got: " + hudText);
@@ -250,7 +250,7 @@ class GameControllerTest extends JavaFXTestBase {
 
         // Place an obstacle directly to the left of the snake's initial head (10, 10) at (9, 10)
         // after GameController construction (which calls loadLevelLayout(1) and resets obstacles)
-        obs.getObstacles().add(new Cell(9, 10));
+        obs.addObstacle(new Cell(9, 10));
 
         // Start game moving LEFT into (9, 10)
         ctrl.handle(new javafx.scene.input.KeyEvent(
@@ -261,10 +261,10 @@ class GameControllerTest extends JavaFXTestBase {
 
         // Execute tick: snake moves LEFT into obstacle at (9, 10) and dies
         ctrl.onTick();
-        assertTrue(snk.getDead(), "Snake should be dead after hitting obstacle at (9, 10)");
+        assertTrue(snk.isDead(), "Snake should be dead after hitting obstacle at (9, 10)");
         assertEquals(GameState.DEAD, ctrl.getGameState(), "onTick must transition gameState to DEAD");
-        assertTrue(gv.gameOverLabel.isVisible(), "gameOverLabel must be visible when gameState is DEAD");
-        assertFalse(gv.gameWonLabel.isVisible(), "gameWonLabel must remain hidden when DEAD");
+        assertTrue(gv.getGameOverLabel().isVisible(), "gameOverLabel must be visible when gameState is DEAD");
+        assertFalse(gv.getGameWonLabel().isVisible(), "gameWonLabel must remain hidden when DEAD");
     }
 
     @Test
@@ -304,7 +304,7 @@ class GameControllerTest extends JavaFXTestBase {
         assertTrue(game.gameWon(), "Game should be won after eating final Level 3 coin");
         assertEquals(GameState.WON, ctrl.getGameState(), "onTick must transition gameState to WON");
         assertFalse(ctrl.isAnimationRunning(), "Animation must stop when game is WON");
-        assertTrue(gv.gameWonLabel.isVisible(), "gameWonLabel must be visible when gameState is WON");
-        assertFalse(gv.gameOverLabel.isVisible(), "gameOverLabel must remain hidden when WON");
+        assertTrue(gv.getGameWonLabel().isVisible(), "gameWonLabel must be visible when gameState is WON");
+        assertFalse(gv.getGameOverLabel().isVisible(), "gameOverLabel must remain hidden when WON");
     }
 }

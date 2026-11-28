@@ -50,7 +50,7 @@ public class GameController {
         this.snake.setGrowthRate(game.getGameMode().getGrowthRate());
         this.obstacle.loadLevelLayout(game.getCurrentLevel());
 
-        if (this.snake.getDead()) {
+        if (this.snake.isDead()) {
             this.gameState = GameState.DEAD;
         } else if (this.game.gameWon()) {
             this.gameState = GameState.WON;
@@ -71,7 +71,7 @@ public class GameController {
     private final Timeline animation = new Timeline(new KeyFrame(Duration.seconds(1), event -> onTick()));
 
     void onTick() {
-        if (snake.getDead()) {
+        if (snake.isDead()) {
             gameState = GameState.DEAD;
             animation.stop();
             gameView.updateStateOverlays(gameState);
@@ -95,7 +95,7 @@ public class GameController {
 
         snake.move(currentDirection);
 
-        if (!snake.getDead() && snake.resolveCoinConsumption(coin)) {
+        if (!snake.isDead() && snake.resolveCoinConsumption(coin)) {
             coinSound.play();
             powerCoin();
             game.recordCoinEaten();
@@ -106,7 +106,7 @@ public class GameController {
                 } else {
                     gameState = GameState.WON;
                     animation.stop();
-                    gameView.drawGrid(coin, snake, obstacle, gameView.gc);
+                    gameView.drawGrid(coin, snake, obstacle);
                     gameView.updateStateOverlays(gameState);
                     gameView.updateScoreLabel();
                     return;
@@ -118,11 +118,11 @@ public class GameController {
 
         keyPressed = false;
 
-        if (!snake.getDead() || snake.hitSelf()) {
-            gameView.drawGrid(coin, snake, obstacle, gameView.gc);
+        if (!snake.isDead() || snake.hitSelf()) {
+            gameView.drawGrid(coin, snake, obstacle);
         }
 
-        if (snake.getDead()) {
+        if (snake.isDead()) {
             gameState = GameState.DEAD;
             animation.stop();
         }
@@ -177,7 +177,7 @@ public class GameController {
                         keyPressed = true;
                     }
                     if ((gameState == GameState.READY || gameState == GameState.LEVEL_CLEARED)
-                            && !snake.getDead() && !game.gameWon()) {
+                            && !snake.isDead() && !game.gameWon()) {
                         gameState = GameState.RUNNING;
                         animation.play();
                     }
@@ -248,7 +248,7 @@ public class GameController {
         if (gameState == GameState.PAUSED) {
             gameState = prePauseState;
         }
-        if (gameState == GameState.RUNNING && !snake.getDead() && !game.gameWon()) {
+        if (gameState == GameState.RUNNING && !snake.isDead() && !game.gameWon()) {
             animation.play();
         }
     }
@@ -326,7 +326,7 @@ public class GameController {
         gameView.updateStateOverlays(gameState);
         gameView.updateScoreLabel();
 
-        gameView.drawGrid(coin, snake, obstacle, gameView.gc);
+        gameView.drawGrid(coin, snake, obstacle);
     }
 
     void loadLevel(int level) {
@@ -341,7 +341,7 @@ public class GameController {
         newCoin();
         gameView.updateStateOverlays(gameState);
         gameView.updateScoreLabel();
-        gameView.drawGrid(coin, snake, obstacle, gameView.gc);
+        gameView.drawGrid(coin, snake, obstacle);
     }
 
     private void powerCoin() {
