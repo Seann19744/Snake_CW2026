@@ -106,7 +106,7 @@ The following features, enhancements, and bug fixes have been implemented, teste
     - Corrected typographical error `initalizeMainMenu()` to `initializeMainMenu()` in `ViewManager.java`.
 
 13. **Design Pattern: GoF Factory Pattern (`CoinGenerator`)**:
-    - Extracted coin creation out of `GameController` into a dedicated `CoinGenerator` class (`com.comp2042.model.CoinGenerator`).
+    - Extracted coin creation out of `GameController` and `MainMenuController` into a dedicated `CoinGenerator` class (`com.comp2042.model.CoinGenerator`), ensuring consistent factory instantiation from the very first coin spawned in `MainMenuController.launchSnake()`.
     - Encapsulates probability distributions and board condition checks (e.g., ensuring `SilverCoin` only spawns when the board has no obstacles).
     - Enables dependency injection of `Random` for deterministic unit testing.
 
@@ -205,7 +205,7 @@ The following features were considered during design and development but were no
 - Added `handleQuit()` handler for the main menu **Quit** button to cleanly close the stage and exit the JavaFX application via `Platform.exit()`.
 - Added `drawPixelArtBackground()` on `menuBgCanvas` to render a retro 25x25 checkerboard tile grid (`#feffe4` / `#f1efd2`), double-layered pixel arcade border with corner rivets, and decorative pixel-art snake and coin sprites.
 - Added `lbl_highScore` binding and `updateHighScoreLabel()` (with a `showingProperty()` stage listener) to display the persistent best score at the top of the Main Menu.
-- Refactored `startGame(GameMode)` and `launchSnake(Stage, GameMode)` to launch the game directly with the selected `GameMode`.
+- Refactored `startGame(GameMode)` and `launchSnake(Stage, GameMode)` to launch the game directly with the selected `GameMode` and instantiate the initial coin via `new CoinGenerator().generateCoin(...)`.
 - Replaced hardcoded char constant `DIFFICULTY = 'N'` with dynamic selection.
 
 ### 3. `src/main/resources/resources/views/MainMenu.fxml` & `styling.css`

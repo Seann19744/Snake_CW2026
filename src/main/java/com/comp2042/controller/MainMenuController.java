@@ -256,7 +256,7 @@ public class MainMenuController {
         Game game = new Game(X_VALUE, Y_VALUE, POWER_UP, gameMode);
         Obstacle obstacle = new Obstacle(game.getWidth(), game.getHeight());
         Snake snake = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle, gameMode.getGrowthRate());
-        Coin coin = new Coin(game.getWidth(), game.getHeight(), snake, obstacle);
+        Coin coin = new CoinGenerator().generateCoin(game.getWidth(), game.getHeight(), snake, obstacle, false);
 
         GameView gameView = new GameView(game);
         GameController controller = new GameController(snake, coin, game, gameView, obstacle, gameStage);
