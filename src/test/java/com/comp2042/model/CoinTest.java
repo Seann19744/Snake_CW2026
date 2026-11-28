@@ -110,10 +110,10 @@ class CoinTest {
         assertEquals(5, game.getScorePoints(), "BlueCoin should award 5 points");
         Snake testSnake = new Snake(4, 4, false, obstacle);
         blueCoin.applyEffect(game, testSnake, obstacle, speedController);
-        testSnake.move('L');
-        testSnake.move('L');
-        testSnake.move('L'); // Crosses border
-        assertFalse(testSnake.getDead(), "Snake should pass through border when BlueCoin effect is active");
+        testSnake.move(Direction.LEFT);
+        testSnake.move(Direction.LEFT);
+        testSnake.move(Direction.LEFT); // Crosses border
+        assertFalse(testSnake.isDead(), "Snake should pass through border when BlueCoin effect is active");
     }
 
     @Test

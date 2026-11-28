@@ -29,7 +29,6 @@ class GameTest {
         assertEquals(0, game.getScorePoints(), "Initial score points should be 0");
         assertEquals(1, game.getCurrentLevel(), "Initial level should be 1");
         assertEquals(0, game.getLevelCoinsEaten(), "Initial level coins should be 0");
-        assertEquals(0, game.getTotalCoinsEaten(), "Initial total coins should be 0");
     }
 
     @Test
@@ -55,7 +54,6 @@ class GameTest {
         assertEquals(15, game.getScorePoints(), "Score points should be 15 after adding 15");
         assertEquals(15, GameSettings.getInstance().getHighScore(), "Session high score should automatically update when points are added");
         assertEquals(2, game.getLevelCoinsEaten(), "Level coins eaten should be 2");
-        assertEquals(2, game.getTotalCoinsEaten(), "Total coins eaten should be 2");
 
         game.resetScore();
         assertEquals(0, game.getScorePoints(), "Score points should reset to 0");

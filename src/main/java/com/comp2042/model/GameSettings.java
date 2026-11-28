@@ -73,18 +73,6 @@ public class GameSettings {
         loadHighScore();
     }
 
-    public Path getHighScoreFile() {
-        return highScoreFile;
-    }
-
-    public boolean isPersistenceEnabled() {
-        return persistenceEnabled;
-    }
-
-    public void setPersistenceEnabled(boolean persistenceEnabled) {
-        this.persistenceEnabled = persistenceEnabled;
-    }
-
     /**
      * Loads the saved high score from disk if the file exists.
      */

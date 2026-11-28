@@ -256,7 +256,7 @@ public class MainMenuController {
         Game game = new Game(X_VALUE, Y_VALUE, POWER_UP, gameMode);
         Obstacle obstacle = new Obstacle(game.getWidth(), game.getHeight());
         Snake snake = new Snake(game.getWidth(), game.getHeight(), game.isNoBorder(), obstacle, gameMode.getGrowthRate());
-        Coin coin = new Coin(game.getWidth(), game.getHeight(), snake, obstacle);
+        Coin coin = new CoinGenerator().generateCoin(game.getWidth(), game.getHeight(), snake, obstacle, false);
 
         GameView gameView = new GameView(game);
         GameController controller = new GameController(snake, coin, game, gameView, obstacle, gameStage);
@@ -270,17 +270,17 @@ public class MainMenuController {
 
         gameView.makeScene(gameScene, snake, coin, obstacle);
         gamePane.getChildren().addAll(
-                gameView.gridCanvas,
-                gameView.gameOverLabel,
-                gameView.gameWonLabel,
-                gameView.scoreLabel,
-                gameView.pauseOverlay
+                gameView.getGridCanvas(),
+                gameView.getGameOverLabel(),
+                gameView.getGameWonLabel(),
+                gameView.getScoreLabel(),
+                gameView.getPauseOverlay()
         );
         gamePane.setPadding(new Insets(20));
-        gamePane.setAlignment(gameView.gameOverLabel, Pos.TOP_CENTER);
-        gamePane.setAlignment(gameView.gameWonLabel, Pos.TOP_CENTER);
-        gamePane.setAlignment(gameView.scoreLabel, Pos.BOTTOM_CENTER);
-        gamePane.setAlignment(gameView.pauseOverlay, Pos.CENTER);
+        gamePane.setAlignment(gameView.getGameOverLabel(), Pos.TOP_CENTER);
+        gamePane.setAlignment(gameView.getGameWonLabel(), Pos.TOP_CENTER);
+        gamePane.setAlignment(gameView.getScoreLabel(), Pos.BOTTOM_CENTER);
+        gamePane.setAlignment(gameView.getPauseOverlay(), Pos.CENTER);
 
         // Dynamically scale on window resize or fullscreen toggle using live controller state
         gameScene.widthProperty().addListener((obs, oldV, newV) ->
@@ -293,13 +293,5 @@ public class MainMenuController {
 
     public ViewManager getViewManager() {
         return viewManager;
-    }
-
-    public static int getxValue() {
-        return X_VALUE;
-    }
-
-    public static int getyValue() {
-        return Y_VALUE;
     }
 }

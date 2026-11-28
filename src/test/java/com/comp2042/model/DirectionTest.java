@@ -58,14 +58,4 @@ class DirectionTest {
         assertEquals(360, Direction.getCornerRotation(Direction.UP, Direction.LEFT));
         assertEquals(360, Direction.getCornerRotation(Direction.RIGHT, Direction.DOWN));
     }
-
-    @Test
-    @DisplayName("Verify char conversions")
-    void testConversions() {
-        assertEquals(Direction.UP, Direction.fromChar('U'));
-        assertEquals(Direction.DOWN, Direction.fromChar('D'));
-        assertEquals(Direction.LEFT, Direction.fromChar('L'));
-        assertEquals(Direction.RIGHT, Direction.fromChar('R'));
-        assertThrows(IllegalArgumentException.class, () -> Direction.fromChar('X'));
-    }
 }

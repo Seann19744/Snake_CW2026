@@ -78,18 +78,4 @@ public enum Direction {
         }
         return 0;
     }
-
-    /**
-     * Maps a legacy character ('U', 'D', 'L', 'R') to its corresponding
-     * {@link Direction}.
-     */
-    public static Direction fromChar(char dir) {
-        return switch (dir) {
-            case 'U' -> UP;
-            case 'D' -> DOWN;
-            case 'L' -> LEFT;
-            case 'R' -> RIGHT;
-            default -> throw new IllegalArgumentException("Unknown direction char: " + dir);
-        };
-    }
 }

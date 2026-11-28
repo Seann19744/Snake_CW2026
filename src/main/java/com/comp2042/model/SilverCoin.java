@@ -9,11 +9,6 @@ public class SilverCoin extends Coin {
     }
 
     @Override
-    public int getPoints() {
-        return 5;
-    }
-
-    @Override
     public void applyEffect(Game game, Snake snake, Obstacle obstacle, SpeedController speedController) {
         super.applyEffect(game, snake, obstacle, speedController);
         Random rnd = new Random();

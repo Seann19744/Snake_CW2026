@@ -6,11 +6,6 @@ public class RainbowCoin extends Coin {
         super(x, y, snake, obstacle);
     }
 
-    @Override
-    public int getPoints() {
-        return 5;
-    }
-
     public double getSpeedBonus() {
         return 5.0;
     }
