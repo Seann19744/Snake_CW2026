@@ -6,6 +6,10 @@ import java.util.List;
 import java.util.Random;
 
 public class Obstacle {
+    public static final int MAX_OBSTACLES = 50;
+    public static final int HEAD_SAFETY_BUFFER = 2;
+    private static final int MAX_SPAWN_ATTEMPT_MULTIPLIER = 4;
+
     private final ArrayList<Cell> obstacles = new ArrayList<>();
     private final int x;
     private final int y;
@@ -17,19 +21,19 @@ public class Obstacle {
 
     /**
      * Adds randomly placed obstacles to the grid, avoiding the coin, the snake,
-     * existing obstacles, and a 2-tile safety radius around the snake's head.
-     * Does nothing if more than 50 obstacles already exist.
+     * existing obstacles, and a {@link #HEAD_SAFETY_BUFFER}-tile safety radius around the snake's head.
+     * Does nothing if more than {@link #MAX_OBSTACLES} obstacles already exist.
      *
      * @param snake the snake, used to avoid its head and body
      * @param coin the current coin, used to avoid its square
      * @param amount how many obstacles are added
      */
     public void newObstacles(Snake snake, Coin coin, int amount) {
-        if (obstacles.size() > 50) {
+        if (obstacles.size() > MAX_OBSTACLES) {
             return;
         }
         Random rnd = new Random();
-        int maxAttempts = x * y * 4;
+        int maxAttempts = x * y * MAX_SPAWN_ATTEMPT_MULTIPLIER;
         Cell p;
         for (int i = 0; i < amount; i++) {
             int attempts = 0;
@@ -66,7 +70,7 @@ public class Obstacle {
         int rawDy = Math.abs(candidate.y() - head.y());
         int dx = Math.min(rawDx, x - rawDx);
         int dy = Math.min(rawDy, y - rawDy);
-        return dx <= 2 && dy <= 2;
+        return dx <= HEAD_SAFETY_BUFFER && dy <= HEAD_SAFETY_BUFFER;
     }
 
     public List<Cell> getObstacles() {

@@ -74,21 +74,21 @@
                                 <HBox alignment="CENTER_LEFT" spacing="14.0" styleClass="pixel-slot">
                                     <children>
                                         <Button fx:id="btn_quickMode" maxWidth="130.0" minHeight="40.0" minWidth="130.0" mnemonicParsing="false" onAction="#handleQuickMode" prefHeight="40.0" prefWidth="130.0" styleClass="startAndQuitBtn" text="Quick" textFill="WHITE" />
-                                        <Label fx:id="lbl_quickDesc" alignment="CENTER_LEFT" maxWidth="315.0" prefWidth="315.0" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px; -fx-line-spacing: 1px; -fx-text-fill: #2b2b2b;" text="Travel at standard speed and pass safely through screen edges. Every coin adds 1 body segment (6, 8, and 10 coins per level)." textAlignment="LEFT" wrapText="true" />
+                                        <Label fx:id="lbl_quickDesc" alignment="CENTER_LEFT" maxWidth="315.0" prefWidth="315.0" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px; -fx-line-spacing: 1px; -fx-text-fill: #2b2b2b;" textAlignment="LEFT" wrapText="true" />
                                     </children>
                                 </HBox>
 
                                 <HBox alignment="CENTER_LEFT" spacing="14.0" styleClass="pixel-slot">
                                     <children>
                                         <Button fx:id="btn_classicMode" maxWidth="130.0" minHeight="40.0" minWidth="130.0" mnemonicParsing="false" onAction="#handleClassicMode" prefHeight="40.0" prefWidth="130.0" styleClass="startAndQuitBtn" text="Classic" textFill="WHITE" />
-                                        <Label fx:id="lbl_classicDesc" alignment="CENTER_LEFT" maxWidth="315.0" prefWidth="315.0" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px; -fx-line-spacing: 1px; -fx-text-fill: #2b2b2b;" text="Travel at standard speed within solid, deadly walls. Every coin adds 1 body segment (8, 10, and 12 coins per level)." textAlignment="LEFT" wrapText="true" />
+                                        <Label fx:id="lbl_classicDesc" alignment="CENTER_LEFT" maxWidth="315.0" prefWidth="315.0" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px; -fx-line-spacing: 1px; -fx-text-fill: #2b2b2b;" textAlignment="LEFT" wrapText="true" />
                                     </children>
                                 </HBox>
 
                                 <HBox alignment="CENTER_LEFT" spacing="14.0" styleClass="pixel-slot">
                                     <children>
                                         <Button fx:id="btn_hardcoreMode" maxWidth="130.0" minHeight="40.0" minWidth="130.0" mnemonicParsing="false" onAction="#handleHardcoreMode" prefHeight="40.0" prefWidth="130.0" styleClass="startAndQuitBtn" text="Hardcore" textFill="WHITE" />
-                                        <Label fx:id="lbl_hardcoreDesc" alignment="CENTER_LEFT" maxWidth="315.0" prefWidth="315.0" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px; -fx-line-spacing: 1px; -fx-text-fill: #2b2b2b;" text="Race at high speed within solid, deadly walls. Every coin adds 2 body segments (10, 12, and 14 coins per level)." textAlignment="LEFT" wrapText="true" />
+                                        <Label fx:id="lbl_hardcoreDesc" alignment="CENTER_LEFT" maxWidth="315.0" prefWidth="315.0" style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px; -fx-line-spacing: 1px; -fx-text-fill: #2b2b2b;" textAlignment="LEFT" wrapText="true" />
                                     </children>
                                 </HBox>
                             </children>
@@ -123,59 +123,7 @@
                     </padding>
                     <children>
                         <Label styleClass="pixel-header" text="HOW TO PLAY" />
-
-                        <VBox alignment="CENTER_LEFT" maxWidth="480.0" spacing="4.0" styleClass="pixel-slot">
-                            <children>
-                                <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 13px; -fx-text-fill: #2d572c; -fx-underline: true;" text="CONTROLS" />
-                                <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="• Arrow Keys: Start moving and steer the snake" wrapText="true" />
-                                <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="• ESC: Pause the game and open the pause menu" wrapText="true" />
-                                <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="• G: Toggle grid on/off  |  F11: Fullscreen  |  TAB: Restart" wrapText="true" />
-                            </children>
-                        </VBox>
-
-                        <VBox alignment="CENTER_LEFT" maxWidth="480.0" spacing="4.0" styleClass="pixel-slot">
-                            <children>
-                                <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 13px; -fx-text-fill: #2d572c; -fx-underline: true;" text="COINS &amp; GOAL" />
-                                <HBox alignment="CENTER_LEFT" spacing="8.0">
-                                    <children>
-                                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                                            <image><Image url="@res/redcoin.png" /></image>
-                                        </ImageView>
-                                        <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="Red: +5 pts" />
-                                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                                            <image><Image url="@res/goldcoin.png" /></image>
-                                        </ImageView>
-                                        <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="Gold: +15 bonus pts" />
-                                    </children>
-                                </HBox>
-                                <HBox alignment="CENTER_LEFT" spacing="8.0">
-                                    <children>
-                                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                                            <image><Image url="@res/rainbowcoin.png" /></image>
-                                        </ImageView>
-                                        <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="Rainbow: +5 pts &amp; speed boost" />
-                                    </children>
-                                </HBox>
-                                <HBox alignment="CENTER_LEFT" spacing="8.0">
-                                    <children>
-                                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                                            <image><Image url="@res/bluecoin.png" /></image>
-                                        </ImageView>
-                                        <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="Blue: +5 pts &amp; pass through walls" />
-                                    </children>
-                                </HBox>
-                                <HBox alignment="CENTER_LEFT" spacing="8.0">
-                                    <children>
-                                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
-                                            <image><Image url="@res/silvercoin.png" /></image>
-                                        </ImageView>
-                                        <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px;" text="Silver: +5 pts &amp; spawns obstacle blocks" />
-                                    </children>
-                                </HBox>
-                                <Label style="-fx-font-family: 'SF Pixelate'; -fx-font-size: 10px; -fx-text-fill: #4a4a4a;" text="Clear all 3 levels by collecting the target coins without crashing!" wrapText="true" />
-                            </children>
-                        </VBox>
-
+                        <VBox fx:id="helpContentBox" alignment="CENTER" maxWidth="480.0" spacing="8.0" />
                         <Button fx:id="btn_helpBack" maxWidth="130.0" minHeight="40.0" minWidth="130.0" mnemonicParsing="false" onAction="#handleCloseHelp" prefHeight="40.0" prefWidth="130.0" styleClass="startAndQuitBtn" text="Back" textFill="WHITE" />
                     </children>
                 </VBox>

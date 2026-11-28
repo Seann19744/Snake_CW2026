@@ -9,6 +9,12 @@ import java.util.Random;
  */
 public class CoinGenerator {
 
+    public static final int POWER_UP_ROLL_BOUND = 12;
+    public static final int GOLD_COIN_ROLL = 1;
+    public static final int RAINBOW_COIN_ROLL = 2;
+    public static final int BLUE_COIN_ROLL = 3;
+    public static final int SILVER_COIN_ROLL = 4;
+
     private final Random random;
 
     /**
@@ -44,14 +50,14 @@ public class CoinGenerator {
             return new Coin(width, height, snake, obstacle);
         }
 
-        int ran = random.nextInt(12);
-        if (ran == 1) {
+        int roll = random.nextInt(POWER_UP_ROLL_BOUND);
+        if (roll == GOLD_COIN_ROLL) {
             return new GoldCoin(width, height, snake, obstacle);
-        } else if (ran == 2) {
+        } else if (roll == RAINBOW_COIN_ROLL) {
             return new RainbowCoin(width, height, snake, obstacle);
-        } else if (ran == 3) {
+        } else if (roll == BLUE_COIN_ROLL) {
             return new BlueCoin(width, height, snake, obstacle);
-        } else if (ran == 4 && obstacle.getObstacles().isEmpty()) {
+        } else if (roll == SILVER_COIN_ROLL && obstacle.getObstacles().isEmpty()) {
             return new SilverCoin(width, height, snake, obstacle);
         } else {
             return new Coin(width, height, snake, obstacle);

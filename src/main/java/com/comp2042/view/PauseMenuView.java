@@ -5,6 +5,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
@@ -105,38 +108,15 @@ public class PauseMenuView {
         Label helpTitle = new Label("HOW TO PLAY");
         helpTitle.getStyleClass().add("pixel-header");
 
-        VBox controlsSection = new VBox(5);
-        controlsSection.setAlignment(Pos.CENTER_LEFT);
-        controlsSection.setMaxWidth(480);
-        controlsSection.getStyleClass().add("pixel-slot");
-        Label controlsHeader = new Label("CONTROLS");
-        controlsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-text-fill: #2d572c; -fx-underline: true;");
-        controlsSection.getChildren().addAll(
-                controlsHeader,
-                createHelpLabel("• Arrow Keys: Start moving and steer the snake"),
-                createHelpLabel("• ESC: Pause the game and open the pause menu"),
-                createHelpLabel("• G: Toggle grid on/off  |  F11: Fullscreen  |  TAB: Restart")
-        );
-
-        VBox coinsSection = new VBox(5);
-        coinsSection.setAlignment(Pos.CENTER_LEFT);
-        coinsSection.setMaxWidth(480);
-        coinsSection.getStyleClass().add("pixel-slot");
-        Label coinsHeader = new Label("COINS & GOAL");
-        coinsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 14px; -fx-text-fill: #2d572c; -fx-underline: true;");
-        coinsSection.getChildren().addAll(
-                coinsHeader,
-                createHelpLabel("• Red Coin: +5 points  |  Gold Coin: +15 bonus points"),
-                createHelpLabel("• Rainbow Coin: +5 points & boosts movement speed"),
-                createHelpLabel("• Blue Coin: +5 points & lets you pass through walls"),
-                createHelpLabel("• Silver Coin: +5 points & spawns obstacle blocks"),
-                createHelpLabel("• Clear all 3 levels by collecting target coins without crashing!")
-        );
+        VBox helpSections = new VBox(8);
+        helpSections.setAlignment(Pos.CENTER);
+        helpSections.setMaxWidth(480);
+        populateHelpContent(helpSections);
 
         helpBackButton.getStyleClass().add("startAndQuitBtn");
         helpBackButton.setPrefSize(130, 40);
 
-        pauseHelpBox.getChildren().setAll(helpTitle, controlsSection, coinsSection, helpBackButton);
+        pauseHelpBox.getChildren().setAll(helpTitle, helpSections, helpBackButton);
 
         pauseSettingsButton.setOnAction(e -> {
             updateGridButtonText();
@@ -178,10 +158,76 @@ public class PauseMenuView {
         overlay.getChildren().setAll(pauseBox, pauseSettingsBox, pauseHelpBox, pauseHelpButton);
     }
 
-    private Label createHelpLabel(String text) {
+    /**
+     * Populates a target container with the shared "CONTROLS" and "COINS &amp; GOAL" help sections
+     * so that both the Main Menu help overlay and the in-game Pause Menu help overlay share
+     * a single authoritative source of truth (DRY principle).
+     *
+     * @param container the VBox container to populate with the help sections
+     */
+    public static void populateHelpContent(VBox container) {
+        VBox controlsSection = new VBox(4);
+        controlsSection.setAlignment(Pos.CENTER_LEFT);
+        controlsSection.setMaxWidth(480);
+        controlsSection.getStyleClass().add("pixel-slot");
+        Label controlsHeader = new Label("CONTROLS");
+        controlsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 13px; -fx-text-fill: #2d572c; -fx-underline: true;");
+        controlsSection.getChildren().addAll(
+                controlsHeader,
+                createHelpLabel("• Arrow Keys: Start moving and steer the snake"),
+                createHelpLabel("• ESC: Pause the game and open the pause menu"),
+                createHelpLabel("• G: Toggle grid on/off  |  F11: Fullscreen  |  TAB: Restart")
+        );
+
+        VBox coinsSection = new VBox(4);
+        coinsSection.setAlignment(Pos.CENTER_LEFT);
+        coinsSection.setMaxWidth(480);
+        coinsSection.getStyleClass().add("pixel-slot");
+        Label coinsHeader = new Label("COINS & GOAL");
+        coinsHeader.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 13px; -fx-text-fill: #2d572c; -fx-underline: true;");
+
+        HBox redAndGoldRow = new HBox(8,
+                createCoinIcon("resources/views/res/redcoin.png"),
+                createHelpLabel("Red: +5 pts"),
+                createCoinIcon("resources/views/res/goldcoin.png"),
+                createHelpLabel("Gold: +15 bonus pts")
+        );
+        redAndGoldRow.setAlignment(Pos.CENTER_LEFT);
+
+        Label goalLabel = createHelpLabel("Clear all 3 levels by collecting the target coins without crashing!");
+        goalLabel.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 10px; -fx-text-fill: #4a4a4a;");
+
+        coinsSection.getChildren().addAll(
+                coinsHeader,
+                redAndGoldRow,
+                createCoinHelpRow("resources/views/res/rainbowcoin.png", "Rainbow: +5 pts & speed boost"),
+                createCoinHelpRow("resources/views/res/bluecoin.png", "Blue: +5 pts & pass through walls"),
+                createCoinHelpRow("resources/views/res/silvercoin.png", "Silver: +5 pts & spawns obstacle blocks"),
+                goalLabel
+        );
+
+        container.getChildren().setAll(controlsSection, coinsSection);
+    }
+
+    private static HBox createCoinHelpRow(String imagePath, String description) {
+        HBox row = new HBox(8, createCoinIcon(imagePath), createHelpLabel(description));
+        row.setAlignment(Pos.CENTER_LEFT);
+        return row;
+    }
+
+    private static ImageView createCoinIcon(String imagePath) {
+        ImageView icon = new ImageView(new Image(imagePath));
+        icon.setFitWidth(16);
+        icon.setFitHeight(16);
+        icon.setPreserveRatio(true);
+        icon.setPickOnBounds(true);
+        return icon;
+    }
+
+    private static Label createHelpLabel(String text) {
         Label lbl = new Label(text);
         lbl.setWrapText(true);
-        lbl.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 12px; -fx-text-fill: #2b2b2b;");
+        lbl.setStyle("-fx-font-family: 'SF Pixelate'; -fx-font-size: 11px; -fx-text-fill: #2b2b2b;");
         return lbl;
     }
 

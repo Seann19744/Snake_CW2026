@@ -290,7 +290,9 @@ class GameControllerTest extends JavaFXTestBase {
             }
         };
         GameView gv = new GameView(game);
-        GameController ctrl = new GameController(snk, winningCoin, game, gv, obs, null);
+        java.util.concurrent.atomic.AtomicBoolean coinSoundPlayed = new java.util.concurrent.atomic.AtomicBoolean(false);
+        GameController ctrl = new GameController(snk, winningCoin, game, gv, obs, null,
+                new CoinGenerator(), new SoundManager(() -> coinSoundPlayed.set(true)));
 
         // Start game moving LEFT toward (9, 10)
         ctrl.handle(new javafx.scene.input.KeyEvent(
@@ -299,8 +301,9 @@ class GameControllerTest extends JavaFXTestBase {
         ctrl.stopAnimation();
         assertEquals(GameState.RUNNING, ctrl.getGameState());
 
-        // Execute tick: snake moves LEFT onto (9, 10), eats final coin, and wins the game!
+        // Execute tick: snake moves LEFT onto (9, 10), eats final coin, triggers injected SoundManager, and wins!
         ctrl.onTick();
+        assertTrue(coinSoundPlayed.get(), "Injected SoundManager must play coin sound when coin is eaten");
         assertTrue(game.gameWon(), "Game should be won after eating final Level 3 coin");
         assertEquals(GameState.WON, ctrl.getGameState(), "onTick must transition gameState to WON");
         assertFalse(ctrl.isAnimationRunning(), "Animation must stop when game is WON");

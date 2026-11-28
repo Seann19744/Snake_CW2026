@@ -3,6 +3,7 @@ package com.comp2042.controller;
 import com.comp2042.Main;
 import com.comp2042.model.*;
 import com.comp2042.view.GameView;
+import com.comp2042.view.PauseMenuView;
 import com.comp2042.view.ViewManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -15,6 +16,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -48,6 +50,9 @@ public class MainMenuController {
     private StackPane helpOverlay;
 
     @FXML
+    private VBox helpContentBox;
+
+    @FXML
     private Button btn_gridToggle;
 
     @FXML
@@ -68,6 +73,9 @@ public class MainMenuController {
         }
         if (lbl_hardcoreDesc != null) {
             lbl_hardcoreDesc.setText(GameMode.HARDCORE.getDescription());
+        }
+        if (helpContentBox != null) {
+            PauseMenuView.populateHelpContent(helpContentBox);
         }
         updateGridButton();
         updateHighScoreLabel();

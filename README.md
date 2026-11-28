@@ -110,10 +110,11 @@ The following features, enhancements, and bug fixes have been implemented, teste
     - Encapsulates probability distributions and board condition checks (e.g., ensuring `SilverCoin` only spawns when the board has no obstacles).
     - Enables dependency injection of `Random` for deterministic unit testing.
 
-14. **SOLID Refactoring: Polymorphic Power-Up Effects (Open-Closed Principle)**:
-    - Replaced the hardcoded class-type checking ladder (`if (coin.getClass().equals(RainbowCoin.class)) ...`) in `GameController.powerCoin()` with a polymorphic `applyEffect(Game, Snake, Obstacle, Timeline)` method across the `Coin` hierarchy.
-    - Each coin subclass encapsulates its own effect (`RainbowCoin` adds speed bonus, `BlueCoin` enables border-crossing, `SilverCoin` spawns obstacles, `GoldCoin` adds 15 points).
-    - New coin types can now be introduced without modifying existing controller logic, fully conforming to the Open-Closed Principle (OCP) and Single Responsibility Principle (SRP).
+14. **SOLID Refactoring: Polymorphic Power-Up Effects & Sprite Resolution (Open-Closed Principle)**:
+    - Replaced the hardcoded class-type checking ladder (`if (coin.getClass().equals(RainbowCoin.class)) ...`) in `GameController.powerCoin()` with a polymorphic `applyEffect(Game, Snake, Obstacle, SpeedController)` method across the `Coin` hierarchy.
+    - Replaced the `instanceof` chain in `GameView.getCoinImage(Coin)` with a polymorphic `getSpritePath()` method on `Coin` and its subclasses, paired with an image cache (`Map<String, Image>`) in `GameView`.
+    - Each coin subclass encapsulates its own effect and sprite path (`RainbowCoin` adds speed bonus, `BlueCoin` enables border-crossing, `SilverCoin` spawns obstacles, `GoldCoin` adds 15 points).
+    - New coin types can now be introduced without modifying existing controller or view logic, fully conforming to the Open-Closed Principle (OCP) and Single Responsibility Principle (SRP).
 
 15. **Persistent Best Score Tracking & Pixel Art Main Menu Display**:
     - Added persistent high score tracking in `GameSettings` (`highscore.txt` in the project root directory), automatically saving new high score records whenever points are earned (`Game.addPoints(int)`) and reloading them on application startup.
@@ -186,8 +187,13 @@ The following features were considered during design and development but were no
 
 ### 9. `com.comp2042.view.PauseMenuView`
 - **Location**: `src/main/java/com/comp2042/view/PauseMenuView.java`
-- **Purpose**: Dedicated view component encapsulating the in-game pause overlay (`pauseBox`), settings sub-menu (`pauseSettingsBox`), and How to Play help overlay (`pauseHelpBox`).
-- **Justification**: Applies the **Single Responsibility Principle (SRP)** by extracting ~140 lines of pause overlay UI construction and sub-menu navigation out of `GameView`, allowing `GameView` to focus exclusively on board rendering, HUD labels, and window scaling.
+- **Purpose**: Dedicated view component encapsulating the in-game pause overlay (`pauseBox`), settings sub-menu (`pauseSettingsBox`), and shared How to Play help overlay builder (`populateHelpContent(VBox)`).
+- **Justification**: Applies the **Single Responsibility Principle (SRP)** and **Don't Repeat Yourself (DRY)** principle by extracting pause overlay UI construction out of `GameView` and providing a single shared help-section factory (`populateHelpContent(VBox)`) reused by both `PauseMenuView` and `MainMenuController` (`helpContentBox` in `MainMenu.fxml`), eliminating duplicated help text across FXML and Java view code.
+
+### 10. `com.comp2042.controller.SoundManager`
+- **Location**: `src/main/java/com/comp2042/controller/SoundManager.java`
+- **Purpose**: Dedicated audio service class encapsulating sound effect loading (`/resources/views/res/coinSound.wav` via `AudioClip`) and playback (`playCoinSound()`).
+- **Justification**: Applies the **Single Responsibility Principle (SRP)** and **Dependency Injection** by extracting media loading and audio playback out of `GameController`. Supports a custom `Runnable` constructor overload (`SoundManager(Runnable)`) so unit tests can verify audio triggers deterministically without playing physical speaker audio.
 
 ---
 
@@ -200,8 +206,8 @@ The following features were considered during design and development but were no
 ### 2. `com.comp2042.controller.MainMenuController`
 - Moved to package `com.comp2042.controller`.
 - Replaced the main menu `ComboBox` dropdown with a dedicated **Select Difficulty** overlay (`difficultyOverlay`) opened via `handleStart()`.
-- Added handlers (`handleQuickMode()`, `handleClassicMode()`, `handleHardcoreMode()`, `handleCloseDifficulty()`) and dynamic description labels (`lbl_quickDesc`, `lbl_classicDesc`, `lbl_hardcoreDesc`) populated from `GameMode.getDescription()`.
-- Added top-right `?` help button handlers (`handleOpenHelp()`, `handleCloseHelp()`) controlling the **How to Play** overlay (`helpOverlay`).
+- Added handlers (`handleQuickMode()`, `handleClassicMode()`, `handleHardcoreMode()`, `handleCloseDifficulty()`) and dynamic description labels (`lbl_quickDesc`, `lbl_classicDesc`, `lbl_hardcoreDesc`) populated exclusively from `GameMode.getDescription()` (removing duplicate hardcoded description attributes from `MainMenu.fxml`).
+- Added top-right `?` help button handlers (`handleOpenHelp()`, `handleCloseHelp()`) controlling the **How to Play** overlay (`helpOverlay`), with `helpContentBox` populated dynamically via `PauseMenuView.populateHelpContent(helpContentBox)`.
 - Added `handleQuit()` handler for the main menu **Quit** button to cleanly close the stage and exit the JavaFX application via `Platform.exit()`.
 - Added `drawPixelArtBackground()` on `menuBgCanvas` to render a retro 25x25 checkerboard tile grid (`#feffe4` / `#f1efd2`), double-layered pixel arcade border with corner rivets, and decorative pixel-art snake and coin sprites.
 - Added `lbl_highScore` binding and `updateHighScoreLabel()` (with a `showingProperty()` stage listener) to display the persistent best score at the top of the Main Menu.
@@ -217,6 +223,7 @@ The following features were considered during design and development but were no
 
 ### 4. `com.comp2042.controller.GameController`
 - Moved to package `com.comp2042.controller` and updated model and view imports.
+- **Single Responsibility & Audio Dependency Injection**: Extracted `AudioClip` loading and playback into `SoundManager`, injected via constructor chaining alongside `CoinGenerator` while keeping directional input handling and the 2-slot FIFO turn queue (`MAX_INPUT_QUEUE_SIZE = 2`) cohesive inside `GameController`.
 - **Factory Pattern Integration**: Injected `CoinGenerator` to handle coin spawning in `newCoin()` and `reset()`, removing hardcoded random coin instantiation from the controller.
 - **Polymorphic Power-Up Handling (OCP)**: Refactored `powerCoin()` to delegate directly to `coin.applyEffect(game, snake, obstacle, animation)`, completely removing fragile `getClass().equals(...)` conditionals and conforming to the Open-Closed Principle.
 - **Rainbow Coin Bug Fix**: Corrected condition in `newCoin()` from duplicate `ran == 1` to `ran == 2`, making `RainbowCoin` spawnable during gameplay.
@@ -260,7 +267,7 @@ The following features were considered during design and development but were no
 ### 10. `com.comp2042.model.Coin` and Subclasses (`GoldCoin`, `SilverCoin`, `BlueCoin`, `RainbowCoin`)
 - Moved to package `com.comp2042.model`.
 - Updated constructors and method parameters from `Snake snek` to `Snake snake` and coordinates to `Cell`.
-- Implemented polymorphic `applyEffect(Game, Snake, Obstacle, SpeedController)` across all coin types (Open-Closed Principle & Dependency Inversion Principle), removing JavaFX `Image` and `Timeline` dependencies from the model hierarchy.
+- Implemented polymorphic `applyEffect(Game, Snake, Obstacle, SpeedController)` and `getSpritePath()` across all coin types (Open-Closed Principle & Dependency Inversion Principle), removing JavaFX `Image` and `Timeline` dependencies from the model hierarchy and eliminating the `instanceof` chain in `GameView.getCoinImage(Coin)`.
 
 ---
 
@@ -273,8 +280,9 @@ src/main/java/com/comp2042/
 ├── Launcher.java                       [Application Entry Point]
 ├── Main.java                           [JavaFX Application Lifecycle]
 ├── controller/                         [Controller Layer]
-│   ├── GameController.java             (Input handling, game loop, audio trigger)
-│   └── MainMenuController.java         (Main menu UI interactions, difficulty binding)
+│   ├── GameController.java             (Input handling, 2-slot turn queue, game loop orchestration)
+│   ├── MainMenuController.java         (Main menu UI interactions, difficulty binding)
+│   └── SoundManager.java               (Audio effect loading and coin sound playback)
 ├── model/                              [Model Layer]
 │   ├── BlueCoin.java                   (Border pass power-up coin)
 │   ├── Cell.java                       (Immutable 2D grid coordinate record)
@@ -313,7 +321,7 @@ Adhering to clean code principles and Java naming conventions:
 - **`ateCoin(Coin)` -> `resolveCoinConsumption(Coin)`**: Renamed in `Snake.java` to reflect that the method both checks coin collection and advances/grows the snake's tail segments.
 - **`getDead()` -> `isDead()`**: Renamed in `Snake.java` to follow standard Java boolean getter conventions.
 - **`initalizeMainMenu()` -> `initializeMainMenu()`**: Corrected spelling error in `ViewManager.java` and updated all callers (`Main.java`).
-- **Standardized Constants**: Maintained UPPER_SNAKE_CASE for class constants (`X_VALUE`, `Y_VALUE`, `POWER_UP`).
+- **Standardized Constants**: Maintained UPPER_SNAKE_CASE for class constants (`X_VALUE`, `Y_VALUE`, `POWER_UP`, `MAX_OBSTACLES`, `HEAD_SAFETY_BUFFER`, `POWER_UP_ROLL_BOUND`, and `GameView` font/margin/rendering constants).
 
 ---
 
@@ -332,14 +340,14 @@ mvn clean test
 | :--- | :---: | :---: | :---: | :--- |
 | `CellTest` | Model | 2 | **PASS (2/2)** | Immutable coordinate equality, hash codes, delta & `Direction` translations |
 | `DirectionTest` | Model | 3 | **PASS (3/3)** | Grid deltas (`dx`, `dy`), head/body rotation angles, 180° `isOpposite()`, 8 corner turn rotations |
-| `CoinTest` | Model | 10 | **PASS (10/10)** | Point values and polymorphic `applyEffect()` via `SpeedController` for `Coin`, `GoldCoin`, `RainbowCoin`, `BlueCoin`, `SilverCoin` |
+| `CoinTest` | Model | 10 | **PASS (10/10)** | Point values, polymorphic `getSpritePath()`, and `applyEffect()` via `SpeedController` for `Coin`, `GoldCoin`, `RainbowCoin`, `BlueCoin`, `SilverCoin` |
 | `CoinGeneratorTest` | Model | 7 | **PASS (7/7)** | Deterministic Factory Pattern tests using injected `Random` double, obstacle condition checks for `SilverCoin` |
 | `GameModeTest` | Model | 4 | **PASS (4/4)** | Speed, border wrap-around, level coin quotas, growth rates, and English descriptions for `QUICK`, `CLASSIC`, `HARDCORE` |
 | `GameSettingsTest` | Model | 8 | **PASS (8/8)** | Singleton identity, grid toggle state, high score threshold updates, `@TempDir` disk persistence, and corrupt/negative `highscore.txt` fallback to `0` |
 | `GameTest` | Model | 4 | **PASS (4/4)** | Initialization, grid size multiplier, point scoring & high score integration, 3-level progression & victory condition |
-| `ObstacleTest` | Model | 7 | **PASS (7/7)** | Boundary bounds, snake/coin collision avoidance, 50-obstacle cap, level 1–3 static layouts, duplicate prevention & 2-tile head safety buffer |
+| `ObstacleTest` | Model | 7 | **PASS (7/7)** | Boundary bounds, unmodifiable list view, snake/coin collision avoidance, 50-obstacle cap, level 1–3 static layouts, duplicate prevention & 2-tile head safety buffer |
 | `SnakeTest` | Model | 14 | **PASS (14/14)** | 4-direction movement, coin growth (`1x` and `2x`), fatal wall collisions, border wrap-around, wrap-onto-edge-obstacle death, per-segment direction tracking across wrap edges, normal & Hardcore duplicated-tail self-collision, `resetPosition()` uncoiling stack |
-| `GameControllerTest` | Controller | 15 | **PASS (15/15)** | Non-arrow key rejection, 4-direction 180° reversal blocking, pause menu & help overlay toggling, `G` grid shortcut, resize handling, post-victory input lock, `LEVEL_CLEARED` pause & uncoil spawn, `TAB` HUD preservation, 2-slot rapid U-turn input queue, `onTick()` transitions to `DEAD` and `WON` |
+| `GameControllerTest` | Controller | 15 | **PASS (15/15)** | Non-arrow key rejection, 4-direction 180° reversal blocking, pause menu & help overlay toggling, `G` grid shortcut, resize handling, post-victory input lock, `LEVEL_CLEARED` pause & uncoil spawn, `TAB` HUD preservation, 2-slot rapid U-turn input queue, `onTick()` transitions to `DEAD` and `WON` with injected `SoundManager` verification |
 | **Total** | **All** | **74** | **74 Passed, 0 Failed** | **100% Pass Rate across Model and Controller layers** |
 
 ---

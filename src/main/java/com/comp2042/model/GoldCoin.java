@@ -10,4 +10,9 @@ public class GoldCoin extends Coin {
     public int getPoints() {
         return 15;
     }
+
+    @Override
+    public String getSpritePath() {
+        return "resources/views/res/goldcoin.png";
+    }
 }
