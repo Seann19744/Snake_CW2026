@@ -14,7 +14,6 @@ public class Game {
     private final GameMode gameMode;
     private int currentLevel = 1;
     private int levelCoinsEaten = 0;
-    private int totalCoinsEaten = 0;
 
     public Game(int x, int y, boolean powerUp, GameMode gameMode) {
         this.gameMode = gameMode;
@@ -59,11 +58,10 @@ public class Game {
     }
 
     /**
-     * Increments the current level and total coin counters when a coin is collected.
+     * Increments the current level coin counter when a coin is collected.
      */
     public void recordCoinEaten() {
         levelCoinsEaten++;
-        totalCoinsEaten++;
     }
 
     public int getWidth() {
@@ -78,7 +76,6 @@ public class Game {
         scorePoints = 0;
         currentLevel = 1;
         levelCoinsEaten = 0;
-        totalCoinsEaten = 0;
     }
 
     public double getMultiplier() {
@@ -116,10 +113,6 @@ public class Game {
 
     public int getLevelCoinsEaten() {
         return levelCoinsEaten;
-    }
-
-    public int getTotalCoinsEaten() {
-        return totalCoinsEaten;
     }
 
     public int getCoinsRequiredForCurrentLevel() {

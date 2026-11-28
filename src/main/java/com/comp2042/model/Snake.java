@@ -32,10 +32,6 @@ public class Snake {
         this.gy = y;
     }
 
-    public void move(char dir) {
-        move(Direction.fromChar(dir));
-    }
-
     public void move(Direction dir) {
         if (dir == null) {
             return;
@@ -66,10 +62,6 @@ public class Snake {
         if (body.size() > 1 && body.subList(1, body.size()).contains(head)) {
             dead = true;
         }
-    }
-
-    public Direction getDirection() {
-        return direction;
     }
 
     public Direction getSegmentDirection(int index) {

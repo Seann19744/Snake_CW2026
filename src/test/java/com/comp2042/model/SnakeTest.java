@@ -222,7 +222,6 @@ class SnakeTest {
         for (Cell cell : snake.getBody()) {
             assertEquals(new Cell(11, 10), cell, "All body segments must stack on spawn tail (11, 10)");
         }
-        assertEquals(Direction.LEFT, snake.getDirection(), "Direction must reset to LEFT");
         assertEquals(270, snake.getSnakeDir(), "Angle must reset to 270");
         assertFalse(snake.getDead(), "Dead flag must be false after resetPosition");
     }
